@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+     <script src="https://omlet.me/a/lib/handlebars.js"></script>
+     <script src="https://omlet.me/a/lib/base64.js"></script>
+     <script src="https://omlet.me/a/js/yeouiju.js"></script>
+     <script src="https://omlet.me/a/js/omlet.js"></script>
+     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+     <script src="https://omlet.me/a/lib/jquery-cookie.js"></script>
+
+</head>
+<body>
+  <button id="createButton">Create a Conversation</button>
+  <button id="clearButton">Clear Document</button>
+  <button id="getDocButton">Get Document</button>
+
+  <textarea id = "console" readonly style="width: 100%; min-height:100px;resize: none"> </textarea>
+  <button id="joinDataButton">Join the data transfer session</button>
+  <button id="joinAVButton">Join the A/V transfer session</button>
+<div>
+  <video id="localVideo">
+</div>
+<div>
+  <video id="remoteVideo">
+</div>
+  <script src="adapter.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
