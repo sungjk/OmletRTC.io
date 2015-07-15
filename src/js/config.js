@@ -7,7 +7,7 @@
 // Web-Server
 var ws = {};
 module.exports.ws = ws;
-ws.port = 8080;
+ws.port = 3310;
 ws.securePort = 443;
 ws.secured = false; //HTTPS support
 
