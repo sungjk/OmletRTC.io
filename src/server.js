@@ -3,8 +3,7 @@ var express = require('express');
 var fs = require('fs');
 var app = express() ;
 
-
-var config = require('./config');
+var config = require('./js/config');
 var events = require('./js/events') ;
 var bodyParser = require('body-parser');
 
