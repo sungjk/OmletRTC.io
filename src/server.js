@@ -58,7 +58,7 @@ else { //HTTP Setup
 	var ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1"
 	server = http.createServer(app).listen(port,ip);
 
-	console.log('[+] Set [http] protocol and server running at port #' + port);
+	console.log('[+] Set [http] protocol and server running at ' + ip + ':' + port);
 }
 
 
