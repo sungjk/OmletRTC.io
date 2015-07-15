@@ -62,12 +62,14 @@ else { //HTTP Setup
 }
 
 
-var io = require('socket.io').listen(server, function(err) {
-	if(err)
-		console.log(err);
-	else
-		console.log('[+] server running.');
-});
+var io = require('socket.io').listen(server);
+
+// , function(err) {
+// 	if(err)
+// 		console.log(err);
+// 	else
+// 		console.log('[+] server running.');
+// });
 //io.set('log level', 1); // reduce logging
 
 var channelsInfo = {} ;
