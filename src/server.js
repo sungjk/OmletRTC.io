@@ -55,8 +55,8 @@ if ( config.ws.secured ) { // HTTPS Setup
 else { //HTTP Setup
 	var http = require('http') ;
 	var port = process.env.OPENSHIFT_NODEJS_PORT  || config.ws.port;
-	//var ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1"
-	var ip = "203.246.112.144";
+	var ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1"
+	//var ip = "203.246.112.144";
 	server = http.createServer(app).listen(port, ip);
 
 	console.log('[+] Set [http] protocol and server running at ' + ip + ':' + port);
