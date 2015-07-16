@@ -192,7 +192,7 @@ io.sockets.on('connection',function(socket){
 	});
 });
 
-//app.set('view engine', 'jade');
+app.set('view engine', 'jade');
 
 
 //////////////////////////////////////////////////////
