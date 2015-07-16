@@ -53,8 +53,6 @@ function ReceiveDoc(doc) {
 
 //var there = 0 ;
 function ReceiveUpdatedDoc(doc) {
-
-
     chatDoc = doc;
 
     log( "Updated Doc Fetched" );
@@ -64,7 +62,6 @@ function ReceiveUpdatedDoc(doc) {
     if( Object.keys(chatDoc.participants).length != 2 ) {
       return ;
     }
-
 
     //log("Updated signals: " + JSON.stringify(processedSignals) ) ;
 
