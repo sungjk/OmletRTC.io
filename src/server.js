@@ -48,18 +48,18 @@ if ( config.ws.secured ) { // HTTPS Setup
 		cert: fs.readFileSync('./server.crt').toString()
 	};
 	var securePort = process.env.OPENSHIFT_NODEJS_PORT || config.ws.securePort;
-	server = https.createServer(options,app).listen(securePort);
-
-	console.log('[+] Set [https] protocol and server running at port #' + port);
+	server = https.createServer(options,app).listen(securePort, function() {
+		console.log('[+] Set [https] protocol and server running at port #' + port);
+	});
 } 
 else { //HTTP Setup
 	var http = require('http') ;
 	var port = process.env.OPENSHIFT_NODEJS_PORT  || config.ws.port;
 	var ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
 	//var ip = "203.246.112.144";
-	server = http.createServer(app).listen(port, ip);
-
-	console.log('[+] Set [http] protocol and server running at ' + ip + ':' + port);
+	server = http.createServer(app).listen(port, function() {
+		console.log('[+] Set [http] protocol and server running at ' + ip + ':' + port);
+	});
 }
 
 
