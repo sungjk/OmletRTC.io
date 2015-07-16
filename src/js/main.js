@@ -262,16 +262,16 @@ function participantAdded(doc) {
 
 function DocumentCreated(doc) {
     //var callbackurl = window.location.href.replace("chat-maker.html" , "webrtc-data.html") ;
-    var callbackurl = "https://webrtcbench-dbh3099.rhcloud.com/chat-maker-media.html#/docId/" + myDocId;
+    var callbackurl = "http://203.246.112.144:3310/chat-maker-media.html#/docId/" + myDocId;
     log(callbackurl);
 
     //if(Omlet.isInstalled()) {
         var rdl = Omlet.createRDL({
-            appName: "webrtc-data",
+            appName: "OmletRTC",
             noun: "poll",
-            displayTitle: "webrt-data",
-            displayThumbnailUrl: "https://dhorh0z3k6ro7.cloudfront.net/apps/quikpoll/images/quikpoll.png",
-            displayText: "WEBRTC CHATROOM",
+            displayTitle: "displayTitle",
+            displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
+            displayText: "displayText",
             json: doc,
             callback: callbackurl
         });
