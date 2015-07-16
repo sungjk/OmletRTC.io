@@ -1,0 +1,42 @@
+doctype html
+html(lang="en")
+	head
+		title!= title	
+		script( src="js/adapter.js")
+		script( src="js/main.js")
+		script( src="socket.io/socket.io.js" )
+		script( src="https://omlet.me/a/lib/handlebars.js")
+		script( src="https://omlet.me/a/lib/base64.js")
+		script( src="https://omlet.me/a/js/yeouiju.js")
+  		script( src="https://omlet.me/a/js/omlet.js")
+  		script( src="https://code.jquery.com/jquery-1.11.1.min.js")
+  		script( src="https://omlet.me/a/lib/jquery-cookie.js")
+
+	body
+		text Channel Id:
+		input( id='channelId' , type="text" value!=cid )
+		div
+		button(id='openChannel' , onclick="initConnection()" ) Open Channel
+		div
+		button(id="joinChannel" , onclick="joinChannel()") Join Channel
+		button(id="confirmConnection", onclick="connectToChannel()") Connect through Channel
+
+
+		if video == "true"
+			div(id="local-stream")
+			div(id="remote-streams")
+		if data == "true"
+			div
+			textarea#chatarea( name="chatarea", readonly , rows="6", cols="66" )
+			div
+			input(id = 'usertext' , type="text" , width='50%' )
+			button( id = 'sendTextBtn' , disabled="true") Send
+
+
+			div
+			input(type="file" id="fileSelector")
+			button(id="sendFileBtn" , disabled="true") Send File
+			div
+			text incoming files:
+			div
+			a(id="download-file") Download File
