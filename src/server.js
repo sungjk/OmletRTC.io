@@ -65,26 +65,20 @@ else { //HTTP Setup
 
 var io = require('socket.io').listen(server);
 
-// , function(err) {
-// 	if(err)
-// 		console.log(err);
-// 	else
-// 		console.log('[+] server running.');
-// });
 //io.set('log level', 1); // reduce logging
 
 var channelsInfo = {} ;
 
-// process.on('uncaughtException', function(err) {
-// 	console.log('[-] Caught exception: ' + err);
-// 	console.log('[-] Closing servers.');
-// 	server.close();
-// });
+process.on('uncaughtException', function(err) {
+	console.log('[-] Caught exception: ' + err);
+	console.log('[-] Closing servers.');
+	server.close();
+});
 
-// process.on('exit', function(err) {
-// 	console.log('[+] Closing servers.');
-// 	server.close();
-// });
+process.on('exit', function(err) {
+	console.log('[+] Closing servers.');
+	server.close();
+});
 
 
 /////////////////////////////////////
