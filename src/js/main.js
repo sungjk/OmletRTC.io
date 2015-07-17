@@ -553,7 +553,7 @@ function getRemoteMedia() {
     // }
     audio: false,
     video: true
-  }, streaming, logError);
+  }, streamingRemote, logError);
 }
 
 
