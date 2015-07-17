@@ -41,8 +41,11 @@ var processedSignals = {} ;
  */
 
 // HTML5 <video> elements
-var localVideo = document.querySelector('#localVideo');
-var remoteVideo = document.querySelector('#remoteVideo');
+var localVideo = get("localVideo");
+var remoteVideo = get("remoteVideo");
+
+// var localVideo = document.querySelector('#localVideo');
+// var remoteVideo = document.querySelector('#remoteVideo');
 
 
 
