@@ -715,11 +715,16 @@ function initConnection(caller, data, video) {
     //   log("[+] PC1: " + peerConnection.iceGatheringState + " " + peerConnection.iceConnectionState);
     // }
 
-    navigator.getUserMedia(constraints, handleUserMedia, handleUserMediaError);
+
+    //handleUserMedia();
+    
 
     peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
     peerConnection.addStream(localStream);
     peerConnection.onicecandidate = onIceCandidate;
+    peerConnection.oniceconnectionstatechange = function (ice_state) {
+      log("[+] PC1: " + peerConnection.iceGatheringState + " " + peerConnection.iceConnectionState);
+    }
     //peerConnection.onicecandidate = handleIceCandidate;
 
     
@@ -758,7 +763,8 @@ function initConnection(caller, data, video) {
       peerConnection.onaddstream = handleRemoteStreamAdded;
       peerConnection.onremovestream = handleRemoteStreamRemoved;
 
-      
+      navigator.getUserMedia(constraints, handleUserMedia, handleUserMediaError);
+
 
       // peerConnection.onremovestream = function (event) {
       //   log('PC1: Remote stream removed.');
@@ -883,21 +889,6 @@ function handleRemoteStreamAdded(event) {
 function handleRemoteStreamRemoved(event) {
     console.log('Remote stream removed. Event: ', event);
 }
-
-
-// ICE candidates management
-function handleIceCandidate(event) {
-    console.log('handleIceCandidate event: ', event);
-    if (event.candidate) {
-        sendMessage({ type: 'candidate', label: event.candidate.sdpMLineIndex, id: event.candidate.sdpMid, candidate: event.candidate.candidate });
-    } else {
-        console.log('End of candidates.');
-        console.log('open');
-        isStarted = false;
-
-    }
-}
-
 
 
 
