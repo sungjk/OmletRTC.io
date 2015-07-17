@@ -702,8 +702,7 @@ function initConnection(caller, data, video){
         // media.src = webkitURL.createObjectURL(event.stream);
         // media.autoplay = true;
         // media.play();
-
-        getMedia();
+        
         //getRemoteMedia();
       };
 
@@ -711,7 +710,7 @@ function initConnection(caller, data, video){
         log('PC1: Remote stream removed.');
       };
 
-      //getMedia();
+      getMedia();
     }
   }
   else {  // Callee
