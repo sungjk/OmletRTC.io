@@ -66,9 +66,10 @@ var attachVideoNumber = 0;
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 // PeerConnection ICE protocol configuration (either Firefox or Chrome)
-var pc_config = webrtcDetectedBrowser === 'firefox' ? 
+var pc_config = webrtcDetectedBrowser === 'chrome' ? 
   {'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
   {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
+
 var pc_constraints = {
     'optional': [{ 'DtlsSrtpKeyAgreement': true }]
 };
