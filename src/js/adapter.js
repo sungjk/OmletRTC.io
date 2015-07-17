@@ -72,7 +72,7 @@ var server = {
     //{url:"stun:stun.services.mozilla.com"}//,
     //{url:"stun:23.21.150.121"},
     {url:"stun:stun.l.google.com:19302"}]
-
+}
 
 
 
