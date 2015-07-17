@@ -167,103 +167,106 @@ function ReceiveUpdatedDoc(doc) {
 
 function ReceiveUpdate(chatDocId) {
   log( "Doc updated. Getting updated version..." );
-    //log( "chat id: " + chatDoc.chatId ) ;
-    //log( "people in this conversation: " + Object.keys(doc.participants).length );
-    documentApi.get(chatDocId, ReceiveUpdatedDoc , function(e) {
-      alert("error on getting doc: " + JSON.stringify(e));
-    });
+  //log( "chat id: " + chatDoc.chatId ) ;
+  //log( "people in this conversation: " + Object.keys(doc.participants).length );
+
+  documentApi.get(chatDocId, ReceiveUpdatedDoc , function(e) {
+    alert("error on getting doc: " + JSON.stringify(e));
+  });
+}
+
+function hasDocument() {
+  var docIdParam = window.location.hash.indexOf("/docId/");
+  return (docIdParam != -1);
+}
+
+function getDocumentReference() {
+  var docIdParam = window.location.hash.indexOf("/docId/");
+  if (docIdParam == -1) return false;
+
+  var docId = window.location.hash.substring(docIdParam+7);
+  var end = docId.indexOf("/");
+
+  if (end != -1)
+    docId = docId.substring(0, end);
+  return docId;
+}
+
+
+function _loadDocument() {
+  if (hasDocument()) {
+    myDocId = getDocumentReference();
+    log("Doc found with id#: " + myDocId );
+    documentApi.watch(myDocId, ReceiveUpdate);
+    log("Getting Doc...");
+    documentApi.get(myDocId, ReceiveDoc );
+      //watchDocument(myDocId, ReceiveUpdate);
+  } 
+  else {
+    log("[-] Document ***NOT*** found " );
   }
-
-  function hasDocument() {
-    var docIdParam = window.location.hash.indexOf("/docId/");
-    return (docIdParam != -1);
-  }
-
-  function getDocumentReference() {
-    var docIdParam = window.location.hash.indexOf("/docId/");
-    if (docIdParam == -1) return false;
-    var docId = window.location.hash.substring(docIdParam+7);
-    var end = docId.indexOf("/");
-    if (end != -1)
-      docId = docId.substring(0, end);
-    return docId;
-  }
+}
 
 
-  function _loadDocument() {
-    if (hasDocument()) {
-      myDocId = getDocumentReference();
-      log("Doc found with id#: " + myDocId );
-      documentApi.watch(myDocId, ReceiveUpdate);
-      log("Getting Doc...");
-      documentApi.get(myDocId, ReceiveDoc );
-        //watchDocument(myDocId, ReceiveUpdate);
-    } 
-    else {
-      log("[-] Document ***NOT*** found " );
-    }
-  }
+function initDocumentAPI() {
+  log("Initializating Document API");
+
+  if (!Omlet.isInstalled()) 
+    log("[-] NO OMLET for US " );
+  documentApi = Omlet.document;
+
+  log("Loading document") ;
+  _loadDocument();
+}
 
 
-  function initDocumentAPI() {
-    log("Initializating Document API");
+function log(message) {
+  var logArea = document.getElementById("console");
+  logArea.value += "\n" + message ;
+  logArea.scrollTop = logArea.scrollHeight;
+}
 
-    if (!Omlet.isInstalled()) 
-      log("[-] NO OMLET for US " );
-    documentApi = Omlet.document;
-
-    log("Loading document") ;
-    _loadDocument();
-  }
-
-
-  function log(message) {
-    var logArea = document.getElementById("console");
-    logArea.value += "\n" + message ;
-    logArea.scrollTop = logArea.scrollHeight;
-  }
-
-  function InitialDocument() {
-    var chatId = 100;
-    var identity = Omlet.getIdentity();
-    log('id:' + JSON.stringify(identity));
+function InitialDocument() {
+  var chatId = 100;
+  var identity = Omlet.getIdentity();
+  log('id:' + JSON.stringify(identity));
 
   // Particiapnat includes omlet id, connection info
   var initValues = {
       'chatId' : chatId ,
       'creator':identity,
       'participants':{}
-    };
+  };
 
-    return initValues;
-  }
-
-
-  function Initialize(old, params) {
-    return params;
-  }
-
-  function clear(old, params) {
-    processedSignals = {};
-    old.participants = {} ;
-    old.creator = '' ;
-    return old;
-  }
-
-  function addParticipant(old, params) {
-    old.participants[params.name] = params.value ;
-    //old.creator = '' ;
-    return old;
-  }
+  return initValues;
+}
 
 
-  function addSignal(old, params) {
-    //log("Adding a signal" + params) ;
-    //log("Old: " + JSON.stringify(old)) ;
-    old.participants[params.name].signals.push(params.signal) ;
-    //old.creator =  ;
-    return old;
-  }
+function Initialize(old, params) {
+  return params;
+}
+
+function clear(old, params) {
+  processedSignals = {};
+  old.participants = {} ;
+  old.creator = '' ;
+  return old;
+}
+
+function addParticipant(old, params) {
+  old.participants[params.name] = params.value ;
+  //old.creator = '' ;
+  return old;
+}
+
+
+function addSignal(old, params) {
+  //log("Adding a signal" + params) ;
+  //log("Old: " + JSON.stringify(old)) ;
+  old.participants[params.name].signals.push(params.signal) ;
+  //old.creator =  ;
+  return old;
+}
 
 
 function DocumentCleared(doc) {
@@ -286,7 +289,7 @@ function DocumentCreated(doc) {
     var callbackurl = "http://203.246.112.144:3310/chat-maker-media.html#/docId/" + myDocId;
     log(callbackurl);
 
-    //if(Omlet.isInstalled()) {
+    if(Omlet.isInstalled()) {
       var rdl = Omlet.createRDL({
         appName: "OmletRTC",
         noun: "poll",
@@ -296,9 +299,10 @@ function DocumentCreated(doc) {
         json: doc,
         callback: callbackurl
       });
+      
       Omlet.exit(rdl);
-    //}
-  }
+    }
+}
 
 
 //////////////////////////////////////////////
