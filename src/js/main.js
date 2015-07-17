@@ -719,7 +719,8 @@ function initConnection(caller, data, video) {
 
     peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
     peerConnection.addStream(localStream);
-    peerConnection.onicecandidate = handleIceCandidate;
+    peerConnection.onicecandidate = onIceCandidate;
+    //peerConnection.onicecandidate = handleIceCandidate;
 
     
 
@@ -881,6 +882,20 @@ function handleRemoteStreamAdded(event) {
 
 function handleRemoteStreamRemoved(event) {
     console.log('Remote stream removed. Event: ', event);
+}
+
+
+// ICE candidates management
+function handleIceCandidate(event) {
+    console.log('handleIceCandidate event: ', event);
+    if (event.candidate) {
+        sendMessage({ type: 'candidate', label: event.candidate.sdpMLineIndex, id: event.candidate.sdpMid, candidate: event.candidate.candidate });
+    } else {
+        console.log('End of candidates.');
+        console.log('open');
+        isStarted = false;
+
+    }
 }
 
 
