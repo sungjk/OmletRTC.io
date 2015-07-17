@@ -511,11 +511,9 @@ function onMessage2(msg){
 
 function streaming(stream) {
   var localMedia = get("localVideo")
-  if (window.URL) {
-    localMedia.src = window.URL.createObjectURL(stream);
-  } else {
-    localMedia.src = stream;
-  }
+  if (window.URL) localMedia.src = window.URL.createObjectURL(stream);
+  else            localMedia.src = stream;
+  
   localMedia.autoplay = true;
   localMedia.play();
 
@@ -533,7 +531,7 @@ function getMedia(){
 }
 
 function streamingRemote(stream) {
-  var remoteMedia = get("remoteVieo");
+  var remoteMedia = get("remoteVideo");
 
   if (window.URL) remoteMedia.src = window.URL.createObjectURL(stream);
   else            remoteMedia.src = stream;
