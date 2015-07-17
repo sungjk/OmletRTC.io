@@ -56,7 +56,7 @@ else { //HTTP Setup
 	var http = require('http') ;
 	var port = process.env.OPENSHIFT_NODEJS_PORT  || config.ws.port;
 	var ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
-	//var ip = "203.246.112.144";
+	
 	server = http.createServer(app).listen(port, function() {
 		console.log('[+] Set [http] protocol and server running at port #' + port);
 	});
@@ -254,7 +254,3 @@ app.get('/webrtc-data.html', function(req,res){
 */
 
 app.use(express.static('.'));
-
-
-
-
