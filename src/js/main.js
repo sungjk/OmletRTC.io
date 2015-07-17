@@ -519,14 +519,16 @@ function streaming(stream) {
 
 function getMedia(){
   navigator.getUserMedia({
-    "audio": false, 
-    "video:" :{
-      mandatory: {
-        minFrameRate: 30,
-        maxHeight: 240,
-        maxWidth: 320
-      }
-    }
+    // "audio": false, 
+    // "video:" :{
+    //   mandatory: {
+    //     minFrameRate: 30,
+    //     maxHeight: 240,
+    //     maxWidth: 320
+    //   }
+    // }
+    audio: false,
+    video: true
   }, streaming, logError);
 }
 
