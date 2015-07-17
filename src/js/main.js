@@ -526,9 +526,31 @@ function streaming(stream) {
 
 
 function getMedia(){
-  navigator.getUserMedia(
-    {audio:false, video:true}
-    , streaming, logError);
+  navigator.getUserMedia({
+    audio: false, 
+    video: true
+  }, streaming, logError);
+}
+
+function streamingRemote(stream) {
+  var remoteMedia = get("remoteVieo");
+
+  if (window.URL) remoteMedia.src = window.URL.createObjectURL(stream);
+  else            remoteMedia.src = stream;
+
+  remoteMedia.autoplay = true;
+  remoteMedia.play();
+
+  peerConnection2.addStream(stream);
+  log("Stream attached to PC2") ;
+}
+
+
+function getRemoteMedia() {
+  navigator.getUserMedia({
+    audio: false,
+    video: true
+  }, streaming, logError);
 }
 
 
@@ -720,14 +742,14 @@ function initConnection(caller, data, video){
         log("[+] PC2: Remote stream arrived.");
         //log(JSON.stringify(event));
 
-        var remoteMedia = get("remoteVideo");
-        if (window.URL) {
-          remoteMedia.src = window.URL.createObjectURL(stream);
-        } else {
-          remoteMedia.src = stream;
-        }
-        remoteMedia.autoplay = true;
-        remoteMedia.play() ;
+        // var remoteMedia = get("remoteVideo");
+        // if (window.URL) {
+        //   remoteMedia.src = window.URL.createObjectURL(stream);
+        // } else {
+        //   remoteMedia.src = stream;
+        // }
+        // remoteMedia.autoplay = true;
+        // remoteMedia.play() ;
 
         log('[+] PC2: Remote stream is playing.');
       };
@@ -736,7 +758,7 @@ function initConnection(caller, data, video){
         log('[+] PC2: Remote stream removed.');
       };
 
-      //getMedia() ;
+      getRemoteMedia() ;
     }
   }
 }
