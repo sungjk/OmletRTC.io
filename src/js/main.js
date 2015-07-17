@@ -1,18 +1,50 @@
+//////////////////////////////////
+//// Capture console.log errors///
+//////////////////////////////////
+if (typeof console  != "undefined")
+    if (typeof console.log != 'undefined')
+        console.olog = console.log;
+    else
+        console.olog = function() {};
+
+console.log = function(message) {
+    console.olog(message);
+    $('#debugDiv').append('<p>' + message + '</p>');
+};
+console.error = console.debug = console.info =  console.log
+
+
+
 ///////////////////////////////
 //// Variables ////////////////
 //////////////////////////////
 
-var peerConnection ;
-var peerConnection2 ;
+var peerConnection;
+var peerConnection2;
 
-var dataChannel ;
-var dataChannel2 ;
+var dataChannel;
+var dataChannel2;
 
 var omletAsSignallingChannel = true ;
 var orderedDataChannel = true;
 var detectedBrowser ;
 
 var processedSignals = {} ;
+
+// The local MediaStream to play with
+var localStream;
+
+
+/**
+ *  Variables for WebRTC
+ *
+ * @author Seongjung Jeremy Kim
+ * @since  2015.07.15
+ *
+ */
+
+// Look after different browser vendors' ways of calling the getUserMedia() API method:
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 
 
@@ -27,41 +59,46 @@ var myDocId ;
 
 
 function watchDocument(docref, OnUpdate) {
-    documentApi.watch(docref, function(updatedDocRef) {
-        if (updatedDocRef != chatDocId) {
-            console.log("Wrong document!!");
-        } else {
-            documentApi.get(updatedDocRef, OnUpdate);
-        }
-    }, function(result) {
-        var timestamp = result.Expires;
-        var expires = timestamp - new Date().getTime();
-        var timeout = 0.8 * expires;
-        setTimeout(function() {
-            watchDocument(docref, OnUpdate);
-        }, timeout);
-    }, Error);
+  documentApi.watch(docref, function(updatedDocRef) {
+    if (updatedDocRef != chatDocId) {
+      log("[-] Wrong document.");
+    }
+    else {
+      documentApi.get(updatedDocRef, OnUpdate);
+    }
+  }, function(result) {
+    var timestamp = result.Expires;
+    var expires = timestamp - new Date().getTime();
+    var timeout = 0.8 * expires;
+
+    setTimeout(function() {
+      watchDocument(docref, OnUpdate);
+    }, timeout);
+  }, Error);
 }
 
 
 function ReceiveDoc(doc) {
-    chatDoc = doc;
-    log( "Doc Fetched" );
-    log( "chat id: " + chatDoc.chatId ) ;
-    log( "people in this conversation: " + Object.keys(chatDoc.participants).length );
+  chatDoc = doc;
+  log( "Doc Fetched" );
+  log( "chat id: " + chatDoc.chatId ) ;
+  log( "people in this : " + Object.keys(chatDoc.participants).length );
 }
 
 //var there = 0 ;
 function ReceiveUpdatedDoc(doc) {
-    chatDoc = doc;
 
-    log( "Updated Doc Fetched" );
-    log( "chat id: " + chatDoc.chatId ) ;
-    log( "people in this conversation: " + Object.keys(chatDoc.participants).length );
 
-    if( Object.keys(chatDoc.participants).length != 2 ) {
-      return ;
-    }
+  chatDoc = doc;
+
+  log( "Updated Doc Fetched" );
+  log( "chat id: " + chatDoc.chatId ) ;
+  log( "people in this conversation: " + Object.keys(chatDoc.participants).length );
+
+  if( Object.keys(chatDoc.participants).length != 2 ) {
+    return ;
+  }
+
 
     //log("Updated signals: " + JSON.stringify(processedSignals) ) ;
 
@@ -80,21 +117,21 @@ function ReceiveUpdatedDoc(doc) {
 
       if (signal.signal_type === "new_ice_candidate") {
         log("PC2 is adding ICE.");
-            peerConnection2.addIceCandidate(
-                new RTCIceCandidate(signal.candidate),
-                onAddIceCandidateSuccess, onAddIceCandidateError
-            );
+        peerConnection2.addIceCandidate(
+          new RTCIceCandidate(signal.candidate),
+          onAddIceCandidateSuccess, onAddIceCandidateError
+          );
       } else if (signal.signal_type === "new_description") {
-            log("PC2 is setting remote description");
-            peerConnection2.setRemoteDescription(
-                new RTCSessionDescription(signal.sdp),
-                function () {
-                    log("PC2 is checking for offer.");
-                    if (peerConnection2.remoteDescription.type == "offer") {
-                        log("PC2 is creating answer.");
-                        peerConnection2.createAnswer(onNewDescriptionCreated_2, logError);
-                    }
-                }, logError);
+        log("PC2 is setting remote description");
+        peerConnection2.setRemoteDescription(
+          new RTCSessionDescription(signal.sdp),
+          function () {
+            log("PC2 is checking for offer.");
+            if (peerConnection2.remoteDescription.type == "offer") {
+              log("PC2 is creating answer.");
+              peerConnection2.createAnswer(onNewDescriptionCreated_2, logError);
+            }
+          }, logError);
       }
 
 
@@ -108,132 +145,131 @@ function ReceiveUpdatedDoc(doc) {
         continue ;
       processedSignals[signal.timestamp]  = 1 ;
 
-        if (signal.signal_type === "callee_arrived") {
+      if (signal.signal_type === "callee_arrived") {
 
         //  if( there ==0 ) {
           log("Callee Arrived") ;
           peerConnection.createOffer(
-              onNewDescriptionCreated,
-              logError
-          );
+            onNewDescriptionCreated,
+            logError
+            );
         //  there =1 ;
       //  }
-      }
-      else if (signal.signal_type === "new_ice_candidate") {
-          peerConnection.addIceCandidate(
-              new RTCIceCandidate(signal.candidate),
-              onAddIceCandidateSuccess, onAddIceCandidateError
-          );
-      } else if (signal.signal_type === "new_description") {
-          log(signal.sdp);
-          peerConnection.setRemoteDescription(
-              new RTCSessionDescription(signal.sdp),
-              function () {},
-              logError
-          );
-      }
     }
+    else if (signal.signal_type === "new_ice_candidate") {
+      peerConnection.addIceCandidate(
+        new RTCIceCandidate(signal.candidate),
+        onAddIceCandidateSuccess, onAddIceCandidateError
+        );
+    } else if (signal.signal_type === "new_description") {
+      log(signal.sdp);
+      peerConnection.setRemoteDescription(
+        new RTCSessionDescription(signal.sdp),
+        function () {},
+        logError
+        );
+    }
+  }
 
 }
 
 
 
 function ReceiveUpdate(chatDocId) {
-    log( "Doc updated. Getting updated version..." );
+  log( "Doc updated. Getting updated version..." );
     //log( "chat id: " + chatDoc.chatId ) ;
     //log( "people in this conversation: " + Object.keys(doc.participants).length );
     documentApi.get(chatDocId, ReceiveUpdatedDoc , function(e) {
-        alert("error on getting doc: " + JSON.stringify(e));
+      alert("error on getting doc: " + JSON.stringify(e));
     });
-}
+  }
 
-function hasDocument() {
+  function hasDocument() {
     var docIdParam = window.location.hash.indexOf("/docId/");
     return (docIdParam != -1);
-}
+  }
 
-function getDocumentReference() {
+  function getDocumentReference() {
     var docIdParam = window.location.hash.indexOf("/docId/");
     if (docIdParam == -1) return false;
     var docId = window.location.hash.substring(docIdParam+7);
     var end = docId.indexOf("/");
     if (end != -1)
-        docId = docId.substring(0, end);
+      docId = docId.substring(0, end);
     return docId;
-}
+  }
 
-function _loadDocument() {
+  function _loadDocument() {
     if (hasDocument()) {
-        myDocId = getDocumentReference();
-        log("Doc found with id#: " + myDocId );
-        documentApi.watch(myDocId, ReceiveUpdate);
-        log("Getting Doc...");
-        documentApi.get(myDocId, ReceiveDoc );
+      myDocId = getDocumentReference();
+      log("Doc found with id#: " + myDocId );
+      documentApi.watch(myDocId, ReceiveUpdate);
+      log("Getting Doc...");
+      documentApi.get(myDocId, ReceiveDoc );
         //watchDocument(myDocId, ReceiveUpdate);
-    } else {
+      } else {
         log(" Doc ***NOT*** found " );
-    }
-}
-
-
-function initDocumentAPI() {
-  log("Initializating Document API");
-
-
-    if (!Omlet.isInstalled()) {
-      log(" NO OMLET for US " );
-
+      }
     }
 
-    documentApi = Omlet.document;
-    log("Loading document") ;
-    _loadDocument();
-}
+
+    function initDocumentAPI() {
+      log("Initializating Document API");
 
 
-function log(message){
-  var logArea = document.getElementById("console");
-  logArea.value += "\n" + message ;
-  logArea.scrollTop = logArea.scrollHeight;
-}
+      if (!Omlet.isInstalled()) {
+        log(" NO OMLET for US " );
 
-function InitialDocument() {
+      }
 
-    var chatId = 100;
+      documentApi = Omlet.document;
+      log("Loading document") ;
+      _loadDocument();
+    }
 
-    var identity = Omlet.getIdentity() ;
-    log('id:' + JSON.stringify(identity) );
 
-    // Particiapnat includes omlet id, connection info
+    function log(message){
+      var logArea = document.getElementById("console");
+      logArea.value += "\n" + message ;
+      logArea.scrollTop = logArea.scrollHeight;
+    }
 
-    var initValues = {
+    function InitialDocument() {
+      var chatId = 100;
+      var identity = Omlet.getIdentity() ;
+      log('id:' + JSON.stringify(identity) );
+
+      // Particiapnat includes omlet id, connection info
+
+      var initValues = {
         'chatId' : chatId ,
         'creator':identity,
         'participants':{}
-    };
-    return initValues;
-}
+      };
+
+      return initValues;
+    }
 
 
-function Initialize(old, params) {
+  function Initialize(old, params) {
     return params;
-}
+  }
 
-function clear(old, params) {
-  processedSignals = {};
-  old.participants = {} ;
-  old.creator = '' ;
-  return old;
-}
+  function clear(old, params) {
+    processedSignals = {};
+    old.participants = {} ;
+    old.creator = '' ;
+    return old;
+  }
 
-function addParticipant(old, params) {
+  function addParticipant(old, params) {
     old.participants[params.name] = params.value ;
     //old.creator = '' ;
     return old;
-}
+  }
 
 
-function addSignal(old, params) {
+  function addSignal(old, params) {
   //log("Adding a signal" + params) ;
   //log("Old: " + JSON.stringify(old)) ;
   old.participants[params.name].signals.push(params.signal) ;
@@ -243,8 +279,8 @@ function addSignal(old, params) {
 
 
 function DocumentCleared(doc) {
-    log("Document cleared");
-    log("people in this conversation: " + Object.keys(doc.participants).length );
+  log("Document cleared");
+  log("people in this conversation: " + Object.keys(doc.participants).length );
 }
 
 
@@ -259,19 +295,19 @@ function participantAdded(doc) {
 
 function DocumentCreated(doc) {
     //var callbackurl = window.location.href.replace("chat-maker.html" , "webrtc-data.html") ;
-    var callbackurl = "http://203.246.112.144:3310/chat-maker-media.html#/docId/" + myDocId;
+    var callbackurl = "https://webrtcbench-dbh3099.rhcloud.com/chat-maker-media.html#/docId/" + myDocId;
     log(callbackurl);
 
     //if(Omlet.isInstalled()) {
-        var rdl = Omlet.createRDL({
-            appName: "OmletRTC",
-            noun: "poll",
-            displayTitle: "displayTitle",
-            displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-            displayText: "displayText",
-            json: doc,
-            callback: callbackurl
-        });
+      var rdl = Omlet.createRDL({
+        appName: "webrtc-data",
+        noun: "poll",
+        displayTitle: "webrt-data",
+        displayThumbnailUrl: "https://dhorh0z3k6ro7.cloudfront.net/apps/quikpoll/images/quikpoll.png",
+        displayText: "WEBRTC CHATROOM",
+        json: doc,
+        callback: callbackurl
+      });
       Omlet.exit(rdl);
     //}
   }
@@ -290,25 +326,25 @@ function onAddIceCandidateError(error) {
 }
 
 function logError(error){
-    alert(error);
+  log("Log error: ", error);
 }
 
 
 function onNewDescriptionCreated(description) {
-
   peerConnection.setLocalDescription(description, function () {
-      log("Caller Local Description Set");
-      // Send it to the other peer
-      if ( omletAsSignallingChannel ){
-        //TODO Update the Document
-        log("updating doc with id#:" + myDocId);
+    log("Caller Local Description Set");
+
+    // Send it to the other peer
+    if ( omletAsSignallingChannel ){
+      //TODO Update the Document
+      log("updating doc with id#:" + myDocId);
 
         //documentApi.update(myDocId, addParticipant, {"name": "dummy" , "value" : {"signals":[]} }
         //     , function() { documentApi.get(myDocId, participantAdded); }
         //     , function(e) { alert("error: " + JSON.stringify(e)); }
         //);
 
-        var des_obj = {"name": "caller" , "signal" : {"signal_type": "new_description","timestamp":Date.now(),  "sdp": description} }  ;
+    var des_obj = {"name": "caller" , "signal" : {"signal_type": "new_description","timestamp":Date.now(),  "sdp": description} }  ;
         //var des_str = JSON.stringify( des_obj );
 
 
@@ -317,9 +353,9 @@ function onNewDescriptionCreated(description) {
         //str = JSON.stringify(description);
         //str = '{"sdp": "v=0\r\n\o=- 368374678643784 2 IN IP4 12.3.3.3 \r\ns-=-\r\nt=0 0\r\na=msid-semantic:"}';
         //str = 'Hello kitty' ;
-        documentApi.update(myDocId, addSignal, des_obj , function() { log("Signal added"); }
-             , function(e) { alert("error: " + JSON.stringify(e)); }
-        );
+    documentApi.update(myDocId, addSignal, des_obj , function() { log("Signal added"); }
+     , function(e) { alert("error: " + JSON.stringify(e)); }
+     );
 
         //documentApi.update(myDocId, addSignal
         //    , {
@@ -333,39 +369,34 @@ function onNewDescriptionCreated(description) {
       //       , function(e) { alert("error: " + JSON.stringify(e)); }
       //  );
 
-      } else {
+    }
+    else {
         // Other method
-      }
-    },
-    logError
-  );
+    }
+  }, logError);
 }
 
 
 function onNewDescriptionCreated_2(description) {
-
   peerConnection2.setLocalDescription(description, function () {
-      log("Callee Local Description Set");
-      // Send it to the other peer
-      if ( omletAsSignallingChannel ){
-        //TODO Update the Document
-        var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_description","timestamp":Date.now(),  "sdp": description} }  ;
-        documentApi.update(myDocId, addSignal, des_obj , function() { log("Signal added"); }
-             , function(e) { alert("error: " + JSON.stringify(e)); }
-        );
+    log("Callee Local Description Set");
 
-      } else {
-        signallingSocket.emit("message",
-            JSON.stringify({
-              channel: get('channelId').value,
-              signal_type: "new_description",
-              sdp: description
-            })
-          );
-      }
-    },
-    logError
-  );
+    // Send it to the other peer
+    if (omletAsSignallingChannel) {
+      //TODO Update the Document
+      var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_description","timestamp":Date.now(),  "sdp": description} }  ;
+      documentApi.update(myDocId, addSignal, des_obj , function() { log("Signal added"); }
+         , function(e) { alert("error: " + JSON.stringify(e)); });
+    }
+    else {
+      signallingSocket.emit("message",
+        JSON.stringify({
+          channel: get('channelId').value,
+          signal_type: "new_description",
+          sdp: description
+        }));
+    }
+  }, logError);
 }
 
 
@@ -377,8 +408,8 @@ function onIceCandidate(event){
       //TODO Update the Document
       var des_obj = {"name": "caller" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
       documentApi.update(myDocId, addSignal, des_obj , function() { log("NewICE Signal added"); }
-           , function(e) { alert("error: " + JSON.stringify(e)); }
-      );
+       , function(e) { alert("error: " + JSON.stringify(e)); }
+       );
     } else {
     }
   }
@@ -391,8 +422,8 @@ function onIceCandidate2(event){
       //TODO Update the Document
       var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
       documentApi.update(myDocId, addSignal, des_obj , function() { log("NewICE Signal added"); }
-           , function(e) { alert("error: " + JSON.stringify(e)); }
-      );
+       , function(e) { alert("error: " + JSON.stringify(e)); }
+       );
     } else {
     }
   }
@@ -400,68 +431,68 @@ function onIceCandidate2(event){
 
 
 function tryParseJSON (jsonString){
-    try {
-        var o = JSON.parse(jsonString);
+  try {
+    var o = JSON.parse(jsonString);
 
         // Handle non-exception-throwing cases:
         // Neither JSON.parse(false) or JSON.parse(1234) throw errors, hence the type-checking,
         // but... JSON.parse(null) returns 'null', and typeof null === "object",
         // so we must check for that, too.
         if (o && typeof o === "object" && o !== null) {
-            return o;
+          return o;
         }
-    }
-    catch (exception) {
-      return false;
-    }
-};
+      }
+      catch (exception) {
+        return false;
+      }
+    };
 
-function onMessage (event) {
-    var t_msg = time();
-    var blob = event.data;
+    function onMessage (event) {
+      var t_msg = time();
+      var blob = event.data;
     // TODO file transfer
 
     var json = tryParseJSON(blob.toString()) ;
     if ( json ){
         //log( blob.toString() );
         if( json.message === 'Ping' ){
-            dataChannel.send( JSON.stringify( { message:"Pong" , timestamp: time() }) );
+          dataChannel.send( JSON.stringify( { message:"Pong" , timestamp: time() }) );
         } else if (json.message === 'Pong') {
-            log( blob.toString() + " received at " + time() );
+          log( blob.toString() + " received at " + time() );
         } else if ( json.message  === 'File') {
             //log( blob.toString() + " received at " + json.timestamp );
             receivedFileInfo.name = json.name ;
             receivedFileInfo.size = json.size;
             receivedFileInfo.type = json.type ;
             receivedFileInfo.receivedBytes = 0 ;
+          }
         }
-    }
-    else {
-        log("text received at " + t_msg.toString());
+        else {
+          log("text received at " + t_msg.toString());
         //appendDIV(event.data);
-    }
+      }
 
-};
+    };
 
-function dataChannelOpened () {
-  log("Datachennel opened");
+    function dataChannelOpened () {
+      log("Datachennel opened");
 
-  get('chatInput').disabled = false;
-  get('chatInput2').disabled = false;
+      get('chatInput').disabled = false;
+      get('chatInput2').disabled = false;
 
-   get('chatInput').onkeypress = function (e) {
+      get('chatInput').onkeypress = function (e) {
         if (e.keyCode !== 13 || !this.value) return;
         dataChannel.send("P1: " + this.value);
         this.value = '';
         this.focus();
-    };
+      };
 
-  get('chatInput2').onkeypress = function (e) {
+      get('chatInput2').onkeypress = function (e) {
        if (e.keyCode !== 13 || !this.value) return;
        dataChannel2.send("P2: " + this.value);
        this.value = '';
        this.focus();
-   };
+     };
 
   //dataChannelOpened = true;
   //get('sendbtn').onclick = sendFile ;
@@ -477,124 +508,236 @@ function onMessage2(msg){
 }
 
 
+
 function streaming(stream) {
-      var localMedia = get("localVideo")
-      localMedia.src = webkitURL.createObjectURL(stream);
-      localMedia.autoplay = true;
+  var localMedia = get("localVideo")
+  if (window.URL) {
+    localMedia.src = window.URL.createObjectURL(stream);
+  } else {
+    localMedia.src = stream;
+  }
+  localMedia.autoplay = true;
+  localMedia.play();
 
-      localMedia.play();
-
-      peerConnection.addStream(stream);
-      log("Stream attached to PC1") ;
+  peerConnection.addStream(stream);
+  log("Stream attached to PC1") ;
 }
 
 
 
 function getMedia(){
-  getUserMedia( { "audio":false, "video":{mandatory: { minFrameRate: 30, maxHeight: 240, maxWidth: 320}}} , streaming, logError ) ;
+  navigator.getUserMedia(
+    {audio:false, video:true}
+    , streaming, logError);
 }
+
+
+/**
+ *
+ * @author Seongjung Jeremy Kim
+ * @since  2015.07.15
+ *
+ */
+
+// Original onstraints object for web app video
+var srcConstraints = {
+  "audio":false,
+  "video": {
+    mandatory: {
+      minFrameRate: 30,
+      maxHeight: 240,
+      maxWidth: 320
+    }
+  }
+};
+
+// Constraints object for low resolution video
+var qvgaConstraints = { video: {
+    mandatory: {
+      maxWidth: 320,
+      maxHeight: 240
+} }
+};
+
+// Constraints object for standard resolution video
+var vgaConstraints = { video: {
+    mandatory: {
+      maxWidth: 640,
+      maxHeight: 480
+} }
+};
+
+// Constraints object for high resolution video
+var hdConstraints = { video: {
+    mandatory: {
+      maxWidth: 1280,
+      maxHeight: 960
+} }
+};
+
+
+/**
+ *
+ * @author Seongjung Jeremy Kim
+ * @since  2015.07.15
+ *
+ */
+
+// Callback to be called in case of failure...
+function errorCallback(error){
+  log("[-] navigator.getUserMedia; " + error);
+}
+
+// Callback to be called in case of success...
+function successCallback(stream) {
+  localMedia = get("localVideo")
+
+  // Make the stream available to the console for introspection
+  window.stream = stream;
+  // Attach the returned stream to the <video> element in the HTML page
+  localMedia.src = window.URL.createObjectURL(stream);
+  // Set <video> element property
+  localMedia.autoplay = true;
+  // Start playing video
+  localMedia.play();
+
+  peerConnection.addStream(stream);
+  log("[+] Stream attached to PC1.") ;
+}
+
+
+/**
+ *
+ * @author Seongjung Jeremy Kim
+ * @since  2015.07.15
+ *
+ */
+// Simple wrapper for getUserMedia() with constraints object as an input parameter
+// function getMedia(constraints){
+//   if (!!localStream) {
+//     localMedia.src = null;
+//     localStream.stop();
+//   }
+
+//   navigator.getUserMedia(constraints, successCallback, errorCallback);
+// }
 
 
 //////////// Establishing Connection ////////////
 function initConnection(caller, data, video){
+  // Caller
   if (caller) {
+    log("[+] Creating the first PeerConnection Object.");
 
-    log("Creating the first PeerConnection Object");
     var options = {
-        "optional": [
-            {DtlsSrtpKeyAgreement: true}
+      "optional": [
+      {DtlsSrtpKeyAgreement: true}
             //,{RtpDataChannels: getData}
-        ],
-        mandatory: { googIPv6: true }
-    };
-    peerConnection = new RTCPeerConnection(null, options);
+            ],
+            mandatory: { googIPv6: true }
+          };
+          peerConnection = new RTCPeerConnection(null, options);
 
     // Sends ice candidates to the other peer
     peerConnection.onicecandidate = onIceCandidate;
     peerConnection.oniceconnectionstatechange = function (ice_state) {
-      log("PC1:" + peerConnection.iceGatheringState + " " + peerConnection.iceConnectionState);
+      log("[+] PC1: " + peerConnection.iceGatheringState + " " + peerConnection.iceConnectionState);
     }
 
-    if( data ) {
-        var dataChannelOptions = {
-            ordered: true
-        };
-        log("Creating data channel");
-        dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
+    if(data) {
+      log("[+] Creating data channel.");
 
-        dataChannel.onerror = logError ;
-        dataChannel.onmessage = onMessage;
-        dataChannel.onopen = dataChannelOpened;
-        dataChannel.onclose = function () {
-            log("The Data Channel is closed");
-        };
+      var dataChannelOptions = {
+        ordered: true
+      };
+
+      dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
+
+      dataChannel.onerror = logError ;
+      dataChannel.onmessage = onMessage;
+      dataChannel.onopen = dataChannelOpened;
+      dataChannel.onclose = function () {
+        log("[-] The Data Channel is closed.");
+      };
     }
 
-    if( video ) {
-         peerConnection.onaddstream = function (event) {
-                log('PC1: Remote stream arrived.');
-                //var media = get("");
-                //media.id = "remoteView0";
-                //media.src = webkitURL.createObjectURL(event.stream);
-                //media.autoplay = true;
-        } ;
-        peerConnection.onremovestream = function (event) {
-                log('PC1: Remote stream removed.');
-        };
-        getMedia() ;
+    if(video) {
+      peerConnection.onaddstream = function (event) {
+        log('[+] PC1: Remote stream is arrived.');
+
+        //var media = get("");
+        //media.id = "remoteView0";
+        //media.src = webkitURL.createObjectURL(event.stream);
+        //media.autoplay = true;
+
+        // var media = get("localVideo");
+        // media.src = webkitURL.createObjectURL(event.stream);
+        // media.autoplay = true;
+        // media.play();
+      };
+
+      peerConnection.onremovestream = function (event) {
+        log('PC1: Remote stream removed.');
+      };
+
+      getMedia();
     }
-
-
-
   }
-  else {
+  else {  // Callee
+    log("[+] Creating the second PeerConnection Object.");
 
-    log("Creating the second PeerConnection Object");
     var options = {
-        "optional": [
-            {DtlsSrtpKeyAgreement: true}
-            //,{RtpDataChannels: getData}
-        ],
-        mandatory: { googIPv6: true }
+      "optional": [
+        {DtlsSrtpKeyAgreement: true}
+        //,{RtpDataChannels: getData}
+      ],
+      mandatory: { googIPv6: true }
     };
+
     peerConnection2 = new RTCPeerConnection(null, options);
 
     // Sends ice candidates to the other peer
     peerConnection2.onicecandidate = onIceCandidate2;
     peerConnection2.oniceconnectionstatechange = function (ice_state) {
-      log("PC2:" + peerConnection2.iceGatheringState + " " + peerConnection2.iceConnectionState);
+      log("[+] PC2: " + peerConnection2.iceGatheringState + " " + peerConnection2.iceConnectionState);
     }
 
-    if ( data ){
-        peerConnection2.ondatachannel = function (e) {
-            // Data channle opened
-            log("Datachennel PC2-side opened");
-            dataChannel2 = e.channel;
-            dataChannel2.onerror = logError ;
-            dataChannel2.onmessage = onMessage2;
-            dataChannel2.onclose = function () {
-                log("The Data Channel is closed");
-            };
+    if (data){
+      peerConnection2.ondatachannel = function (e) {
+        // Data channle opened
+        log("Datachennel PC2-side opened");
+        dataChannel2 = e.channel;
+        dataChannel2.onerror = logError ;
+        dataChannel2.onmessage = onMessage2;
+        dataChannel2.onclose = function () {
+          log("The Data Channel is closed");
+        };
+      }
+    }
+
+    if(video) {
+      peerConnection2.onaddstream = function (event) {
+        log("[+] PC2: Remote stream arrived.");
+        //log(JSON.stringify(event));
+
+        var remoteMedia = get("remoteVideo");
+        if (window.URL) {
+          remoteMedia.src = window.URL.createObjectURL(stream);
+        } else {
+          remoteMedia.src = stream;
         }
+        remoteMedia.autoplay = true;
+        remoteMedia.play() ;
+
+        log('[+] PC2: Remote stream is playing.');
+      };
+
+      peerConnection2.onremovestream = function (event) {
+        log('[+] PC2: Remote stream removed.');
+      };
+
+      //getMedia() ;
     }
-
-    if( video ) {
-         peerConnection2.onaddstream = function (event) {
-                log('PC2: Remote stream arrived.');
-                log( JSON.stringify(event));
-                var remoteMedia = get("remoteVideo");
-                remoteMedia.src = webkitURL.createObjectURL(event.stream);
-                remoteMedia.autoplay = true;
-                remoteMedia.play() ;
-                log('PC2: Remote stream is playing.');
-
-            } ;
-        peerConnection2.onremovestream = function (event) {
-                log('PC2: Remote stream removed.');
-            };
-        //getMedia() ;
-    }
-
   }
 }
 
@@ -617,1026 +760,140 @@ function get(id){
 
 document.getElementById("createButton").addEventListener('click',function(){
   if(!Omlet.isInstalled()) {
-    log("Omlet is not installed");
+    log("[-] Omlet is not installed.");
   }
+  else {
+    log("[+] Omlet is installed.");
+    log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
 
-    log("Omlet found.");
-    log("DocumentAPI Obj:" + JSON.stringify(documentApi) );
     documentApi.create(function(d) {
-        log("Doc created");
-        myDocId = d.Document;
-        location.hash = "#/docId/" + myDocId;
+      log("[+] Function call: documentApi.create");
 
-        documentApi.update(myDocId, Initialize, InitialDocument(), function() {
-            documentApi.get(myDocId, DocumentCreated) } ,
-            function(e) {
-            alert("error: " + JSON.stringify(e));
-            });
+      myDocId = d.Document;
+      location.hash = "#/docId/" + myDocId;
 
-
-        }, function(e) {
-            alert("error: " + JSON.stringify(e));
+      documentApi.update(myDocId, Initialize, InitialDocument(), function() {
+        documentApi.get(myDocId, DocumentCreated)
+      }, function(e) {
+          alert("[-] create-update; " + JSON.stringify(e));
         });
-
+    }, function(e) {
+      alert("[-] create; " + JSON.stringify(e));
+    });
+  }
 });
 
 
 document.getElementById("clearButton").addEventListener('click',function(){
   if(!Omlet.isInstalled()) {
-    log("Omlet is not installed");
+    log("[-] Omlet is not installed.");
   }
-    log("Clearing Doc...");
-    documentApi.update(myDocId, clear, {}
-         , function() { documentApi.get(myDocId, DocumentCleared); }
-         , function(e) { alert("error: " + JSON.stringify(e)); }
-    );
+  else {
+    log("[+] Clearing Document.");
 
+    documentApi.update(myDocId, clear, {}
+     , function() { documentApi.get(myDocId, DocumentCleared); }
+     , function(e) { alert("[-] clear-update; " + JSON.stringify(e)); }
+     );
+  }
 });
 
 
 document.getElementById("getDocButton").addEventListener('click',function(){
   if(!Omlet.isInstalled()) {
-    log("Omlet is not installed");
+    log("[-] Omlet is not installed.");
   }
-    log("Getting Doc...");
-    documentApi.get(myDocId, ReceiveDoc );
+  else {
+    log("[+] Getting Document.");
+    documentApi.get(myDocId, ReceiveDoc);
+  }
 });
 
 
-document.getElementById("joinDataButton").addEventListener('click',function(){
-  log("Check for other party");
+document.getElementById("joinDataButton").addEventListener('click',function() {
   var caller = false;
-  if(  Object.keys(chatDoc.participants).length  == 0 ){
 
-    initConnection(true,true,false);
+  log("[*] Check for other party");
+
+  if(Object.keys(chatDoc.participants).length  == 0){
+    initConnection(true, true, false);
+
     try{
-      log("Adding the caller ");
+      log("[+] Adding the caller.");
+
       documentApi.update(myDocId, addParticipant, {"name": "caller" , "value" : {"signals":[]} }
-           , function() { documentApi.get(myDocId, participantAdded); }
-           , function(e) { alert("error: " + JSON.stringify(e)); }
+       , function() { documentApi.get(myDocId, participantAdded); }
+       , function(e) { alert("[-] Adding caller-update; " + JSON.stringify(e)); }
       );
       //documentApi.update(chatDocId, addParticipant, {"caller":true}, ReceiveUpdate);
     }
     catch(err){
-      log(err.message);
+      log("[-] Adding caller; " + err.message);
     }
-  } else {
+  }
+  else {
+    initConnection(false, true, false) ;
 
-    initConnection(false,true,false) ;
-    log(" Adding the callee ");
-    documentApi.update(myDocId, addParticipant, {"name": "callee" , "value" : {"signals":[{"signal_type": "callee_arrived" , "timestamp": Date.now()}]} }
-         , function() { documentApi.get(myDocId, participantAdded); }
-         , function(e) { alert("error: " + JSON.stringify(e)); }
-    );
+    try {
+      log("[+] Adding the callee.");
+
+      documentApi.update(myDocId, addParticipant, {"name": "callee" , "value" : {"signals":[{"signal_type": "callee_arrived" , "timestamp": Date.now()}]} }
+       , function() { documentApi.get(myDocId, participantAdded); }
+       , function(e) { alert("[-] Adding callee-update; " + JSON.stringify(e)); }
+      );
+    }
+    catch(err) {
+      log("[-] Adding the callee; " + err.message);
+    }
     //documentApi.update(chatDocId, addParticipant, {"caller":false}, ReceiveUpdate);
   }
-
-
-
 });
 
 
 document.getElementById("joinAVButton").addEventListener('click',function(){
-  log("Check for other party");
   var caller = false;
-  if(  Object.keys(chatDoc.participants).length  == 0 ){
 
-    initConnection(true,false,true);
+  log("[*] Check for other party.");
+
+  if(Object.keys(chatDoc.participants).length  == 0){
+    initConnection(true, false, true);
+
     try{
-      log("Adding the caller ");
+      log("[+] Adding the caller.");
       documentApi.update(myDocId, addParticipant, {"name": "caller" , "value" : {"signals":[]} }
-           , function() { documentApi.get(myDocId, participantAdded); }
-           , function(e) { alert("error: " + JSON.stringify(e)); }
-      );
+       , function() { documentApi.get(myDocId, participantAdded); }
+       , function(e) { alert("[-] Adding caller-update; " + JSON.stringify(e)); }
+       );
       //documentApi.update(chatDocId, addParticipant, {"caller":true}, ReceiveUpdate);
     }
     catch(err){
-      log(err.message);
+      log("[-] Adding caller; " + err.message);
     }
-  } else {
+  }
+  else {
+    initConnection(false, false, true) ;
 
-    initConnection(false,false,true) ;
-    log(" Adding the callee ");
+    log("[+] Adding the callee.");
+
     documentApi.update(myDocId, addParticipant, {"name": "callee" , "value" : {"signals":[{"signal_type": "callee_arrived" , "timestamp": Date.now()}]} }
-         , function() { documentApi.get(myDocId, participantAdded); }
-         , function(e) { alert("error: " + JSON.stringify(e)); }
-    );
+     , function() { documentApi.get(myDocId, participantAdded); }
+     , function(e) { alert("[-] Adding callee-update; " + JSON.stringify(e)); }
+     );
     //documentApi.update(chatDocId, addParticipant, {"caller":false}, ReceiveUpdate);
   }
-
-
-
 });
 
+
 Omlet.ready(function() {
-  log("Omlet Ready");
+  log("[+] Omlet is Ready.");
+
   if (hasDocument()) {
-    log("Initializing Document");
+    log("[+] Initializing Document.");
     initDocumentAPI();
   }
   else {
-    log("No Doc found");
+    log("[-] Doc is not found.");
     initDocumentAPI();
     // No Doc --> Use traditional Style
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-//////////////////////////////////
-// Sajjad
-//////////////////////////////////
-
-
-///////////////////////////////
-//// Variables ////////////////
-//////////////////////////////
-
-// var peerConnection;
-// var peerConnection2;
-
-// var dataChannel;
-// var dataChannel2;
-
-// var omletAsSignallingChannel = true ;
-// var orderedDataChannel = true;
-// var detectedBrowser ;
-
-// var processedSignals = {} ;
-
-// // The local MediaStream to play with
-// var localStream;
-
-
-// /**
-//  *  Variables for WebRTC
-//  * 
-//  * @author Seongjung Jeremy Kim
-//  * @since  2015.07.15
-//  *
-//  */
-
-// // Look after different browser vendors' ways of calling the getUserMedia() API method:
-// navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-
-
-// //////////////////////////////
-// ///// Framework Code ///////
-// //////////////////////////////
-
-// var documentApi;
-// var myDocId ;
-// //var callbackurl
-
-
-
-// function watchDocument(docref, OnUpdate) {
-//   documentApi.watch(docref, function(updatedDocRef) {
-//     if (updatedDocRef != chatDocId) {
-//       console.log("[-] Wrong document.");
-//     } 
-//     else {
-//       documentApi.get(updatedDocRef, OnUpdate);
-//     }
-//   }, function(result) {
-//     var timestamp = result.Expires;
-//     var expires = timestamp - new Date().getTime();
-//     var timeout = 0.8 * expires;
-
-//     setTimeout(function() {
-//       watchDocument(docref, OnUpdate);
-//     }, timeout);
-//   }, Error);
-// }
-
-
-// function ReceiveDoc(doc) {
-//   chatDoc = doc;
-//   log( "Doc Fetched" );
-//   log( "chat id: " + chatDoc.chatId ) ;
-//   log( "people in this : " + Object.keys(chatDoc.participants).length );
-// }
-
-// //var there = 0 ;
-// function ReceiveUpdatedDoc(doc) {
-
-
-//   chatDoc = doc;
-
-//   log( "Updated Doc Fetched" );
-//   log( "chat id: " + chatDoc.chatId ) ;
-//   log( "people in this conversation: " + Object.keys(chatDoc.participants).length );
-
-//   if( Object.keys(chatDoc.participants).length != 2 ) {
-//     return ;
-//   }
-
-
-//     //log("Updated signals: " + JSON.stringify(processedSignals) ) ;
-
-//     // Having two people
-//     var caller = chatDoc.participants["caller"] ;
-//     var callee = chatDoc.participants["callee"] ;
-
-//     //log( "CALLER:" + JSON.stringify(caller));
-//     // Callee Signal Handler - process signals generated by caller
-//     for (var i = 0; i < caller.signals.length; i++) {
-
-//       var signal = caller.signals[i];
-//       if (signal.timestamp in processedSignals)
-//         continue ;
-//       processedSignals[signal.timestamp]  = 1 ;
-
-//       if (signal.signal_type === "new_ice_candidate") {
-//         log("PC2 is adding ICE.");
-//         peerConnection2.addIceCandidate(
-//           new RTCIceCandidate(signal.candidate),
-//           onAddIceCandidateSuccess, onAddIceCandidateError
-//           );
-//       } else if (signal.signal_type === "new_description") {
-//         log("PC2 is setting remote description");
-//         peerConnection2.setRemoteDescription(
-//           new RTCSessionDescription(signal.sdp),
-//           function () {
-//             log("PC2 is checking for offer.");
-//             if (peerConnection2.remoteDescription.type == "offer") {
-//               log("PC2 is creating answer.");
-//               peerConnection2.createAnswer(onNewDescriptionCreated_2, logError);
-//             }
-//           }, logError);
-//       }
-
-
-//     }
-
-//     //log("CALLEE:" + JSON.stringify(callee));
-//     // Caller Signal Handler - process signals generated by callee
-//     for (var i = 0; i < callee.signals.length; i++) {
-//       var signal = callee.signals[i];
-//       if (signal.timestamp in processedSignals)
-//         continue ;
-//       processedSignals[signal.timestamp]  = 1 ;
-
-//       if (signal.signal_type === "callee_arrived") {
-
-//         //  if( there ==0 ) {
-//           log("Callee Arrived") ;
-//           peerConnection.createOffer(
-//             onNewDescriptionCreated,
-//             logError
-//             );
-//         //  there =1 ;
-//       //  }
-//     }
-//     else if (signal.signal_type === "new_ice_candidate") {
-//       peerConnection.addIceCandidate(
-//         new RTCIceCandidate(signal.candidate),
-//         onAddIceCandidateSuccess, onAddIceCandidateError
-//         );
-//     } else if (signal.signal_type === "new_description") {
-//       log(signal.sdp);
-//       peerConnection.setRemoteDescription(
-//         new RTCSessionDescription(signal.sdp),
-//         function () {},
-//         logError
-//         );
-//     }
-//   }
-
-// }
-
-
-
-// function ReceiveUpdate(chatDocId) {
-//   log( "Doc updated. Getting updated version..." );
-//     //log( "chat id: " + chatDoc.chatId ) ;
-//     //log( "people in this conversation: " + Object.keys(doc.participants).length );
-//     documentApi.get(chatDocId, ReceiveUpdatedDoc , function(e) {
-//       alert("error on getting doc: " + JSON.stringify(e));
-//     });
-//   }
-
-//   function hasDocument() {
-//     var docIdParam = window.location.hash.indexOf("/docId/");
-//     return (docIdParam != -1);
-//   }
-
-//   function getDocumentReference() {
-//     var docIdParam = window.location.hash.indexOf("/docId/");
-//     if (docIdParam == -1) return false;
-//     var docId = window.location.hash.substring(docIdParam+7);
-//     var end = docId.indexOf("/");
-//     if (end != -1)
-//       docId = docId.substring(0, end);
-//     return docId;
-//   }
-
-//   function _loadDocument() {
-//     if (hasDocument()) {
-//       myDocId = getDocumentReference();
-//       log("Doc found with id#: " + myDocId );
-//       documentApi.watch(myDocId, ReceiveUpdate);
-//       log("Getting Doc...");
-//       documentApi.get(myDocId, ReceiveDoc );
-//         //watchDocument(myDocId, ReceiveUpdate);
-//       } else {
-//         log(" Doc ***NOT*** found " );
-//       }
-//     }
-
-
-//     function initDocumentAPI() {
-//       log("Initializating Document API");
-
-
-//       if (!Omlet.isInstalled()) {
-//         log(" NO OMLET for US " );
-
-//       }
-
-//       documentApi = Omlet.document;
-//       log("Loading document") ;
-//       _loadDocument();
-//     }
-
-
-//     function log(message){
-//       var logArea = document.getElementById("console");
-//       logArea.value += "\n" + message ;
-//       logArea.scrollTop = logArea.scrollHeight;
-//     }
-
-//     function InitialDocument() {
-//       var chatId = 100;
-//       var identity = Omlet.getIdentity() ;
-//       log('id:' + JSON.stringify(identity) );
-
-//       // Particiapnat includes omlet id, connection info
-
-//       var initValues = {
-//         'chatId' : chatId ,
-//         'creator':identity,
-//         'participants':{}
-//       };
-
-//       return initValues;
-//     }
-
-
-//   function Initialize(old, params) {
-//     return params;
-//   }
-
-//   function clear(old, params) {
-//     processedSignals = {};
-//     old.participants = {} ;
-//     old.creator = '' ;
-//     return old;
-//   }
-
-//   function addParticipant(old, params) {
-//     old.participants[params.name] = params.value ;
-//     //old.creator = '' ;
-//     return old;
-//   }
-
-
-//   function addSignal(old, params) {
-//   //log("Adding a signal" + params) ;
-//   //log("Old: " + JSON.stringify(old)) ;
-//   old.participants[params.name].signals.push(params.signal) ;
-//   //old.creator =  ;
-//   return old;
-// }
-
-
-// function DocumentCleared(doc) {
-//   log("Document cleared");
-//   log("people in this conversation: " + Object.keys(doc.participants).length );
-// }
-
-
-// function participantAdded(doc) {
-//   log("Participant added");
-//   //chatDoc = doc ;
-//   //log( JSON.stringify(doc));
-//   //log("Participant added");
-//   //log( "people in this conversation: " + Object.keys(doc.participants).length );
-// }
-
-
-// function DocumentCreated(doc) {
-//     //var callbackurl = window.location.href.replace("chat-maker.html" , "webrtc-data.html") ;
-//     var callbackurl = "https://webrtcbench-dbh3099.rhcloud.com/chat-maker-media.html#/docId/" + myDocId;
-//     log(callbackurl);
-
-//     //if(Omlet.isInstalled()) {
-//       var rdl = Omlet.createRDL({
-//         appName: "webrtc-data",
-//         noun: "poll",
-//         displayTitle: "webrt-data",
-//         displayThumbnailUrl: "https://dhorh0z3k6ro7.cloudfront.net/apps/quikpoll/images/quikpoll.png",
-//         displayText: "WEBRTC CHATROOM",
-//         json: doc,
-//         callback: callbackurl
-//       });
-//       Omlet.exit(rdl);
-//     //}
-//   }
-
-
-// //////////////////////////////////////////////
-// /////////////// WebRTC Code //////////////////
-// //////////////////////////////////////////////
-
-// function onAddIceCandidateSuccess() {
-//   log('AddIceCandidate success.');
-// }
-
-// function onAddIceCandidateError(error) {
-//   log('Failed to add Ice Candidate: ' + error.toString());
-// }
-
-// function logError(error){
-//   alert(error);
-// }
-
-
-// function onNewDescriptionCreated(description) {
-//   peerConnection.setLocalDescription(description, function () {
-//     log("Caller Local Description Set");
-
-//     // Send it to the other peer
-//     if ( omletAsSignallingChannel ){
-//       //TODO Update the Document
-//       log("updating doc with id#:" + myDocId);
-
-//         //documentApi.update(myDocId, addParticipant, {"name": "dummy" , "value" : {"signals":[]} }
-//         //     , function() { documentApi.get(myDocId, participantAdded); }
-//         //     , function(e) { alert("error: " + JSON.stringify(e)); }
-//         //);
-
-//     var des_obj = {"name": "caller" , "signal" : {"signal_type": "new_description","timestamp":Date.now(),  "sdp": description} }  ;
-//         //var des_str = JSON.stringify( des_obj );
-
-
-
-//         //log(des_str) ;
-//         //str = JSON.stringify(description);
-//         //str = '{"sdp": "v=0\r\n\o=- 368374678643784 2 IN IP4 12.3.3.3 \r\ns-=-\r\nt=0 0\r\na=msid-semantic:"}';
-//         //str = 'Hello kitty' ;
-//     documentApi.update(myDocId, addSignal, des_obj , function() { log("Signal added"); }
-//      , function(e) { alert("error: " + JSON.stringify(e)); }
-//      );
-
-//         //documentApi.update(myDocId, addSignal
-//         //    , {
-//               //"name": "caller" ,
-//               //"signal": {
-//             //    "type": "new_description",
-//             //    "sdp": description
-//             //  }
-//       //      }
-//       //       , function() { log("sldpa signal added"); }
-//       //       , function(e) { alert("error: " + JSON.stringify(e)); }
-//       //  );
-
-//     } 
-//     else {
-//         // Other method
-//     }
-//   }, logError);
-// }
-
-
-// function onNewDescriptionCreated_2(description) {
-//   peerConnection2.setLocalDescription(description, function () {
-//     log("Callee Local Description Set");
-      
-//     // Send it to the other peer
-//     if (omletAsSignallingChannel) {
-//       //TODO Update the Document
-//       var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_description","timestamp":Date.now(),  "sdp": description} }  ;
-//       documentApi.update(myDocId, addSignal, des_obj , function() { log("Signal added"); }
-//          , function(e) { alert("error: " + JSON.stringify(e)); });
-//     } 
-//     else {
-//       signallingSocket.emit("message",
-//         JSON.stringify({
-//           channel: get('channelId').value,
-//           signal_type: "new_description",
-//           sdp: description
-//         }));
-//     }
-//   }, logError);
-// }
-
-
-
-// function onIceCandidate(event){
-//   log("New Ice Candidate Found");
-//   if (event.candidate) {
-//     if ( omletAsSignallingChannel ){
-//       //TODO Update the Document
-//       var des_obj = {"name": "caller" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
-//       documentApi.update(myDocId, addSignal, des_obj , function() { log("NewICE Signal added"); }
-//        , function(e) { alert("error: " + JSON.stringify(e)); }
-//        );
-//     } else {
-//     }
-//   }
-// }
-
-// function onIceCandidate2(event){
-//   log("New Ice Candidate Found");
-//   if (event.candidate) {
-//     if ( omletAsSignallingChannel ){
-//       //TODO Update the Document
-//       var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
-//       documentApi.update(myDocId, addSignal, des_obj , function() { log("NewICE Signal added"); }
-//        , function(e) { alert("error: " + JSON.stringify(e)); }
-//        );
-//     } else {
-//     }
-//   }
-// }
-
-
-// function tryParseJSON (jsonString){
-//   try {
-//     var o = JSON.parse(jsonString);
-
-//         // Handle non-exception-throwing cases:
-//         // Neither JSON.parse(false) or JSON.parse(1234) throw errors, hence the type-checking,
-//         // but... JSON.parse(null) returns 'null', and typeof null === "object",
-//         // so we must check for that, too.
-//         if (o && typeof o === "object" && o !== null) {
-//           return o;
-//         }
-//       }
-//       catch (exception) {
-//         return false;
-//       }
-//     };
-
-//     function onMessage (event) {
-//       var t_msg = time();
-//       var blob = event.data;
-//     // TODO file transfer
-
-//     var json = tryParseJSON(blob.toString()) ;
-//     if ( json ){
-//         //log( blob.toString() );
-//         if( json.message === 'Ping' ){
-//           dataChannel.send( JSON.stringify( { message:"Pong" , timestamp: time() }) );
-//         } else if (json.message === 'Pong') {
-//           log( blob.toString() + " received at " + time() );
-//         } else if ( json.message  === 'File') {
-//             //log( blob.toString() + " received at " + json.timestamp );
-//             receivedFileInfo.name = json.name ;
-//             receivedFileInfo.size = json.size;
-//             receivedFileInfo.type = json.type ;
-//             receivedFileInfo.receivedBytes = 0 ;
-//           }
-//         }
-//         else {
-//           log("text received at " + t_msg.toString());
-//         //appendDIV(event.data);
-//       }
-
-//     };
-
-//     function dataChannelOpened () {
-//       log("Datachennel opened");
-
-//       get('chatInput').disabled = false;
-//       get('chatInput2').disabled = false;
-
-//       get('chatInput').onkeypress = function (e) {
-//         if (e.keyCode !== 13 || !this.value) return;
-//         dataChannel.send("P1: " + this.value);
-//         this.value = '';
-//         this.focus();
-//       };
-
-//       get('chatInput2').onkeypress = function (e) {
-//        if (e.keyCode !== 13 || !this.value) return;
-//        dataChannel2.send("P2: " + this.value);
-//        this.value = '';
-//        this.focus();
-//      };
-
-//   //dataChannelOpened = true;
-//   //get('sendbtn').onclick = sendFile ;
-//   //get('pingbtn').onclick = function() { log("sending ping at " + time() ) ; dataChannel.send( JSON.stringify({message : 'Ping' , timestamp: time() }) ); };
-// };
-
-// function onMessage(msg){
-//   log("DC1 received:" + msg.data) ;
-// }
-
-// function onMessage2(msg){
-//   log("DC2 received:" + msg.data) ;
-// }
-
-
-
-// function streaming(stream) {
-//   var localMedia = get("localVideo")
-//   localMedia.src = webkitURL.createObjectURL(stream);
-//   localMedia.autoplay = true;
-//   localMedia.play();
-
-//   peerConnection.addStream(stream);
-//   log("Stream attached to PC1") ;
-// }
-
-
-
-// function getMedia(){
-//   getUserMedia( 
-//   { 
-//     "audio":false, 
-//     "video":
-//     { 
-//       mandatory: 
-//       { 
-//         minFrameRate: 30, 
-//         maxHeight: 240, 
-//         maxWidth: 320
-//       }
-//     }
-//   } , streaming, logError ) ;
-// }
-
-
-// /**
-//  * 
-//  * @author Seongjung Jeremy Kim
-//  * @since  2015.07.15
-//  *
-//  */
-
-// // Original onstraints object for web app video
-// var srcConstraints = {
-//   "audio":false, 
-//   "video": { 
-//     mandatory: { 
-//       minFrameRate: 30, 
-//       maxHeight: 240, 
-//       maxWidth: 320
-//     }
-//   }
-// };
-
-// // Constraints object for low resolution video
-// var qvgaConstraints = { video: {
-//     mandatory: {
-//       maxWidth: 320,
-//       maxHeight: 240
-// } }
-// };
-
-// // Constraints object for standard resolution video
-// var vgaConstraints = { video: {
-//     mandatory: {
-//       maxWidth: 640,
-//       maxHeight: 480
-// } }
-// };
-
-// // Constraints object for high resolution video
-// var hdConstraints = { video: {
-//     mandatory: {
-//       maxWidth: 1280,
-//       maxHeight: 960
-// } }
-// };
-
-
-// /**
-//  * 
-//  * @author Seongjung Jeremy Kim
-//  * @since  2015.07.15
-//  *
-//  */
-
-// // Callback to be called in case of failure...
-// function errorCallback(error){ 
-//   log("[-] navigator.getUserMedia; " + error);
-// }
-
-// // Callback to be called in case of success...
-// function successCallback(stream) {
-//   localMedia = get("localVideo")
-
-//   // Make the stream available to the console for introspection 
-//   window.stream = stream;
-//   // Attach the returned stream to the <video> element in the HTML page
-//   localMedia.src = window.URL.createObjectURL(stream);
-//   // Set <video> element property
-//   localMedia.autoplay = true;
-//   // Start playing video
-//   localMedia.play();
-
-//   peerConnection.addStream(stream);
-//   log("[+] Stream attached to PC1.") ;
-// }
-
-
-// /**
-//  * 
-//  * @author Seongjung Jeremy Kim
-//  * @since  2015.07.15
-//  *
-//  */
-// // Simple wrapper for getUserMedia() with constraints object as an input parameter
-// // function getMedia(constraints){
-// //   if (!!localStream) { 
-// //     localMedia.src = null; 
-// //     localStream.stop();
-// //   }
-
-// //   navigator.getUserMedia(constraints, successCallback, errorCallback);
-// // }
-
-
-// //////////// Establishing Connection ////////////
-// function initConnection(caller, data, video){
-//   // Caller
-//   if (caller) {
-//     log("[+] Creating the first PeerConnection Object.");
-
-//     var options = {
-//       "optional": [
-//       {DtlsSrtpKeyAgreement: true}
-//             //,{RtpDataChannels: getData}
-//             ],
-//             mandatory: { googIPv6: true }
-//           };
-//           peerConnection = new RTCPeerConnection(null, options);
-
-//     // Sends ice candidates to the other peer
-//     peerConnection.onicecandidate = onIceCandidate;
-//     peerConnection.oniceconnectionstatechange = function (ice_state) {
-//       log("[+] PC1: " + peerConnection.iceGatheringState + " " + peerConnection.iceConnectionState);
-//     }
-
-//     if(data) {
-//       log("[+] Creating data channel.");
-
-//       var dataChannelOptions = {
-//         ordered: true
-//       };
-      
-//       dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
-
-//       dataChannel.onerror = logError ;
-//       dataChannel.onmessage = onMessage;
-//       dataChannel.onopen = dataChannelOpened;
-//       dataChannel.onclose = function () {
-//         log("[-] The Data Channel is closed.");
-//       };
-//     }
-
-//     if(video) {
-//       peerConnection.onaddstream = function (event) {
-//         log('[+] PC1: Remote stream is arrived.');
-
-//         var media = get("");
-//         media.id = "remoteView0";
-//         media.src = webkitURL.createObjectURL(event.stream);
-//         media.autoplay = true;
-
-//         // var media = get("localVideo");
-//         // media.src = webkitURL.createObjectURL(event.stream);
-//         // media.autoplay = true;
-//         // media.play();
-//       };
-
-//       peerConnection.onremovestream = function (event) {
-//         log('PC1: Remote stream removed.');
-//       };
-      
-//       getMedia();
-//     }
-//   }
-//   else {  // Callee
-//     log("[+] Creating the second PeerConnection Object.");
-
-//     var options = {
-//       "optional": [
-//         {DtlsSrtpKeyAgreement: true}
-//         //,{RtpDataChannels: getData}
-//       ],
-//       mandatory: { googIPv6: true }
-//     };
-          
-//     peerConnection2 = new RTCPeerConnection(null, options);
-
-//     // Sends ice candidates to the other peer
-//     peerConnection2.onicecandidate = onIceCandidate2;
-//     peerConnection2.oniceconnectionstatechange = function (ice_state) {
-//       log("[+] PC2: " + peerConnection2.iceGatheringState + " " + peerConnection2.iceConnectionState);
-//     }
-
-//     if (data){
-//       peerConnection2.ondatachannel = function (e) {
-//         // Data channle opened
-//         log("Datachennel PC2-side opened");
-//         dataChannel2 = e.channel;
-//         dataChannel2.onerror = logError ;
-//         dataChannel2.onmessage = onMessage2;
-//         dataChannel2.onclose = function () {
-//           log("The Data Channel is closed");
-//         };
-//       }
-//     }
-
-//     if(video) {
-//       peerConnection2.onaddstream = function (event) {
-//         log("[+] PC2: Remote stream arrived.");
-//         //log(JSON.stringify(event));
-
-//         var remoteMedia = get("remoteVideo");
-//         remoteMedia.src = webkitURL.createObjectURL(event.stream);
-//         remoteMedia.autoplay = true;
-//         remoteMedia.play() ;
-
-//         log('[+] PC2: Remote stream is playing.');
-//       };
-
-//       peerConnection2.onremovestream = function (event) {
-//         log('[+] PC2: Remote stream removed.');
-//       };
-        
-//       //getMedia() ;
-//     }
-//   }
-// }
-
-// ///////////////////////////////////
-// ///////// Utility /////////////////
-// ///////////////////////////////////
-// function log(message){
-//   var logArea = this.get("console");
-//   logArea.value += "\n" + message ;
-//   logArea.scrollTop = logArea.scrollHeight;
-// }
-
-// function get(id){
-//   return document.getElementById(id);
-// }
-
-// /////////////////////////////////////
-// ///////////////  App ////////////////
-// /////////////////////////////////////
-
-// document.getElementById("createButton").addEventListener('click',function(){
-//   if(!Omlet.isInstalled()) {
-//     log("[-] Omlet is not installed.");
-//   }
-//   else {
-//     log("[+] Omlet is installed.");
-//     log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
-
-//     documentApi.create(function(d) {
-//       log("[+] Function call: documentApi.create");
-
-//       myDocId = d.Document;
-//       location.hash = "#/docId/" + myDocId;
-
-//       documentApi.update(myDocId, Initialize, InitialDocument(), function() {
-//         documentApi.get(myDocId, DocumentCreated) 
-//       }, function(e) {
-//           alert("[-] create-update; " + JSON.stringify(e));
-//         });
-//     }, function(e) {
-//       alert("[-] create; " + JSON.stringify(e));
-//     });
-//   }
-// });
-
-
-// document.getElementById("clearButton").addEventListener('click',function(){
-//   if(!Omlet.isInstalled()) {
-//     log("[-] Omlet is not installed.");
-//   }
-//   else {
-//     log("[+] Clearing Document.");
-
-//     documentApi.update(myDocId, clear, {}
-//      , function() { documentApi.get(myDocId, DocumentCleared); }
-//      , function(e) { alert("[-] clear-update; " + JSON.stringify(e)); }
-//      );
-//   }
-// });
-
-
-// document.getElementById("getDocButton").addEventListener('click',function(){
-//   if(!Omlet.isInstalled()) {
-//     log("[-] Omlet is not installed.");
-//   }
-//   else {
-//     log("[+] Getting Document.");
-//     documentApi.get(myDocId, ReceiveDoc);
-//   }
-// });
-
-
-// document.getElementById("joinDataButton").addEventListener('click',function() {
-//   var caller = false;
-
-//   log("[*] Check for other party");
-
-//   if(Object.keys(chatDoc.participants).length  == 0){
-//     initConnection(true, false, true);
-
-//     try{
-//       log("[+] Adding the caller.");
-
-//       documentApi.update(myDocId, addParticipant, {"name": "caller" , "value" : {"signals":[]} }
-//        , function() { documentApi.get(myDocId, participantAdded); }
-//        , function(e) { alert("[-] Adding caller-update; " + JSON.stringify(e)); }
-//       );
-//       //documentApi.update(chatDocId, addParticipant, {"caller":true}, ReceiveUpdate);
-//     }
-//     catch(err){
-//       log("[-] Adding caller; " + err.message);
-//     }
-//   } 
-//   else {
-//     initConnection(false, false, true) ;
-
-//     try {
-//       log("[+] Adding the callee.");
-
-//       documentApi.update(myDocId, addParticipant, {"name": "callee" , "value" : {"signals":[{"signal_type": "callee_arrived" , "timestamp": Date.now()}]} }
-//        , function() { documentApi.get(myDocId, participantAdded); }
-//        , function(e) { alert("[-] Adding callee-update; " + JSON.stringify(e)); }
-//       );
-//     }
-//     catch(err) {
-//       log("[-] Adding the callee; " + err.message);
-//     }
-//     //documentApi.update(chatDocId, addParticipant, {"caller":false}, ReceiveUpdate);
-//   }
-// });
-
-
-// document.getElementById("joinAVButton").addEventListener('click',function(){
-//   var caller = false;
-
-//   log("[*] Check for other party.");
-  
-//   if(Object.keys(chatDoc.participants).length  == 0){
-//     initConnection(true, true, true);
-
-//     try{
-//       log("[+] Adding the caller.");
-//       documentApi.update(myDocId, addParticipant, {"name": "caller" , "value" : {"signals":[]} }
-//        , function() { documentApi.get(myDocId, participantAdded); }
-//        , function(e) { alert("[-] Adding caller-update; " + JSON.stringify(e)); }
-//        );
-//       //documentApi.update(chatDocId, addParticipant, {"caller":true}, ReceiveUpdate);
-//     }
-//     catch(err){
-//       log("[-] Adding caller; " + err.message);
-//     }
-//   } 
-//   else {
-//     initConnection(false, true, true) ;
-
-//     log("[+] Adding the callee.");
-
-//     documentApi.update(myDocId, addParticipant, {"name": "callee" , "value" : {"signals":[{"signal_type": "callee_arrived" , "timestamp": Date.now()}]} }
-//      , function() { documentApi.get(myDocId, participantAdded); }
-//      , function(e) { alert("[-] Adding callee-update; " + JSON.stringify(e)); }
-//      );
-//     //documentApi.update(chatDocId, addParticipant, {"caller":false}, ReceiveUpdate);
-//   }
-// });
-
-
-// Omlet.ready(function() {
-//   log("[+] Omlet is Ready.");
-
-//   if (hasDocument()) {
-//     log("[+] Initializing Document.");
-//     initDocumentAPI();
-//   }
-//   else {
-//     log("[-] Doc is not found.");
-//     initDocumentAPI();
-//     // No Doc --> Use traditional Style
-//   }
-// });
