@@ -702,13 +702,16 @@ function initConnection(caller, data, video){
         // media.src = webkitURL.createObjectURL(event.stream);
         // media.autoplay = true;
         // media.play();
+
+        getMedia();
+        getRemoteMedia();
       };
 
       peerConnection.onremovestream = function (event) {
         log('PC1: Remote stream removed.');
       };
 
-      getMedia();
+      //getMedia();
     }
   }
   else {  // Callee
@@ -756,7 +759,7 @@ function initConnection(caller, data, video){
         // }
         // remoteMedia.autoplay = true;
         // remoteMedia.play() ;
-
+        getMedia();
         getRemoteMedia();
 
         log('[+] PC2: Remote stream is playing.');
