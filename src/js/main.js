@@ -712,6 +712,8 @@ function initConnection(caller, data, video) {
     //   log("[+] PC1: " + peerConnection.iceGatheringState + " " + peerConnection.iceConnectionState);
     // }
 
+    navigator.getUserMedia(constraints, handleUserMedia, handleUserMediaError);
+
     peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
     peerConnection.addStream(localStream);
     peerConnection.onicecandidate = handleIceCandidate;
@@ -752,7 +754,7 @@ function initConnection(caller, data, video) {
       peerConnection.onaddstream = handleRemoteStreamAdded;
       peerConnection.onremovestream = handleRemoteStreamRemoved;
 
-      navigator.getUserMedia(constraints, handleUserMedia, handleUserMediaError);
+      
 
       // peerConnection.onremovestream = function (event) {
       //   log('PC1: Remote stream removed.');
