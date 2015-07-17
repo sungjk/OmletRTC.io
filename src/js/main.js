@@ -519,8 +519,8 @@ function streaming(stream) {
 
 function getMedia(){
   navigator.getUserMedia({
-    "audio": false, 
-    "video" :{
+    audio: false, 
+    video: {
       mandatory: {
         minFrameRate: 30,
         maxHeight: 240,
@@ -549,8 +549,8 @@ function streamingRemote(stream) {
 
 function getRemoteMedia() {
   navigator.getUserMedia({
-    "audio": false, 
-    "video" :{
+    audio: false, 
+    video: {
       mandatory: {
         minFrameRate: 30,
         maxHeight: 240,
