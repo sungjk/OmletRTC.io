@@ -704,7 +704,7 @@ function initConnection(caller, data, video){
         // media.play();
 
         getMedia();
-        getRemoteMedia();
+        //getRemoteMedia();
       };
 
       peerConnection.onremovestream = function (event) {
@@ -759,7 +759,7 @@ function initConnection(caller, data, video){
         // }
         // remoteMedia.autoplay = true;
         // remoteMedia.play() ;
-        getMedia();
+        //getMedia();
         getRemoteMedia();
 
         log('[+] PC2: Remote stream is playing.');
