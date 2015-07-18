@@ -663,6 +663,7 @@ function initConnection(caller, data, video) {
       localPeerConnection.onremovestream = function (event) {
         log('[+] localPeerConnection: local stream removed.');
       };
+       
     }
   }
   else {  // Callee
@@ -709,6 +710,7 @@ function initConnection(caller, data, video) {
         remotePeerConnection.addStream(event.stream);
 
         log("[+] Add remote peer stream.");
+        //log('[+] remotePeerConnection: remote stream added.');
       };
 
       remotePeerConnection.onremovestream = function (event) {
