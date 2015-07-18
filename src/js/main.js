@@ -559,7 +559,7 @@ function remoteStreaming(stream) {
   remoteMedia.play();
 
   remotePeerConnection.addStream(stream);
-  log("[+] Add remote peer stream.") ;
+  log("[+] Add remote peer stream.");
 }
 
 
@@ -656,7 +656,10 @@ function initConnection(caller, data, video) {
     if(video) {
       getLocalMedia();
 
-      localPeerConnection.onaddstream = getRemoteMedia;
+      localPeerConnection.onaddstream = function (event) {
+        log("[+] Add local peer stream.") ;
+      };
+
       localPeerConnection.onremovestream = handleRemoteStreamRemoved;
     }
   }
@@ -693,9 +696,11 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      getLocalMedia();
+      getRemoteMedia();
 
-      remotePeerConnection.onaddstream = getRemoteMedia;
+      remotePeerConnection.onaddstream = function (event) {
+        log('[+] Add remote stream.');
+      };      
       remotePeerConnection.onremovestream = handleRemoteStreamRemoved;
     }
   }
@@ -816,7 +821,6 @@ document.getElementById("joinDataButton").addEventListener('click',function() {
 
 document.getElementById("joinAVButton").addEventListener('click',function(){
   var caller = false;
-
   log("[*] Check for other party.");
 
   if(Object.keys(chatDoc.participants).length  == 0) {
