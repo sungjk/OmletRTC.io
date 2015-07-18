@@ -700,16 +700,16 @@ function initConnection(caller, data, video) {
 
     if(video) {
       remotePeerConnection.onaddstream = function (event) {
-        var remoteMedia = get("remoteVideo");
+        // var remoteMedia = get("remoteVideo");
 
-        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
-        else            remoteMedia.src = event.stream;
+        // if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+        // else            remoteMedia.src = event.stream;
 
-        remoteMedia.autoplay = true;
-        remoteMedia.play();
-        remotePeerConnection.addStream(event.stream);
+        // remoteMedia.autoplay = true;
+        // remoteMedia.play();
+        // remotePeerConnection.addStream(event.stream);
 
-        log("[+] Add remote peer stream.");
+        // log("[+] Add remote peer stream.");
         //log('[+] remotePeerConnection: remote stream added.');
       };
 
@@ -717,7 +717,7 @@ function initConnection(caller, data, video) {
         log('[+] remotePeerConnection: remote stream removed.');
       };
 
-      // getRemoteMedia();
+       getRemoteMedia();
     }
   }
 }
