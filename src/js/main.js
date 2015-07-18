@@ -710,22 +710,22 @@ function initConnection(caller, data, video) {
     if(video) {
       //getLocalMedia();
 
-      remotePeerConnection.onaddstream = function (event) {
-        var remoteMedia = get("remoteVideo");
+      // remotePeerConnection.onaddstream = function (event) {
+      //   var remoteMedia = get("remoteVideo");
 
-        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
-        else            remoteMedia.src = event.stream;
+      //   if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+      //   else            remoteMedia.src = event.stream;
 
-        remoteMedia.autoplay = true;
-        remoteMedia.play();
-        //remotePeerConnection.addStream(event.stream);
+      //   remoteMedia.autoplay = true;
+      //   remoteMedia.play();
+      //   remotePeerConnection.addStream(event.stream);
 
-        navigator.getUserMedia({audio: false, video: true}, remotePeerConnection.addStream(event.stream), logError);
 
-        log("[+] Add remote peer stream.");
-        //log('[+] remotePeerConnection: remote stream added.');
-      };
+      //   log("[+] Add remote peer stream.");
+      //   //log('[+] remotePeerConnection: remote stream added.');
+      // };
 
+      remotePeerConnection.onaddstream = getRemoteMedia;
       remotePeerConnection.onremovestream = function (event) {
         log('[+] remotePeerConnection: remote stream removed.');
       };
