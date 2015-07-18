@@ -691,7 +691,6 @@ function initConnection(caller, data, video) {
       ],
       mandatory: { googIPv6: true }
     };
-
     remotePeerConnection = new RTCPeerConnection(null, options);
 
     // Sends ice candidates to the other peer
