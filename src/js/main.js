@@ -114,9 +114,6 @@ function watchDocument(docref, OnUpdate) {
 
 function ReceiveDoc(doc) {
   chatDoc = doc;
-  log("[+] Doc Fetched" );
-  log("[+] chat id: " + chatDoc.chatId ) ;
-  log( "[+] people in this : " + Object.keys(chatDoc.participants).length );
 }
 
 function ReceiveUpdatedDoc(doc) {
@@ -657,7 +654,7 @@ function initConnection(caller, data, video) {
       getLocalMedia();
 
       localPeerConnection.onaddstream = function (event) {
-        log("[+] Add local peer stream.") ;
+        log("[+] localPeerConnection.onaddstream") ;
       };
 
       localPeerConnection.onremovestream = handleRemoteStreamRemoved;
@@ -696,11 +693,18 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      getRemoteMedia();
-
       remotePeerConnection.onaddstream = function (event) {
-        log('[+] Add remote stream.');
-      };      
+        var remoteMedia = get("remoteVideo");
+
+        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+        else            remoteMedia.src = event.stream;
+
+        remoteMedia.autoplay = true;
+        remoteMedia.play();
+
+        remotePeerConnection.addStream(event.stream);
+        log("[+] remotePeerConnection.onaddstream");
+      };
       remotePeerConnection.onremovestream = handleRemoteStreamRemoved;
     }
   }
