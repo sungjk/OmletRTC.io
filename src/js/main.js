@@ -44,10 +44,6 @@ var processedSignals = {} ;
 var localVideo = get("localVideo");
 var remoteVideo = get("remoteVideo");
 
-// var localVideo = document.querySelector('#localVideo');
-// var remoteVideo = document.querySelector('#remoteVideo');
-
-
 
 
 /**
@@ -58,36 +54,16 @@ var remoteVideo = get("remoteVideo");
  *
  */
 
-// WebRTC data structures streams
-var localStream;
-var remoteStream;
-
-// Number of attached video
-var attachVideoNumber = 0;
-
-// Look after different browser vendors' ways of calling the getUserMedia() API method:
-navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-// PeerConnection ICE protocol configuration (either Firefox or Chrome)
-var pc_config = webrtcDetectedBrowser === 'chrome' ? 
-  {'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
-  {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
-
-var pc_constraints = {
-    'optional': [{ 'DtlsSrtpKeyAgreement': true }]
-};
-var sdpConstraints = {};
 
 
-
-//////////////////////////////
-///// Framework Code ///////
-//////////////////////////////
+//////////////////////////////////////////////////////////////////
+//
+//                Framework Code          
+//
+/////////////////////////////////////////////////////////////////
 
 var documentApi;
 var myDocId ;
-//var callbackurl
-
 
 
 function watchDocument(docref, OnUpdate) {
@@ -117,7 +93,6 @@ function ReceiveDoc(doc) {
   log( "people in this : " + Object.keys(chatDoc.participants).length );
 }
 
-//var there = 0 ;
 function ReceiveUpdatedDoc(doc) {
   chatDoc = doc;
 
@@ -331,7 +306,7 @@ function DocumentCreated(doc) {
         noun: "poll",
         displayTitle: "OmletRTC",
         displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-        displayText: "displayText",
+        displayText: ip(),
         json: doc,
         callback: callbackurl
       });
@@ -700,31 +675,31 @@ function initConnection(caller, data, video) {
   if (caller) {
     log("[+] Creating the first PeerConnection Object.");
 
-    // var options = {
-    //   "optional": [
-    //   {DtlsSrtpKeyAgreement: true}
-    //         //,{RtpDataChannels: getData}
-    //         ],
-    //         mandatory: { googIPv6: true }
-    //       };
-    //       peerConnection = new RTCPeerConnection(null, options);
+    var options = {
+      "optional": [
+      {DtlsSrtpKeyAgreement: true}
+            //,{RtpDataChannels: getData}
+            ],
+            mandatory: { googIPv6: true }
+          };
+          peerConnection = new RTCPeerConnection(null, options);
 
-    // // Sends ice candidates to the other peer
-    // peerConnection.onicecandidate = onIceCandidate;
-    // peerConnection.oniceconnectionstatechange = function (ice_state) {
-    //   log("[+] PC1: " + peerConnection.iceGatheringState + " " + peerConnection.iceConnectionState);
-    // }
+    // Sends ice candidates to the other peer
+    peerConnection.onicecandidate = onIceCandidate;
+    peerConnection.oniceconnectionstatechange = function (ice_state) {
+      log("[+] PC1: " + peerConnection.iceGatheringState + " " + peerConnection.iceConnectionState);
+    }
 
 
     //handleUserMedia();
     
 
-    peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
-    peerConnection.addStream(localStream);
-    peerConnection.onicecandidate = onIceCandidate;
-    peerConnection.oniceconnectionstatechange = function (ice_state) {
-      log("[+] PC1: " + peerConnection.iceGatheringState + " " + peerConnection.iceConnectionState);
-    }
+    // peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
+    // peerConnection.addStream(localStream);
+    // peerConnection.onicecandidate = onIceCandidate;
+    // peerConnection.oniceconnectionstatechange = function (ice_state) {
+    //   log("[+] PC1: " + peerConnection.iceGatheringState + " " + peerConnection.iceConnectionState);
+    // }
     //peerConnection.onicecandidate = handleIceCandidate;
 
     
@@ -747,30 +722,25 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      // peerConnection.onaddstream = function (event) {
-      //   log('[+] PC1: Remote stream is arrived.');
+      peerConnection.onaddstream = function (event) {
+        log('[+] PC1: Remote stream is arrived.');
 
-      //   //var media = get("");
-      //   //media.id = "remoteView0";
-      //   //media.src = webkitURL.createObjectURL(event.stream);
-      //   //media.autoplay = true;
+        //var media = get("");
+        //media.id = "remoteView0";
+        //media.src = webkitURL.createObjectURL(event.stream);
+        //media.autoplay = true;
 
-      //   // var media = get("localVideo");
-      //   // media.src = webkitURL.createObjectURL(event.stream);
-      //   // media.autoplay = true;
-      //   // media.play();
-      // };
-      peerConnection.onaddstream = handleRemoteStreamAdded;
-      peerConnection.onremovestream = handleRemoteStreamRemoved;
+        // var media = get("localVideo");
+        // media.src = webkitURL.createObjectURL(event.stream);
+        // media.autoplay = true;
+        // media.play();
+      };
 
-      navigator.getUserMedia(constraints, handleUserMedia, handleUserMediaError);
+      peerConnection.onremovestream = function (event) {
+        log('PC1: Remote stream removed.');
+      };
 
-
-      // peerConnection.onremovestream = function (event) {
-      //   log('PC1: Remote stream removed.');
-      // };
-
-      // getMedia();
+       getMedia();
       // getRemoteMedia();
     }
   }
@@ -807,31 +777,26 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      // peerConnection2.onaddstream = function (event) {
-      //   log("[+] PC2: Remote stream arrived.");
-      //   //log(JSON.stringify(event));
+      peerConnection2.onaddstream = function (event) {
+        log("[+] PC2: Remote stream arrived.");
+        //log(JSON.stringify(event));
 
-      //   // var remoteMedia = get("remoteVideo");
-      //   // if (window.URL) {
-      //   //   remoteMedia.src = window.URL.createObjectURL(stream);
-      //   // } else {
-      //   //   remoteMedia.src = stream;
-      //   // }
-      //   // remoteMedia.autoplay = true;
-      //   // remoteMedia.play() ;
-      //   getMedia();
-      //   getRemoteMedia();
+        // var remoteMedia = get("remoteVideo");
+        // if (window.URL) {
+        //   remoteMedia.src = window.URL.createObjectURL(stream);
+        // } else {
+        //   remoteMedia.src = stream;
+        // }
+        // remoteMedia.autoplay = true;
+        // remoteMedia.play();
 
-      //   log('[+] PC2: Remote stream is playing.');
-      // };
+        //getRemoteMedia();
 
-      // peerConnection2.onremovestream = function (event) {
-      //   log('[+] PC2: Remote stream removed.');
-      // };
+        log('[+] PC2: Remote stream is playing.');
+      };
 
-      peerConnection.onaddstream = handleRemoteStreamAdded;
-      peerConnection.onremovestream = handleRemoteStreamRemoved;
-      
+      // peerConnection.onaddstream = handleRemoteStreamAdded;
+      // peerConnection2.onremovestream = handleRemoteStreamRemoved;
     }
   }
 }
@@ -887,7 +852,7 @@ function handleRemoteStreamAdded(event) {
 }
 
 function handleRemoteStreamRemoved(event) {
-    console.log('Remote stream removed. Event: ', event);
+    log('[+] PC2: Remote stream removed.');
 }
 
 
