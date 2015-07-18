@@ -19,8 +19,8 @@ console.error = console.debug = console.info = console.log
 //// Variables ////////////////
 //////////////////////////////
 
-var peerConnection;
-var peerConnection2;
+// var peerConnection;
+// var peerConnection2;
 
 var localPeerConnection;
 var remotePeerConnection;
@@ -719,6 +719,8 @@ function initConnection(caller, data, video) {
         remoteMedia.autoplay = true;
         remoteMedia.play();
         remotePeerConnection.addStream(event.stream);
+
+        navigator.getUserMedia({audio: false, video: true}, function(){}, logError);
 
         log("[+] Add remote peer stream.");
         //log('[+] remotePeerConnection: remote stream added.');
