@@ -37,8 +37,8 @@ var processedSignals = {} ;
 
 
 // HTML5 <video> elements
-// var localVideo = get("localVideo");
-// var remoteVideo = get("remoteVideo");
+var localVideo = get("localVideo");
+var remoteVideo = get("remoteVideo");
 
 // contraints
 var constraints = { video: true, audio: false };
@@ -350,8 +350,10 @@ function onNewDescriptionCreated(description) {
     log("[+] Set local description.");
 
     // Send it to the other peer
-    if (omletAsSignallingChannel){
+    if ( omletAsSignallingChannel ){
       //TODO Update the Document
+      log("[+] Updating doc with id#:" + myDocId);
+
       var des_obj = {
         "name": "caller" , 
         "signal" : {
@@ -363,7 +365,8 @@ function onNewDescriptionCreated(description) {
 
       documentApi.update(myDocId, addSignal, des_obj 
         , function() { log("[+] Add signal."); }
-        , function(e) { alert("error: " + JSON.stringify(e)); });
+        , function(e) { alert("error: " + JSON.stringify(e)); }
+      );
     }
     else {
         // Other method
@@ -434,15 +437,7 @@ function onIceCandidate2(event){
   if (event.candidate) {
     if ( omletAsSignallingChannel ){
       //TODO Update the Document
-      var des_obj = {
-        "name": "callee" , 
-        "signal" : {
-          "signal_type": "new_ice_candidate",
-          "timestamp": Date.now(), 
-          "candidate": event.candidate
-        } 
-      };
-
+      var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
       documentApi.update(myDocId, addSignal, des_obj , function() { log("[+] Add remote ICE Signal."); }
        , function(e) { alert("error: " + JSON.stringify(e)); }
        );
@@ -452,7 +447,7 @@ function onIceCandidate2(event){
 }
 
 
-function tryParseJSON(jsonString){
+function tryParseJSON (jsonString){
   try {
     var o = JSON.parse(jsonString);
 
@@ -556,6 +551,7 @@ function localStreaming(stream) {
 
 function remoteStreaming(stream) {
   var remoteMedia = get("remoteVideo");
+
   if (window.URL) remoteMedia.src = window.URL.createObjectURL(stream);
   else            remoteMedia.src = stream;
 
@@ -638,7 +634,7 @@ function initConnection(caller, data, video) {
     localPeerConnection.oniceconnectionstatechange = function (ice_state) {
       log("[+] PC1: " + localPeerConnection.iceGatheringState + " " + localPeerConnection.iceConnectionState);
     }
-
+    
 
     if(data) {
       log("[+] Creating data channel.");
@@ -661,7 +657,17 @@ function initConnection(caller, data, video) {
       getLocalMedia();
 
       localPeerConnection.onaddstream = function (event) {
-        log('[+] localPeerConnection: local stream added.');
+        // var remoteMedia = get("remoteVideo");
+
+        // if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+        // else            remoteMedia.src = event.stream;
+
+        // remoteMedia.autoplay = true;
+        // remoteMedia.play();
+        // remotePeerConnection.addStream(event.stream);
+
+        // log("[+] Add remote peer stream.");
+        //log('[+] remotePeerConnection: remote stream added.');
       };
 
       localPeerConnection.onremovestream = function (event) {
@@ -702,6 +708,8 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
+      //getLocalMedia();
+
       remotePeerConnection.onaddstream = function (event) {
         var remoteMedia = get("remoteVideo");
 
@@ -713,6 +721,7 @@ function initConnection(caller, data, video) {
         remotePeerConnection.addStream(event.stream);
 
         log("[+] Add remote peer stream.");
+        //log('[+] remotePeerConnection: remote stream added.');
       };
 
       remotePeerConnection.onremovestream = function (event) {
