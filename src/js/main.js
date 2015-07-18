@@ -697,7 +697,7 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      localPeerConnection.onaddstream = function (event) {
+      remotePeerConnection.onaddstream = function (event) {
         var remoteMedia = get("remoteVideo");
 
         if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
@@ -705,7 +705,7 @@ function initConnection(caller, data, video) {
 
         remoteMedia.autoplay = true;
         remoteMedia.play();
-        localPeerConnection.addStream(event.stream);
+        remotePeerConnection.addStream(event.stream);
 
         log("[+] Add remote peer stream.");
       };
