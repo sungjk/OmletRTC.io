@@ -633,7 +633,7 @@ function initConnection(caller, data, video) {
     localPeerConnection.oniceconnectionstatechange = function (ice_state) {
       log("[+] PC1: " + localPeerConnection.iceGatheringState + " " + localPeerConnection.iceConnectionState);
     }
-        
+
 
     if(data) {
       log("[+] Creating data channel.");
@@ -697,7 +697,7 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      remotePeerConnection.onaddstream = function (event) {
+      localPeerConnection.onaddstream = function (event) {
         var remoteMedia = get("remoteVideo");
 
         if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
@@ -705,7 +705,7 @@ function initConnection(caller, data, video) {
 
         remoteMedia.autoplay = true;
         remoteMedia.play();
-        remotePeerConnection.addStream(event.stream);
+        localPeerConnection.addStream(event.stream);
 
         log("[+] Add remote peer stream.");
       };
