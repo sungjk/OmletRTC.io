@@ -551,7 +551,6 @@ function localStreaming(stream) {
 
 function remoteStreaming(stream) {
   var remoteMedia = get("remoteVideo");
-
   if (window.URL) remoteMedia.src = window.URL.createObjectURL(stream);
   else            remoteMedia.src = stream;
 
@@ -654,8 +653,6 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      getLocalMedia();
-
       localPeerConnection.onaddstream = function (event) {
         log('[+] localPeerConnection: local stream added.');
       };
@@ -664,6 +661,7 @@ function initConnection(caller, data, video) {
         log('[+] localPeerConnection: local stream removed.');
       };
        
+      getLocalMedia();
     }
   }
   else {  // Callee
@@ -700,37 +698,21 @@ function initConnection(caller, data, video) {
 
     if(video) {
       remotePeerConnection.onaddstream = function (event) {
-        var localMedia = get("localVideo")
+        var remoteMedia = get("remoteVideo");
 
-        if (window.URL) localMedia.src = window.URL.createObjectURL(event.stream);
-        else            localMedia.src = event.stream;
-        
-        localMedia.autoplay = true;
-        localMedia.play();
+        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+        else            remoteMedia.src = event.stream;
 
-        localPeerConnection.addStream(event.stream);
-        // log("[+] Add remote peer stream.");
+        remoteMedia.autoplay = true;
+        remoteMedia.play();
+        remotePeerConnection.addStream(event.stream);
 
-        
-
-        // var remoteMedia = get("remoteVideo");
-
-        // if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
-        // else            remoteMedia.src = event.stream;
-
-        // remoteMedia.autoplay = true;
-        // remoteMedia.play();
-        // remotePeerConnection.addStream(event.stream);
-
-        // log("[+] Add remote peer stream.");
-        //log('[+] remotePeerConnection: remote stream added.');
+        log("[+] Add remote peer stream.");
       };
 
       remotePeerConnection.onremovestream = function (event) {
         log('[+] remotePeerConnection: remote stream removed.');
       };
-
-      // getRemoteMedia();
     }
   }
 }
