@@ -37,8 +37,8 @@ var processedSignals = {} ;
 
 
 // HTML5 <video> elements
-var localVideo = get("localVideo");
-var remoteVideo = get("remoteVideo");
+// var localVideo = get("localVideo");
+// var remoteVideo = get("remoteVideo");
 
 // contraints
 var constraints = { video: true, audio: false };
@@ -350,10 +350,8 @@ function onNewDescriptionCreated(description) {
     log("[+] Set local description.");
 
     // Send it to the other peer
-    if ( omletAsSignallingChannel ){
+    if (omletAsSignallingChannel){
       //TODO Update the Document
-      log("[+] Updating doc with id#:" + myDocId);
-
       var des_obj = {
         "name": "caller" , 
         "signal" : {
@@ -365,8 +363,7 @@ function onNewDescriptionCreated(description) {
 
       documentApi.update(myDocId, addSignal, des_obj 
         , function() { log("[+] Add signal."); }
-        , function(e) { alert("error: " + JSON.stringify(e)); }
-      );
+        , function(e) { alert("error: " + JSON.stringify(e)); });
     }
     else {
         // Other method
@@ -437,7 +434,15 @@ function onIceCandidate2(event){
   if (event.candidate) {
     if ( omletAsSignallingChannel ){
       //TODO Update the Document
-      var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
+      var des_obj = {
+        "name": "callee" , 
+        "signal" : {
+          "signal_type": "new_ice_candidate",
+          "timestamp": Date.now(), 
+          "candidate": event.candidate
+        } 
+      };
+
       documentApi.update(myDocId, addSignal, des_obj , function() { log("[+] Add remote ICE Signal."); }
        , function(e) { alert("error: " + JSON.stringify(e)); }
        );
@@ -447,7 +452,7 @@ function onIceCandidate2(event){
 }
 
 
-function tryParseJSON (jsonString){
+function tryParseJSON(jsonString){
   try {
     var o = JSON.parse(jsonString);
 
