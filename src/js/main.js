@@ -633,7 +633,7 @@ function initConnection(caller, data, video) {
     localPeerConnection.oniceconnectionstatechange = function (ice_state) {
       log("[+] PC1: " + localPeerConnection.iceGatheringState + " " + localPeerConnection.iceConnectionState);
     }
-    
+        
 
     if(data) {
       log("[+] Creating data channel.");
@@ -653,6 +653,8 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
+      getLocalMedia();
+
       localPeerConnection.onaddstream = function (event) {
         log('[+] localPeerConnection: local stream added.');
       };
@@ -660,8 +662,6 @@ function initConnection(caller, data, video) {
       localPeerConnection.onremovestream = function (event) {
         log('[+] localPeerConnection: local stream removed.');
       };
-       
-      getLocalMedia();
     }
   }
   else {  // Callee
