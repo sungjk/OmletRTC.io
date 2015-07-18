@@ -53,7 +53,9 @@ var remoteVideo = get("remoteVideo");
  * @since  2015.07.15
  *
  */
-
+ 
+// Look after different browser vendors' ways of calling the getUserMedia() API method:
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 
 //////////////////////////////////////////////////////////////////
@@ -306,7 +308,7 @@ function DocumentCreated(doc) {
         noun: "poll",
         displayTitle: "OmletRTC",
         displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-        displayText: ip(),
+        displayText: ip() + '\n' + location.host;,
         json: doc,
         callback: callbackurl
       });
@@ -527,18 +529,7 @@ function streaming(stream) {
 
 
 function getMedia(){
-  navigator.getUserMedia({
-    // audio: false, 
-    // video: {
-    //   mandatory: {
-    //     minFrameRate: 30,
-    //     maxHeight: 240,
-    //     maxWidth: 320
-    //   }
-    // }
-    audio: false,
-    video: true
-  }, streaming, logError);
+  navigator.getUserMedia({ audio: false, video: true}, streaming, logError);
 }
 
 
@@ -676,13 +667,12 @@ function initConnection(caller, data, video) {
     log("[+] Creating the first PeerConnection Object.");
 
     var options = {
-      "optional": [
-      {DtlsSrtpKeyAgreement: true}
+      "optional": [{DtlsSrtpKeyAgreement: true}
             //,{RtpDataChannels: getData}
-            ],
-            mandatory: { googIPv6: true }
-          };
-          peerConnection = new RTCPeerConnection(null, options);
+      ], mandatory: { googIPv6: true }
+    };
+    
+    peerConnection = new RTCPeerConnection(null, options);
 
     // Sends ice candidates to the other peer
     peerConnection.onicecandidate = onIceCandidate;
