@@ -654,6 +654,8 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
+      getLocalMedia();
+
       localPeerConnection.onaddstream = function (event) {
         log('[+] localPeerConnection: local stream added.');
       };
@@ -661,8 +663,6 @@ function initConnection(caller, data, video) {
       localPeerConnection.onremovestream = function (event) {
         log('[+] localPeerConnection: local stream removed.');
       };
-      
-      getLocalMedia(); 
     }
   }
   else {  // Callee
