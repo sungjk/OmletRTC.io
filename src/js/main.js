@@ -721,11 +721,13 @@ function initConnection(caller, data, video) {
         // remoteMedia.play(); 
         // remotePeerConnection.addStream(event.stream); 
    
-        navigator.getUserMedia({
-          audio: false,
-          video: true
-        }, remoteStreaming, logError);
-        
+        // navigator.getUserMedia({
+        //   audio: false,
+        //   video: true
+        // }, remoteStreaming, logError);
+        getRemoteMedia();
+
+
         log("[+] Add remote peer stream.");  
       };
 
