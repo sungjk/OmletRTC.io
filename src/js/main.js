@@ -53,7 +53,7 @@ var remoteVideo = get("remoteVideo");
  * @since  2015.07.15
  *
  */
- 
+
 // Look after different browser vendors' ways of calling the getUserMedia() API method:
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
@@ -308,7 +308,7 @@ function DocumentCreated(doc) {
         noun: "poll",
         displayTitle: "OmletRTC",
         displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-        displayText: ip() + '\n' + location.host;,
+        displayText: ip() + '\n' + location.host,
         json: doc,
         callback: callbackurl
       });
