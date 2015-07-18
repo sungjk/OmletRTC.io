@@ -657,13 +657,22 @@ function initConnection(caller, data, video) {
       getLocalMedia();
 
       localPeerConnection.onaddstream = function (event) {
-        log('[+] localPeerConnection: local stream added.');
+        var remoteMedia = get("remoteVideo");
+
+        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+        else            remoteMedia.src = event.stream;
+
+        remoteMedia.autoplay = true;
+        remoteMedia.play();
+        remotePeerConnection.addStream(event.stream);
+
+        log("[+] Add remote peer stream.");
+        //log('[+] remotePeerConnection: remote stream added.');
       };
 
       localPeerConnection.onremovestream = function (event) {
         log('[+] localPeerConnection: local stream removed.');
       };
-       
     }
   }
   else {  // Callee
@@ -699,6 +708,8 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
+      getLocalMedia();
+
       remotePeerConnection.onaddstream = function (event) {
         var remoteMedia = get("remoteVideo");
 
@@ -716,8 +727,6 @@ function initConnection(caller, data, video) {
       remotePeerConnection.onremovestream = function (event) {
         log('[+] remotePeerConnection: remote stream removed.');
       };
-
-      // getRemoteMedia();
     }
   }
 }
