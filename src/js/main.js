@@ -425,8 +425,10 @@ function onIceCandidate(event){
 
       documentApi.update(myDocId, addSignal, des_obj , function() { log("[+] Add local ICE Signal."); }
        , function(e) { alert("error: " + JSON.stringify(e)); }
-       );
-    } else {
+     );
+    } 
+    else {
+    
     }
   }
 }
@@ -437,11 +439,21 @@ function onIceCandidate2(event){
   if (event.candidate) {
     if ( omletAsSignallingChannel ){
       //TODO Update the Document
-      var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
+      var des_obj = {
+        "name": "callee" , 
+        "signal" : {
+          "signal_type" : "new_ice_candidate",
+          "timestamp": Date.now(), 
+          "candidate": event.candidate
+        } 
+      };
+
       documentApi.update(myDocId, addSignal, des_obj , function() { log("[+] Add remote ICE Signal."); }
        , function(e) { alert("error: " + JSON.stringify(e)); }
-       );
-    } else {
+     );
+    } 
+    else {
+    
     }
   }
 }
@@ -666,8 +678,6 @@ function initConnection(caller, data, video) {
     }
   }
   else {  // Callee
-    log("[+] Creating remotePeerConnection Object.");
-
     var options = {
       "optional": [
         {DtlsSrtpKeyAgreement: true}
@@ -675,6 +685,8 @@ function initConnection(caller, data, video) {
       ],
       mandatory: { googIPv6: true }
     };
+
+    log("[+] Creating remotePeerConnection Object.");
     remotePeerConnection = new RTCPeerConnection(null, options);
 
     // Sends ice candidates to the other peer
@@ -699,16 +711,27 @@ function initConnection(caller, data, video) {
 
     if(video) {
       remotePeerConnection.onaddstream = function (event) {
-        var remoteMedia = get("remoteVideo");
+        // var remoteMedia = get("remoteVideo");
 
-        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
-        else            remoteMedia.src = event.stream;
+        // if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+        // else            remoteMedia.src = event.stream;
 
-        remoteMedia.autoplay = true;
-        remoteMedia.play();
-        remotePeerConnection.addStream(event.stream);
+        // remoteMedia.autoplay = true;
+        // remoteMedia.play();
+        // remotePeerConnection.addStream(event.stream);
 
-        log("[+] Add remote peer stream.");
+        // log("[+] Add remote peer stream.");
+
+        var localMedia = get("localVideo")
+
+        if (window.URL) localMedia.src = window.URL.createObjectURL(stream);
+        else            localMedia.src = stream;
+        
+        localMedia.autoplay = true;
+        localMedia.play();
+
+        localPeerConnection.addStream(stream);
+        log("[+] Add local peer stream.") ;
       };
 
       remotePeerConnection.onremovestream = function (event) {
