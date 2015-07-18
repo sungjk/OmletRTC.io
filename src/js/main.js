@@ -720,25 +720,14 @@ function initConnection(caller, data, video) {
         // remoteMedia.play();
         // remotePeerConnection.addStream(event.stream);
 
-        // log("[+] Add remote peer stream.");
-
-        var localMedia = get("localVideo")
-
-        if (window.URL) localMedia.src = window.URL.createObjectURL(stream);
-        else            localMedia.src = stream;
-        
-        localMedia.autoplay = true;
-        localMedia.play();
-
-        localPeerConnection.addStream(stream);
-        log("[+] Add local peer stream.") ;
+        log("[+] Add remote peer stream.");
       };
 
       remotePeerConnection.onremovestream = function (event) {
         log('[+] remotePeerConnection: remote stream removed.');
       };
 
-       //getRemoteMedia();
+       getRemoteMedia();
     }
   }
 }
