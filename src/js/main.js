@@ -708,7 +708,7 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      getLocalMedia();
+      //getLocalMedia();
 
       remotePeerConnection.onaddstream = function (event) {
         var remoteMedia = get("remoteVideo");
