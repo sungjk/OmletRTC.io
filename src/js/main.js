@@ -35,27 +35,49 @@ var detectedBrowser ;
 var processedSignals = {} ;
 
 
-/**
- *  Variables for HTML5 <video> elements
- *
- * @author Seongjung Jeremy Kim
- * @since  2015.07.15
- *
- */
 
 // HTML5 <video> elements
 var localVideo = get("localVideo");
 var remoteVideo = get("remoteVideo");
 
+// contraints
+var constraints = { video: true, audio: false };
 
+// Original constraints object for web app video
+var srcConstraints = {
+  "audio":false,
+  "video": {
+    mandatory: {
+      minFrameRate: 30,
+      maxHeight: 240,
+      maxWidth: 320
+    }
+  }
+};
 
-/**
- *  Variables for WebRTC
- *
- * @author Seongjung Jeremy Kim
- * @since  2015.07.15
- *
- */
+// Constraints object for low resolution video
+var qvgaConstraints = { video: {
+    mandatory: {
+      maxWidth: 320,
+      maxHeight: 240
+} }
+};
+
+// Constraints object for standard resolution video
+var vgaConstraints = { video: {
+    mandatory: {
+      maxWidth: 640,
+      maxHeight: 480
+} }
+};
+
+// Constraints object for high resolution video
+var hdConstraints = { video: {
+    mandatory: {
+      maxWidth: 1280,
+      maxHeight: 960
+} }
+};
 
 
 
@@ -494,6 +516,10 @@ function tryParseJSON (jsonString){
   //get('pingbtn').onclick = function() { log("sending ping at " + time() ) ; dataChannel.send( JSON.stringify({message : 'Ping' , timestamp: time() }) ); };
 };
 
+
+
+
+
 function onMessage(msg){
   log("DC1 received:" + msg.data) ;
 }
@@ -504,7 +530,14 @@ function onMessage2(msg){
 
 
 
-function streaming(stream) {
+/**
+ * Function for media & streaming
+ *
+ * @author Seongjung Jeremy Kim
+ * @since  2015.07.18
+ *
+ */
+function localStreaming(stream) {
   var localMedia = get("localVideo")
   if (window.URL) localMedia.src = window.URL.createObjectURL(stream);
   else            localMedia.src = stream;
@@ -516,7 +549,7 @@ function streaming(stream) {
   log("[+] Add local peer stream.") ;
 }
 
-function streamingRemote(stream) {
+function remoteStreaming(stream) {
   var remoteMedia = get("remoteVideo");
 
   if (window.URL) remoteMedia.src = window.URL.createObjectURL(stream);
@@ -534,7 +567,7 @@ function getLocalMedia(){
   navigator.getUserMedia({ 
     audio: false, 
     video: true
-  }, streaming, logError);
+  }, localStreaming, logError);
 }
 
 
@@ -542,11 +575,31 @@ function getRemoteMedia() {
   navigator.getUserMedia({
     audio: false,
     video: true
-  }, streamingRemote, logError);
+  }, remoteStreaming, logError);
 }
 
 
+// Remote stream handlers...
+// [For testing] attachVideoNumber 변수 선언 해줘야함.
+function handleRemoteStreamAdded(event) {
+    if (attachVideoNumber == 0) {
+        attachMediaStream(remoteVideo, event.stream);
+        log('[+] Add remote peer stream.');
+        remoteStream = event.stream;
+        attachVideoNumber++;
+    }
+    else if (attachVideoNumber == 1) {
+        attachMediaStream(thirdVideo, event.stream);
+        log('[+] Add remote peer stream.');
+        thirdStream = event.stream;
+        attachVideoNumber++;
+    }
+}
 
+
+function handleRemoteStreamRemoved() {
+    log('[+] Remote remote stream');
+}
 
 
 /**
@@ -562,67 +615,8 @@ function errorCallback(error){
 }
 
 
-
-/**
- *
- * @author Seongjung Jeremy Kim
- * @since  2015.07.15
- *
- */
-
-var constraints = { video: true, audio: false };
-
-// Original onstraints object for web app video
-var srcConstraints = {
-  "audio":false,
-  "video": {
-    mandatory: {
-      minFrameRate: 30,
-      maxHeight: 240,
-      maxWidth: 320
-    }
-  }
-};
-
-// Constraints object for low resolution video
-var qvgaConstraints = { video: {
-    mandatory: {
-      maxWidth: 320,
-      maxHeight: 240
-} }
-};
-
-// Constraints object for standard resolution video
-var vgaConstraints = { video: {
-    mandatory: {
-      maxWidth: 640,
-      maxHeight: 480
-} }
-};
-
-// Constraints object for high resolution video
-var hdConstraints = { video: {
-    mandatory: {
-      maxWidth: 1280,
-      maxHeight: 960
-} }
-};
-
-
-
-/**
- *
- * @author Seongjung Jeremy Kim
- * @since  2015.07.15
- *
- */
-
-
-
-
 //////////// Establishing Connection ////////////
 function initConnection(caller, data, video) {
-
   // Caller
   if (caller) {
     log("[+] Creating localPeerConnection Object.");
@@ -660,25 +654,16 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
+      getLocalMedia();
+
       localPeerConnection.onaddstream = function (event) {
-        log('[+] PC1: Remote stream is arrived.');
-
-        //var media = get("");
-        //media.id = "remoteView0";
-        //media.src = webkitURL.createObjectURL(event.stream);
-        //media.autoplay = true;
-
-        // var media = get("localVideo");
-        // media.src = webkitURL.createObjectURL(event.stream);
-        // media.autoplay = true;
-        // media.play();
+        log('[+] localPeerConnection: local stream added.');
       };
 
       localPeerConnection.onremovestream = function (event) {
-        log('PC1: Remote stream removed.');
+        log('[+] localPeerConnection: local stream removed.');
       };
-
-       getLocalMedia();
+       
     }
   }
   else {  // Callee
@@ -706,6 +691,7 @@ function initConnection(caller, data, video) {
         dataChannel2 = e.channel;
         dataChannel2.onerror = logError ;
         dataChannel2.onmessage = onMessage2;
+
         dataChannel2.onclose = function () {
           log("The Data Channel is closed");
         };
@@ -714,80 +700,27 @@ function initConnection(caller, data, video) {
 
     if(video) {
       remotePeerConnection.onaddstream = function (event) {
-        log("[+] PC2: Remote stream arrived.");
-        //log(JSON.stringify(event));
+        var remoteMedia = get("remoteVideo");
 
-        // var remoteMedia = get("remoteVideo");
-        // if (window.URL) {
-        //   remoteMedia.src = window.URL.createObjectURL(stream);
-        // } else {
-        //   remoteMedia.src = stream;
-        // }
-        // remoteMedia.autoplay = true;
-        // remoteMedia.play();
+        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+        else            remoteMedia.src = event.stream;
 
-        getRemoteMedia();
+        remoteMedia.autoplay = true;
+        remoteMedia.play();
+        remotePeerConnection.addStream(event.stream);
 
-        log('[+] PC2: Remote stream is playing.');
+        log("[+] Add remote peer stream.");
+        //log('[+] remotePeerConnection: remote stream added.');
       };
+
+      remotePeerConnection.onremovestream = function (event) {
+        log('[+] remotePeerConnection: remote stream removed.');
+      };
+
+      // getRemoteMedia();
     }
   }
 }
-
-
-
-/**
- *  Handler for remote stream
- *
- * @author Seongjung Jeremy Kim
- * @since  2015.07.17
- *
- */
-
-function handleUserMedia(stream) {
-    localStream = stream;
-    attachMediaStream(localVideo, stream);
-    console.log('Adding local stream.');
-}
-
-function handleUserMediaError(error) {
-    console.log('navigator.getUserMedia error: ', error);
-}
-
-
-// Remote stream handlers...
-function handleRemoteStreamAdded(event) {
-    log('[+] Remote stream added.');
-
-    if (attachVideoNumber == 0) {
-        attachMediaStream(remoteVideo, event.stream);
-        log('[+] Remote stream attached!!.');
-        remoteStream = event.stream;
-        attachVideoNumber++;
-    }
-    // else if (attachVideoNumber == 1) {
-    //     attachMediaStream(thirdVideo, event.stream);
-    //     log('[+] Third stream attached!!.');
-    //     thirdStream = event.stream;
-    //     attachVideoNumber++;
-    // }
-    // else if (attachVideoNumber == 2) {
-    //     attachMediaStream(forthVideo, event.stream);
-    //     log('[+] Forth stream attached!!.');
-    //     forthStream = event.stream;
-    //     attachVideoNumber++;
-    // } else if (attachVideoNumber == 3) {
-    //     attachMediaStream(fifthVideo, event.stream);
-    //     log('[+] Forth stream attached!!.');
-    //     fifthStream = event.stream;
-    //     attachVideoNumber++;
-    // }
-}
-
-function handleRemoteStreamRemoved(event) {
-    log('[+] PC2: Remote stream removed.');
-}
-
 
 
 
@@ -803,6 +736,8 @@ function log(message){
 function get(id){
   return document.getElementById(id);
 }
+
+
 
 /////////////////////////////////////
 ///////////////  App ////////////////
