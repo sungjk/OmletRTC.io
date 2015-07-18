@@ -92,9 +92,9 @@ function watchDocument(docref, OnUpdate) {
 
 function ReceiveDoc(doc) {
   chatDoc = doc;
-  log( "Doc Fetched" );
-  log( "chat id: " + chatDoc.chatId ) ;
-  log( "people in this : " + Object.keys(chatDoc.participants).length );
+  log("[+] Doc Fetched" );
+  log("[+] chat id: " + chatDoc.chatId ) ;
+  log( "[+] people in this : " + Object.keys(chatDoc.participants).length );
 }
 
 function ReceiveUpdatedDoc(doc) {
@@ -119,21 +119,21 @@ function ReceiveUpdatedDoc(doc) {
     var signal = caller.signals[i];
 
     if (signal.timestamp in processedSignals)
-      continue ;
+      continue;
 
     processedSignals[signal.timestamp] = 1 ;
 
     if (signal.signal_type === "new_ice_candidate") {
-      log("PC2 is adding ICE.");
+      log("[+] Remote peer is adding ICE.");
       remotePeerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate), onAddIceCandidateSuccess, onAddIceCandidateError);
     } 
     else if (signal.signal_type === "new_description") {
-      log("PC2 is setting remote description");
+      log("[+] Remote peer is setting remote description");
       remotePeerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp), function () {
-          log("PC2 is checking for offer.");
+          log("[+] Remote peer is checking for offer.");
           
           if (remotePeerConnection.remoteDescription.type == "offer") {
-            log("PC2 is creating answer.");
+            log("[+] Remote peer is creating answer.");
             remotePeerConnection.createAnswer(onNewDescriptionCreated_2, logError);
           }
         }, logError);
@@ -149,23 +149,16 @@ function ReceiveUpdatedDoc(doc) {
       processedSignals[signal.timestamp]  = 1 ;
 
       if (signal.signal_type === "callee_arrived") {
-
-        //  if( there ==0 ) {
-          log("Callee Arrived") ;
+          log("[+] Callee is arrived") ;
           localPeerConnection.createOffer(onNewDescriptionCreated, logError);
-        //  there =1 ;
-      //  }
+      }
+      else if (signal.signal_type === "new_ice_candidate") {
+        localPeerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate), onAddIceCandidateSuccess, onAddIceCandidateError);
+      } else if (signal.signal_type === "new_description") {
+        log(signal.sdp);
+        localPeerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp), function () {}, logError);
+      }
     }
-    else if (signal.signal_type === "new_ice_candidate") {
-      localPeerConnection.addIceCandidate(
-        new RTCIceCandidate(signal.candidate),
-        onAddIceCandidateSuccess, onAddIceCandidateError
-        );
-    } else if (signal.signal_type === "new_description") {
-      log(signal.sdp);
-      localPeerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp), function () {}, logError);
-    }
-  }
 
 }
 
@@ -330,43 +323,26 @@ function logError(error){
 
 function onNewDescriptionCreated(description) {
   localPeerConnection.setLocalDescription(description, function () {
-    log("Caller Local Description Set");
+    log("[+] Set local description.");
 
     // Send it to the other peer
     if ( omletAsSignallingChannel ){
       //TODO Update the Document
-      log("updating doc with id#:" + myDocId);
+      log("[+] Updating doc with id#:" + myDocId);
 
-        //documentApi.update(myDocId, addParticipant, {"name": "dummy" , "value" : {"signals":[]} }
-        //     , function() { documentApi.get(myDocId, participantAdded); }
-        //     , function(e) { alert("error: " + JSON.stringify(e)); }
-        //);
+      var des_obj = {
+        "name": "caller" , 
+        "signal" : {
+          "signal_type": "new_description",
+          "timestamp": Date.now(),  
+          "sdp": description
+        } 
+      } ;
 
-    var des_obj = {"name": "caller" , "signal" : {"signal_type": "new_description","timestamp":Date.now(),  "sdp": description} }  ;
-        //var des_str = JSON.stringify( des_obj );
-
-
-
-        //log(des_str) ;
-        //str = JSON.stringify(description);
-        //str = '{"sdp": "v=0\r\n\o=- 368374678643784 2 IN IP4 12.3.3.3 \r\ns-=-\r\nt=0 0\r\na=msid-semantic:"}';
-        //str = 'Hello kitty' ;
-    documentApi.update(myDocId, addSignal, des_obj , function() { log("Signal added"); }
-     , function(e) { alert("error: " + JSON.stringify(e)); }
-     );
-
-        //documentApi.update(myDocId, addSignal
-        //    , {
-              //"name": "caller" ,
-              //"signal": {
-            //    "type": "new_description",
-            //    "sdp": description
-            //  }
-      //      }
-      //       , function() { log("sldpa signal added"); }
-      //       , function(e) { alert("error: " + JSON.stringify(e)); }
-      //  );
-
+      documentApi.update(myDocId, addSignal, des_obj 
+        , function() { log("[+] Add signal."); }
+        , function(e) { alert("error: " + JSON.stringify(e)); }
+      );
     }
     else {
         // Other method
@@ -377,14 +353,23 @@ function onNewDescriptionCreated(description) {
 
 function onNewDescriptionCreated_2(description) {
   remotePeerConnection.setLocalDescription(description, function () {
-    log("Callee Local Description Set");
+    log("[+] Set remote description.");
 
     // Send it to the other peer
     if (omletAsSignallingChannel) {
       //TODO Update the Document
-      var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_description","timestamp":Date.now(),  "sdp": description} }  ;
-      documentApi.update(myDocId, addSignal, des_obj , function() { log("Signal added"); }
-         , function(e) { alert("error: " + JSON.stringify(e)); });
+      var des_obj = {
+        "name": "callee" , 
+        "signal" : {
+          "signal_type": "new_description",
+          "timestamp":Date.now(),  
+          "sdp": description
+        } 
+      };
+
+      documentApi.update(myDocId, addSignal, des_obj 
+        , function() { log("[+] Add signal."); } 
+        , function(e) { alert("error: " + JSON.stringify(e)); });
     }
     else {
       signallingSocket.emit("message",
@@ -400,12 +385,21 @@ function onNewDescriptionCreated_2(description) {
 
 
 function onIceCandidate(event){
-  log("New Ice Candidate Found");
+  log("[+] local IceCanddidate is Found.");
+
   if (event.candidate) {
     if ( omletAsSignallingChannel ){
       //TODO Update the Document
-      var des_obj = {"name": "caller" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
-      documentApi.update(myDocId, addSignal, des_obj , function() { log("NewICE Signal added"); }
+      var des_obj = {
+        "name": "caller" , 
+        "signal" : {
+          "signal_type": "new_ice_candidate",
+          "timestamp":Date.now(), 
+          "candidate": event.candidate
+        } 
+      };
+
+      documentApi.update(myDocId, addSignal, des_obj , function() { log("[+] Add local ICE Signal."); }
        , function(e) { alert("error: " + JSON.stringify(e)); }
        );
     } else {
@@ -414,12 +408,13 @@ function onIceCandidate(event){
 }
 
 function onIceCandidate2(event){
-  log("New Ice Candidate Found");
+  log("[+] Remote IceCandidate is Found.");
+
   if (event.candidate) {
     if ( omletAsSignallingChannel ){
       //TODO Update the Document
       var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
-      documentApi.update(myDocId, addSignal, des_obj , function() { log("NewICE Signal added"); }
+      documentApi.update(myDocId, addSignal, des_obj , function() { log("[+] Add remote ICE Signal."); }
        , function(e) { alert("error: " + JSON.stringify(e)); }
        );
     } else {
@@ -516,15 +511,8 @@ function streaming(stream) {
   localMedia.play();
 
   localPeerConnection.addStream(stream);
-  log("Stream attached to PC1") ;
+  log("[+] Add local peer stream.") ;
 }
-
-
-
-function getMedia(){
-  navigator.getUserMedia({ audio: false, video: true}, streaming, logError);
-}
-
 
 function streamingRemote(stream) {
   var remoteMedia = get("remoteVideo");
@@ -536,20 +524,20 @@ function streamingRemote(stream) {
   remoteMedia.play();
 
   remotePeerConnection.addStream(stream);
-  log("Stream attached to PC2") ;
+  log("[+] Add remote peer stream.") ;
+}
+
+
+function getLocalMedia(){
+  navigator.getUserMedia({ 
+    audio: false, 
+    video: true
+  }, streaming, logError);
 }
 
 
 function getRemoteMedia() {
   navigator.getUserMedia({
-    // audio: false, 
-    // video: {
-    //   mandatory: {
-    //     minFrameRate: 30,
-    //     maxHeight: 240,
-    //     maxWidth: 320
-    //   }
-    // }
     audio: false,
     video: true
   }, streamingRemote, logError);
@@ -571,22 +559,7 @@ function errorCallback(error){
   log("[-] navigator.getUserMedia; " + error);
 }
 
-// Callback to be called in case of success...
-function successCallback(stream) {
-  localMedia = get("localVideo")
 
-  // Make the stream available to the console for introspection
-  window.stream = stream;
-  // Attach the returned stream to the <video> element in the HTML page
-  localMedia.src = window.URL.createObjectURL(stream);
-  // Set <video> element property
-  localMedia.autoplay = true;
-  // Start playing video
-  localMedia.play();
-
-  localPeerConnection.addStream(stream);
-  log("[+] Stream attached to PC1.") ;
-}
 
 /**
  *
@@ -641,15 +614,8 @@ var hdConstraints = { video: {
  * @since  2015.07.15
  *
  */
-// Simple wrapper for getUserMedia() with constraints object as an input parameter
-// function getMedia(constraints){
-//   if (!!localStream) {
-//     localMedia.src = null;
-//     localStream.stop();
-//   }
 
-//   navigator.getUserMedia(constraints, successCallback, errorCallback);
-// }
+
 
 
 //////////// Establishing Connection ////////////
@@ -710,8 +676,7 @@ function initConnection(caller, data, video) {
         log('PC1: Remote stream removed.');
       };
 
-       getMedia();
-      // getRemoteMedia();
+       getLocalMedia();
     }
   }
   else {  // Callee
@@ -760,7 +725,7 @@ function initConnection(caller, data, video) {
         // remoteMedia.autoplay = true;
         // remoteMedia.play();
 
-        //getRemoteMedia();
+        getRemoteMedia();
 
         log('[+] PC2: Remote stream is playing.');
       };
