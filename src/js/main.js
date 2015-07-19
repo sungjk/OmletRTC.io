@@ -15,13 +15,12 @@ console.error = console.debug = console.info = console.log
 
 
 
-///////////////////////////////
-//// Variables ////////////////
-//////////////////////////////
 
-// var peerConnection;
-// var peerConnection2;
-
+//////////////////////////////////////////////////////////////////
+//
+//                Variables         
+//
+/////////////////////////////////////////////////////////////////
 var localPeerConnection;
 var remotePeerConnection;
 
@@ -34,8 +33,6 @@ var detectedBrowser ;
 
 var processedSignals = {} ;
 
-
-
 // HTML5 <video> elements
 var localVideo = get("localVideo");
 var remoteVideo = get("remoteVideo");
@@ -45,8 +42,8 @@ var constraints = { video: true, audio: false };
 
 // Original constraints object for web app video
 var srcConstraints = {
-  "audio":false,
-  "video": {
+  audio: false,
+  video: {
     mandatory: {
       minFrameRate: 30,
       maxHeight: 240,
@@ -527,7 +524,7 @@ function onMessage2(msg){
 
 
 
-/**
+/*
  * Function for media & streaming
  *
  * @author Seongjung Jeremy Kim
@@ -561,18 +558,20 @@ function remoteStreaming(stream) {
 
 
 function getLocalMedia(){
-  navigator.getUserMedia({ 
-    audio: false, 
-    video: true
-  }, localStreaming, logError);
+  // navigator.getUserMedia({ 
+  //   audio: false, 
+  //   video: true
+  // }, localStreaming, logError);
+  navigator.getUserMedia(srcConstraints, localStreaming, logError);
 }
 
 
 function getRemoteMedia() {
-  navigator.getUserMedia({
-    audio: false,
-    video: true
-  }, remoteStreaming, logError);
+  // navigator.getUserMedia({
+  //   audio: false,
+  //   video: true
+  // }, remoteStreaming, logError);
+  navigator.getUserMedia(srcConstraints, remoteStream, logError);
 }
 
 
@@ -631,7 +630,6 @@ function initConnection(caller, data, video) {
     localPeerConnection.oniceconnectionstatechange = function (ice_state) {
       log("[+] PC1: " + localPeerConnection.iceGatheringState + " " + localPeerConnection.iceConnectionState);
     }
-    
 
     if(data) {
       log("[+] Creating data channel.");
@@ -663,7 +661,7 @@ function initConnection(caller, data, video) {
         remoteMedia.play();
 
         remotePeerConnection.addStream(event.stream);
-        
+
         log("[+] localPeerConnection.onaddstream") ;
       };
 
@@ -758,8 +756,7 @@ document.getElementById("createButton").addEventListener('click',function(){
       myDocId = d.Document;
       location.hash = "#/docId/" + myDocId;
 
-      documentApi.update(myDocId, Initialize, InitialDocument(), function() {
-        documentApi.get(myDocId, DocumentCreated)
+      documentApi.update(myDocId, Initialize, InitialDocument(), function() {documentApi.get(myDocId, DocumentCreated)
       }, function(e) {
           alert("[-] create-update; " + JSON.stringify(e));
         });
