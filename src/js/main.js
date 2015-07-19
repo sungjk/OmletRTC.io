@@ -100,7 +100,7 @@ function ReceiveUpdatedDoc(doc) {
 
   log("[+] Updated Doc Fetched" );
   log("[+] chat id: " + chatDoc.chatId ) ;
-  log("[+] people in this conversation: " + Object.keys(chatDoc.participants).length );
+  log("[+] people in this conversation: " + Object.keys(chatDoc.participants).length);
 
   if(Object.keys(chatDoc.participants).length != 2)
     return ;
@@ -165,12 +165,12 @@ function ReceiveUpdatedDoc(doc) {
 
 
 function ReceiveUpdate(chatDocId) {
-  log( "Doc updated. Getting updated version..." );
+  log("[+] Getting updated version." );
   //log( "chat id: " + chatDoc.chatId ) ;
   //log( "people in this conversation: " + Object.keys(doc.participants).length );
 
   documentApi.get(chatDocId, ReceiveUpdatedDoc , function(e) {
-    alert("error on getting doc: " + JSON.stringify(e));
+    alert("[-] Error on getting doc: " + JSON.stringify(e));
   });
 }
 
@@ -195,11 +195,11 @@ function getDocumentReference() {
 function _loadDocument() {
   if (hasDocument()) {
     myDocId = getDocumentReference();
-    log("Doc found with id#: " + myDocId );
+    log("[+] Get documentReference id: " + myDocId );
+
     documentApi.watch(myDocId, ReceiveUpdate);
-    log("Getting Doc...");
-    documentApi.get(myDocId, ReceiveDoc );
-      //watchDocument(myDocId, ReceiveUpdate);
+    documentApi.get(myDocId, ReceiveDoc);
+    //watchDocument(myDocId, ReceiveUpdate);
   } 
   else {
     log("[-] Document ***NOT*** found " );
@@ -208,13 +208,12 @@ function _loadDocument() {
 
 
 function initDocumentAPI() {
-  log("Initializating Document API");
-
   if (!Omlet.isInstalled()) 
-    log("[-] NO OMLET for US " );
+    log("[-] Omlet is not installed." );
+
   documentApi = Omlet.document;
 
-  log("Loading document") ;
+  log("[+] Loading document") ;
   _loadDocument();
 }
 
@@ -269,10 +268,9 @@ function DocumentCleared(doc) {
 
 
 function participantAdded(doc) {
-  log("Participant added");
+  log("[+] Participant added");
   //chatDoc = doc ;
   //log( JSON.stringify(doc));
-  //log("Participant added");
   //log( "people in this conversation: " + Object.keys(doc.participants).length );
 }
 
@@ -488,8 +486,6 @@ function tryParseJSON (jsonString){
   //get('sendbtn').onclick = sendFile ;
   //get('pingbtn').onclick = function() { log("sending ping at " + time() ) ; dataChannel.send( JSON.stringify({message : 'Ping' , timestamp: time() }) ); };
 };
-
-
 
 
 
@@ -823,11 +819,12 @@ Omlet.ready(function() {
   log("[+] Omlet is Ready.");
 
   if (hasDocument()) {
-    log("[+] Initializing Document.");
+    log("[+] Initializing DocumentAPI.");
     initDocumentAPI();
   }
   else {
     log("[-] Doc is not found.");
+    log("[+] Initializing DocumentAPI to use traditional style.");
     initDocumentAPI();
     // No Doc --> Use traditional Style
   }
