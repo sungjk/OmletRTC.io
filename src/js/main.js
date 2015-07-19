@@ -45,7 +45,7 @@ var srcConstraints = {
   audio: false,
   video: {
     mandatory: {
-      minFrameRate: 30,
+      //minFrameRate: 30,
       maxHeight: 240,
       maxWidth: 320
     }
