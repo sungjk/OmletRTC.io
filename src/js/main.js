@@ -654,9 +654,20 @@ function initConnection(caller, data, video) {
       getLocalMedia();
 
       localPeerConnection.onaddstream = function (event) {
+        var remoteMedia = get("remoteVideo");
+
+        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+        else            remoteMedia.src = event.stream;
+
+        remoteMedia.autoplay = true;
+        remoteMedia.play();
+
+        remotePeerConnection.addStream(event.stream);
+        
         log("[+] localPeerConnection.onaddstream") ;
       };
 
+      //localPeerConnection.onaddstream = getRemoteMedia;
       localPeerConnection.onremovestream = handleRemoteStreamRemoved;
     }
   }
@@ -693,6 +704,8 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
+      getLocalMedia();
+
       remotePeerConnection.onaddstream = function (event) {
         var remoteMedia = get("remoteVideo");
 
