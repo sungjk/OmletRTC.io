@@ -11,8 +11,22 @@ var onMessage = null ;
 var detectedBrowser = null;
 
 
-// contraints
-var constraints = { video: true, audio: false };
+// default contraints object
+var constraints = { 
+    video: true, 
+    audio: false 
+};
+
+// Constraints object for mobile size
+var dynamicConstraints = {
+    audio: false,
+    video: {
+        mandatory: {
+            maxHeight: screen.availHeight / 2;
+            maxWidth: screen.availWidth / 2;
+        }
+    }
+};
 
 // Original constraints object for web app video
 var srcConstraints = {
