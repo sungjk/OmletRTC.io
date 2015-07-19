@@ -52,7 +52,15 @@ var processedSignals = {} ;
 var localVideo = get("localVideo");
 var remoteVideo = get("remoteVideo");
 
+// PeerConnection ICE protocol configuration (either Firefox or Chrome)
+var peerConnectionConfig = detectedBrowser === 'firefox' ? 
+    { 'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
+    { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
 
+var peerConnectionConstraints = {
+    'optional': [{ 'DtlsSrtpKeyAgreement': true }],
+    'mandatory': { googIPv6: true }
+};
 
 
 //////////////////////////////////////////////////////////////////

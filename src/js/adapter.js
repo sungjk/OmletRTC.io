@@ -14,17 +14,6 @@ var width = screen.availWidth / 2;
 var height = screen.availHeight / 2;
 
 
-// PeerConnection ICE protocol configuration (either Firefox or Chrome)
-var peerConnectionConfig = webrtcDetectedBrowser === 'firefox' ? 
-    { 'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
-    { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
-
-var peerConnectionConstraints = {
-    'optional': [{ 'DtlsSrtpKeyAgreement': true }],
-    'mandatory': { googIPv6: true }
-};
-
-
 // default contraints object
 var constraints = { 
     video: true, 
