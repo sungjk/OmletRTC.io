@@ -525,7 +525,7 @@ function getLocalMedia(){
   //   audio: false, 
   //   video: true
   // }, localStreaming, logError);
-  navigator.getUserMedia(dynamicConstraints, localStreaming, logError);
+  navigator.getUserMedia(hdConstraints, localStreaming, logError);
 }
 
 
@@ -534,7 +534,7 @@ function getRemoteMedia() {
   //   audio: false,
   //   video: true
   // }, remoteStreaming, logError);
-  navigator.getUserMedia(dynamicConstraints, remoteStream, logError);
+  navigator.getUserMedia(hdConstraints, remoteStream, logError);
 }
 
 
