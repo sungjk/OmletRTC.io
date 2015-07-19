@@ -25,6 +25,8 @@ function log(message){
 }
 
 
+
+
 //////////////////////////////////////////////////////////////////
 //
 //                Variables 
@@ -216,12 +218,6 @@ function initDocumentAPI() {
   _loadDocument();
 }
 
-
-function log(message) {
-  var logArea = document.getElementById("console");
-  logArea.value += "\n" + message ;
-  logArea.scrollTop = logArea.scrollHeight;
-}
 
 function InitialDocument() {
   var chatId = 100;
@@ -682,9 +678,14 @@ function initConnection(caller, data, video) {
 
 //////////////////////////////////////////////////////////////////
 //
-//                Appication Code
+//                Appication Code for event
 //
 /////////////////////////////////////////////////////////////////
+
+function get(id){
+  return document.getElementById(id);
+}
+
 
 document.getElementById("createButton").addEventListener('click',function(){
   if(!Omlet.isInstalled()) {
@@ -810,15 +811,11 @@ document.getElementById("joinAVButton").addEventListener('click',function(){
 });
 
 
-function get(id){
-  return document.getElementById(id);
-}
-
 
 
 //////////////////////////////////////////////////////////////////
 //
-//                
+//                Omlet start
 //
 /////////////////////////////////////////////////////////////////
 
