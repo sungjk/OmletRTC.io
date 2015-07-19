@@ -271,7 +271,7 @@ function clear(old, params) {
   old.participants = {} ;
   old.creator = '' ;
 
-  log("[+] Clear participants & signal.");
+  //log("[+] Clear participants & signal.");  // error: "InvalidMessageTransform"
   return old;
 }
 
@@ -284,12 +284,10 @@ function addParticipant(old, params) {
 
 
 function addSignal(old, params) {
-  //log("Adding a signal" + params) ;
-  //log("Old: " + JSON.stringify(old)) ;
   old.participants[params.name].signals.push(params.signal) ;
   //old.creator =  ;
 
-  log("[+] Add signal: " + params.signal);
+  //log("[+] Add signal: " + params.signal);    // error: "InvalidMessageTransform"
   return old;
 }
 
