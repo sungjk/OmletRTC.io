@@ -1,3 +1,21 @@
+/*
+ * Procedure of function call (installed omlet)
+ *  1. [Omlet is Ready.]              Omlet.ready : Omlet Start
+ *  2. [Initializing DocumentAPI.]    initDocumentAPI() : get documentAPI
+ *  3. [Loading document]             _loadDocument() : get documentReference id
+ *      [Get documentReference id: ]
+ *
+ *  4. [Check for other party.]               click eventListener for "joinAVButton"
+ *  5. [Creating localPeerConnection Object.] initConnection() : Caller
+        [Adding the Caller]
+ *  6. [Getting updated version.]             ReceiveUpdate() : _loadDocument() -> documentApi.watch(myDocId, ReceiveUpdate);
+ *  7. [Participant added]                    participantAdded : documentAPI.get's success callback
+ *
+ *  8. [Updated Doc Fetched]                  ReceiveUpdatedDoc
+        [chat id: ]
+        [people in this conversation: ]
+ */
+
 //////////////////////////////////////////////////////////////////
 //
 //                Log console
@@ -166,8 +184,6 @@ function ReceiveUpdatedDoc(doc) {
 
 function ReceiveUpdate(chatDocId) {
   log("[+] Getting updated version." );
-  //log( "chat id: " + chatDoc.chatId ) ;
-  //log( "people in this conversation: " + Object.keys(doc.participants).length );
 
   documentApi.get(chatDocId, ReceiveUpdatedDoc , function(e) {
     alert("[-] Error on getting doc: " + JSON.stringify(e));
@@ -235,6 +251,7 @@ function InitialDocument() {
 
 
 function Initialize(old, params) {
+  log("[+] Call initialize function.");
   return params;
 }
 
@@ -242,12 +259,15 @@ function clear(old, params) {
   processedSignals = {};
   old.participants = {} ;
   old.creator = '' ;
+
+  log("[+] Clear participants & signal.");
   return old;
 }
 
 function addParticipant(old, params) {
   old.participants[params.name] = params.value ;
   //old.creator = '' ;
+  log("[+] Add participant: " + params.value);
   return old;
 }
 
@@ -257,13 +277,15 @@ function addSignal(old, params) {
   //log("Old: " + JSON.stringify(old)) ;
   old.participants[params.name].signals.push(params.signal) ;
   //old.creator =  ;
+
+  log("[+] Add signal: " + params.signal);
   return old;
 }
 
 
 function DocumentCleared(doc) {
-  log("Document cleared");
-  log("people in this conversation: " + Object.keys(doc.participants).length );
+  log("[+] Document cleared");
+  log("[+] people in this conversation: " + Object.keys(doc.participants).length );
 }
 
 
