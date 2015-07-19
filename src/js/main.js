@@ -537,7 +537,7 @@ function getLocalMedia(){
   //   audio: false, 
   //   video: true
   // }, localStreaming, logError);
-  navigator.getUserMedia(hdConstraints, localStreaming, logError);
+  navigator.getUserMedia(qvgaConstraints, localStreaming, logError);
 }
 
 
@@ -546,7 +546,7 @@ function getRemoteMedia() {
   //   audio: false,
   //   video: true
   // }, remoteStreaming, logError);
-  navigator.getUserMedia(hdConstraints, remoteStreaming, logError);
+  navigator.getUserMedia(qvgaConstraints, remoteStreaming, logError);
 }
 
 
@@ -622,7 +622,6 @@ function initConnection(caller, data, video) {
         log("[+] localPeerConnection.onaddstream") ;
       };
 
-      //localPeerConnection.onaddstream = getRemoteMedia;
       localPeerConnection.onremovestream = handleRemoteStreamRemoved;
     }
   }
