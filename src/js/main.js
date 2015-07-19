@@ -20,10 +20,11 @@
  *     [Adding the Caller]
  *  6. [Getting updated version.]             ReceiveUpdate() : _loadDocument() -> documentApi.watch(myDocId, ReceiveUpdate);
  *  7. [Participant added]                    participantAdded : documentAPI.get's success callback
- *
  *  8. [Updated Doc Fetched]                  ReceiveUpdatedDoc
-        [chat id: ]
-        [people in this conversation: ]
+ *     [chat id: ]
+ *     [people in this conversation: ]
+ *
+ *  9. [Add local peer stream.]             getLocalMedia() -> localStreaming()
  */
 
 //////////////////////////////////////////////////////////////////
@@ -565,6 +566,8 @@ function remoteStreaming(stream) {
 
 
 function getLocalMedia(){
+  log("[+] Call local's getUserMedia.");
+
   navigator.getUserMedia({ 
     audio: false, 
     video: true
@@ -574,6 +577,8 @@ function getLocalMedia(){
 
 
 function getRemoteMedia() {
+  log("[+] Call remote's getUserMedia.");
+
   navigator.getUserMedia({
     audio: false,
     video: true
