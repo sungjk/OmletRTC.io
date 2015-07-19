@@ -1,6 +1,9 @@
-//////////////////////////////////
-//// Capture console.log errors///
-//////////////////////////////////
+//////////////////////////////////////////////////////////////////
+//
+//                Log console
+//
+/////////////////////////////////////////////////////////////////
+
 if (typeof console  != "undefined")
     if (typeof console.log != 'undefined')
         console.olog = console.log;
@@ -8,17 +11,23 @@ if (typeof console  != "undefined")
         console.olog = function() {};
 
 console.log = function(message) {
-    console.olog(message);
-    $('#debugDiv').append('<p>' + message + '</p>');
+  console.olog(message);
+  $('#debugDiv').append('<p>' + message + '</p>');
 };
+
 console.error = console.debug = console.info = console.log
 
 
+function log(message){
+  var logArea = get("console");
+  logArea.value += "\n" + message ;
+  logArea.scrollTop = logArea.scrollHeight;
+}
 
 
 //////////////////////////////////////////////////////////////////
 //
-//                Variables         
+//                Variables 
 //
 /////////////////////////////////////////////////////////////////
 
@@ -275,7 +284,7 @@ function DocumentCreated(doc) {
         noun: "poll",
         displayTitle: "OmletRTC",
         displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-        displayText: ip() + '\n' + location.host,
+        displayText: 'Client: ' + ip() + '\n' + 'Server:' + location.host,
         json: doc,
         callback: callbackurl
       });
@@ -285,9 +294,12 @@ function DocumentCreated(doc) {
 }
 
 
-//////////////////////////////////////////////
-/////////////// WebRTC Code //////////////////
-//////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////
+//
+//                WebRTC Code         
+//
+/////////////////////////////////////////////////////////////////
 
 function onAddIceCandidateSuccess() {
   log('[+] AddIceCandidate success.');
@@ -534,25 +546,7 @@ function getRemoteMedia() {
   //   audio: false,
   //   video: true
   // }, remoteStreaming, logError);
-  navigator.getUserMedia(hdConstraints, remoteStream, logError);
-}
-
-
-// Remote stream handlers...
-// [For testing] attachVideoNumber 변수 선언 해줘야함.
-function handleRemoteStreamAdded(event) {
-    if (attachVideoNumber == 0) {
-        attachMediaStream(remoteVideo, event.stream);
-        log('[+] Add remote peer stream.');
-        remoteStream = event.stream;
-        attachVideoNumber++;
-    }
-    else if (attachVideoNumber == 1) {
-        attachMediaStream(thirdVideo, event.stream);
-        log('[+] Add remote peer stream.');
-        thirdStream = event.stream;
-        attachVideoNumber++;
-    }
+  navigator.getUserMedia(hdConstraints, remoteStreaming, logError);
 }
 
 
@@ -686,24 +680,11 @@ function initConnection(caller, data, video) {
 
 
 
-///////////////////////////////////
-///////// Utility /////////////////
-///////////////////////////////////
-function log(message){
-  var logArea = this.get("console");
-  logArea.value += "\n" + message ;
-  logArea.scrollTop = logArea.scrollHeight;
-}
-
-function get(id){
-  return document.getElementById(id);
-}
-
-
-
-/////////////////////////////////////
-///////////////  App ////////////////
-/////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+//
+//                Appication Code
+//
+/////////////////////////////////////////////////////////////////
 
 document.getElementById("createButton").addEventListener('click',function(){
   if(!Omlet.isInstalled()) {
@@ -828,6 +809,18 @@ document.getElementById("joinAVButton").addEventListener('click',function(){
   }
 });
 
+
+function get(id){
+  return document.getElementById(id);
+}
+
+
+
+//////////////////////////////////////////////////////////////////
+//
+//                
+//
+/////////////////////////////////////////////////////////////////
 
 Omlet.ready(function() {
   log("[+] Omlet is Ready.");
