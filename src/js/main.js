@@ -43,53 +43,6 @@ var processedSignals = {} ;
 var localVideo = get("localVideo");
 var remoteVideo = get("remoteVideo");
 
-// contraints
-var constraints = { video: true, audio: false };
-
-// Original constraints object for web app video
-var srcConstraints = {
-  audio: false,
-  video: {
-    mandatory: {
-      //minFrameRate: 30,
-      maxHeight: 240,
-      maxWidth: 320
-    }
-  }
-};
-
-// Constraints object for low resolution video
-var qvgaConstraints = { 
-  audio: false,
-  video: {
-    mandatory: {
-      maxWidth: 320,
-      maxHeight: 240
-    } 
-  }
-};
-
-// Constraints object for standard resolution video
-var vgaConstraints = { 
-  audio: false,
-  video: {
-    mandatory: {
-      maxWidth: 640,
-      maxHeight: 480
-    } 
-  }
-};
-
-// Constraints object for high resolution video
-var hdConstraints = { 
-  audio: false,
-  video: {
-    mandatory: {
-      maxWidth: 1280,
-      maxHeight: 960
-    } 
-  }
-};
 
 
 
@@ -572,7 +525,7 @@ function getLocalMedia(){
   //   audio: false, 
   //   video: true
   // }, localStreaming, logError);
-  navigator.getUserMedia(srcConstraints, localStreaming, logError);
+  navigator.getUserMedia(dynamicConstraints, localStreaming, logError);
 }
 
 
@@ -581,7 +534,7 @@ function getRemoteMedia() {
   //   audio: false,
   //   video: true
   // }, remoteStreaming, logError);
-  navigator.getUserMedia(srcConstraints, remoteStream, logError);
+  navigator.getUserMedia(dynamicConstraints, remoteStream, logError);
 }
 
 
