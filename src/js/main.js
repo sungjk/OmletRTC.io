@@ -277,7 +277,7 @@ function clear(old, params) {
 function addParticipant(old, params) {
   old.participants[params.name] = params.value ;
   //old.creator = '' ;
-  log("[+] Add participant: " + params.value);
+  //log("[+] Add participant: " + params.value);  // [-] Adding caller-update; "InvalidMessageTransform"
   return old;
 }
 
