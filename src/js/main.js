@@ -533,20 +533,20 @@ function remoteStreaming(stream) {
 
 
 function getLocalMedia(){
-  // navigator.getUserMedia({ 
-  //   audio: false, 
-  //   video: true
-  // }, localStreaming, logError);
-  navigator.getUserMedia(srcConstraints, localStreaming, logError);
+  navigator.getUserMedia({ 
+    audio: false, 
+    video: true
+  }, localStreaming, logError);
+  //navigator.getUserMedia(srcConstraints, localStreaming, logError);
 }
 
 
 function getRemoteMedia() {
-  // navigator.getUserMedia({
-  //   audio: false,
-  //   video: true
-  // }, remoteStreaming, logError);
-  navigator.getUserMedia(srcConstraints, remoteStreaming, logError);
+  navigator.getUserMedia({
+    audio: false,
+    video: true
+  }, remoteStreaming, logError);
+  //navigator.getUserMedia(srcConstraints, remoteStreaming, logError);
 }
 
 
