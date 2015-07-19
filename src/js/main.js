@@ -536,7 +536,7 @@ function getLocalMedia(){
   navigator.getUserMedia({ 
     audio: false, 
     video: true
-  }, localStreaming, logError);
+  }, localStreaming, errorCallback);
   //navigator.getUserMedia(srcConstraints, localStreaming, logError);
 }
 
@@ -545,7 +545,7 @@ function getRemoteMedia() {
   navigator.getUserMedia({
     audio: false,
     video: true
-  }, remoteStreaming, logError);
+  }, remoteStreaming, errorCallback);
   //navigator.getUserMedia(srcConstraints, remoteStreaming, logError);
 }
 
@@ -554,13 +554,6 @@ function handleRemoteStreamRemoved() {
     log('[+] Remote remote stream');
 }
 
-
-/**
- *
- * @author Seongjung Jeremy Kim
- * @since  2015.07.15
- *
- */
 
 // Callback to be called in case of failure...
 function errorCallback(error){
@@ -574,13 +567,13 @@ function initConnection(caller, data, video) {
   if (caller) {
     log("[+] Creating localPeerConnection Object.");
 
-    var options = {
-      "optional": [{DtlsSrtpKeyAgreement: true}
-            //,{RtpDataChannels: getData}
-      ], mandatory: { googIPv6: true }
-    };
+    // var options = {
+    //   "optional": [{DtlsSrtpKeyAgreement: true}
+    //         //,{RtpDataChannels: getData}
+    //   ], mandatory: { googIPv6: true }
+    // };
     
-    localPeerConnection = new RTCPeerConnection(null, options);
+    localPeerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
 
     // Sends ice candidates to the other peer
     localPeerConnection.onicecandidate = onIceCandidate;
@@ -628,14 +621,14 @@ function initConnection(caller, data, video) {
   else {  // Callee
     log("[+] Creating remotePeerConnection Object.");
 
-    var options = {
-      "optional": [
-        {DtlsSrtpKeyAgreement: true}
-        //,{RtpDataChannels: getData}
-      ],
-      mandatory: { googIPv6: true }
-    };
-    remotePeerConnection = new RTCPeerConnection(null, options);
+    // var options = {
+    //   "optional": [
+    //     {DtlsSrtpKeyAgreement: true}
+    //     //,{RtpDataChannels: getData}
+    //   ],
+    //   mandatory: { googIPv6: true }
+    // };
+    remotePeerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
 
     // Sends ice candidates to the other peer
     remotePeerConnection.onicecandidate = onIceCandidate2;
