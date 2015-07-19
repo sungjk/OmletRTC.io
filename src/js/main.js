@@ -1,13 +1,23 @@
 /*
- * Procedure of function call (installed omlet)
+ * Procedure of function call (Omlet is not installed.)
+ *  1. [Omlet is Ready.]              Omlet.ready : Omlet Start
+ *     [Doc is not found.]
+ *     [Initializing DocumentAPI to use traditional style.]
+ *  2. [Loading document]             _loadDocument() : get documentReference id
+ *     [Document ***NOT*** found]
+ */
+
+
+/*
+ * Procedure of function call (Omlet is installed.)
  *  1. [Omlet is Ready.]              Omlet.ready : Omlet Start
  *  2. [Initializing DocumentAPI.]    initDocumentAPI() : get documentAPI
  *  3. [Loading document]             _loadDocument() : get documentReference id
- *      [Get documentReference id: ]
+ *     [Get documentReference id: ]
  *
  *  4. [Check for other party.]               click eventListener for "joinAVButton"
  *  5. [Creating localPeerConnection Object.] initConnection() : Caller
-        [Adding the Caller]
+ *     [Adding the Caller]
  *  6. [Getting updated version.]             ReceiveUpdate() : _loadDocument() -> documentApi.watch(myDocId, ReceiveUpdate);
  *  7. [Participant added]                    participantAdded : documentAPI.get's success callback
  *
@@ -251,7 +261,7 @@ function InitialDocument() {
 
 
 function Initialize(old, params) {
-  log("[+] Call initialize function.");
+  //log("[+] Call initialize function.");   // [-] create-update; "InvalidMessageTransform"
   return params;
 }
 
