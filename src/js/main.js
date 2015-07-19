@@ -21,15 +21,21 @@ console.error = console.debug = console.info = console.log
 //                Variables         
 //
 /////////////////////////////////////////////////////////////////
+
+// document id for omlet
+var documentApi;
+var myDocId ;
+
+// RTCPeerConnection object
 var localPeerConnection;
 var remotePeerConnection;
 
+// dataChannel object
 var dataChannel;
 var dataChannel2;
 
 var omletAsSignallingChannel = true ;
 var orderedDataChannel = true;
-var detectedBrowser ;
 
 var processedSignals = {} ;
 
@@ -53,41 +59,45 @@ var srcConstraints = {
 };
 
 // Constraints object for low resolution video
-var qvgaConstraints = { video: {
+var qvgaConstraints = { 
+  audio: false,
+  video: {
     mandatory: {
       maxWidth: 320,
       maxHeight: 240
-} }
+    } 
+  }
 };
 
 // Constraints object for standard resolution video
-var vgaConstraints = { video: {
+var vgaConstraints = { 
+  audio: false,
+  video: {
     mandatory: {
       maxWidth: 640,
       maxHeight: 480
-} }
+    } 
+  }
 };
 
 // Constraints object for high resolution video
-var hdConstraints = { video: {
+var hdConstraints = { 
+  audio: false,
+  video: {
     mandatory: {
       maxWidth: 1280,
       maxHeight: 960
-} }
+    } 
+  }
 };
-
 
 
 
 //////////////////////////////////////////////////////////////////
 //
-//                Framework Code          
+//                Framework          
 //
 /////////////////////////////////////////////////////////////////
-
-var documentApi;
-var myDocId ;
-
 
 function watchDocument(docref, OnUpdate) {
   documentApi.watch(docref, function(updatedDocRef) {
