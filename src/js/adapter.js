@@ -13,6 +13,18 @@ var detectedBrowser = null;
 var width = screen.availWidth / 2;
 var height = screen.availHeight / 2;
 
+
+// PeerConnection ICE protocol configuration (either Firefox or Chrome)
+var peerConnectionConfig = webrtcDetectedBrowser === 'firefox' ? 
+    { 'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
+    { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
+
+var peerConnectionConstraints = {
+    'optional': [{ 'DtlsSrtpKeyAgreement': true }],
+    'mandatory': { googIPv6: true }
+};
+
+
 // default contraints object
 var constraints = { 
     video: true, 
@@ -142,18 +154,13 @@ if (detectedBrowser == "Chrome") {
 var server = {
     "iceServers": [
     //{url:"stun:stun.services.mozilla.com"}//,
-    {url:"stun:203.246.112.144:3310"},
+    //{url:"stun:203.246.112.144:3310"},
     {url:"stun:stun.l.google.com:19302"}]
 };
 
 
 // Look after different browser vendors' ways of calling the getUserMedia() API method:
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-
-
-
-
 
 
 
