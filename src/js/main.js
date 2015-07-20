@@ -503,11 +503,19 @@ document.getElementById("createButton").addEventListener('click',function(){
       myDocId = d.Document;
       location.hash = "#/docId/" + myDocId;
 
-      documentApi.update(myDocId, Initialize, InitialDocument(), function() {documentApi.get(myDocId, DocumentCreated)}, function(e) {
-          alert("[-] create-update; " + JSON.stringify(e));
+      documentApi.update(myDocId, Initialize, InitialDocument(), function() {
+          // update successCallback
+          log("[+] update successCallback, initialize.toString(): " + Initialize.toString());
+          documentApi.get(myDocId, DocumentCreated, function(e) {
+            log("[-] update->get errorCallback: " + e);
+          });
+        }, function(e) {
+          // update errorCallback
+          log("[-] update errorCallback: " + JSON.stringify(e));
         });
     }, function(e) {
-      alert("[-] create; " + JSON.stringify(e));
+      // create errorCallback
+      log("[-] create errorCallback: " + JSON.stringify(e));
     });
   }
 });
@@ -782,6 +790,7 @@ function updateCallback(chatDocId) {
   });
 }
 
+
 function responseCallback() {
   log("[+] responseCallback.");
 }
@@ -797,6 +806,7 @@ function hasDocument() {
   return (docIdParam != -1);
 }
 
+
 function getDocumentReference() {
   var docIdParam = window.location.hash.indexOf("/docId/");
   if (docIdParam == -1) return false;
@@ -810,14 +820,6 @@ function getDocumentReference() {
 }
 
 
-function clear(old, params) {
-  processedSignals = {};
-  old.participants = {} ;
-  old.creator = '' ;
-
-  return old;
-}
-
 function addParticipant(old, params) {
   old.participants[params.name] = params.value ;
 
@@ -830,6 +832,15 @@ function addSignal(old, params) {
   //old.creator =  ;
 
   //log("[+] Add signal: " + params.signal);    // error: "InvalidMessageTransform"
+  return old;
+}
+
+
+function clear(old, params) {
+  processedSignals = {};
+  old.participants = {} ;
+  old.creator = '' ;
+
   return old;
 }
 
