@@ -637,11 +637,10 @@ function initDocumentAPI() {
   if (!Omlet.isInstalled())  {
     log("[-] Omlet is not installed." );
   }
-  else {
-    documentApi = Omlet.document;
-    log("[+] Loading document") ;
-    _loadDocument();
-  }
+  
+  documentApi = Omlet.document;
+  log("[+] Loading document") ;
+  _loadDocument();
 }
 
 
