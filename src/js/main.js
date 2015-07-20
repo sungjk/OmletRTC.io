@@ -340,7 +340,7 @@ function getLocalMedia(){
   navigator.getUserMedia({ 
     audio: false, 
     video: true
-  }, localStreaming, errorCallback);
+  }, localStreaming, mediaErrorCallback);
   //navigator.getUserMedia(srcConstraints, localStreaming, logError);
 }
 
@@ -351,7 +351,7 @@ function getRemoteMedia() {
   navigator.getUserMedia({
     audio: false,
     video: true
-  }, remoteStreaming, errorCallback);
+  }, remoteStreaming, mediaErrorCallback);
   //navigator.getUserMedia(srcConstraints, remoteStreaming, logError);
 }
 
@@ -362,7 +362,7 @@ function handleRemoteStreamRemoved() {
 
 
 // Callback to be called in case of failure...
-function errorCallback(error){
+function mediaErrorCallback(error){
   log("[-] navigator.getUserMedia; " + error);
 }
 
@@ -637,7 +637,7 @@ function initDocumentAPI() {
   if (!Omlet.isInstalled())  {
     log("[-] Omlet is not installed." );
   }
-  
+
   documentApi = Omlet.document;
   log("[+] Loading document") ;
   _loadDocument();
@@ -788,7 +788,7 @@ function responseCallback() {
 
 
 function errorCallback(error) {
-  log("[-] " + error.toString()));
+  log("[-] " + error);
 }
 
 
