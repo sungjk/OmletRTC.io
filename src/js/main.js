@@ -84,10 +84,10 @@ var localStream;
 var remoteStream;
 var thirdStream;
 
-var constraints = { 
-  audio: false,
-  video: true 
-};
+// var constraints = { 
+//   audio: false,
+//   video: true 
+// };
 
 // PeerConnection ICE protocol configuration (either Firefox or Chrome)
 var peerConnectionConfig = detectedBrowser === 'Chrome' ? 
@@ -343,11 +343,11 @@ function onMessage2(msg){
  *
  *****************************************/
 
-function tempLocalStreaming(stream) {
-  localStream = stream;
-  attachMediaStream(localVideo, stream);
-  console.log('Adding local stream.');
-}
+// function tempLocalStreaming(stream) {
+//   localStream = stream;
+//   attachMediaStream(localVideo, stream);
+//   console.log('Adding local stream.');
+// }
 
 
  // Function for local streaming
