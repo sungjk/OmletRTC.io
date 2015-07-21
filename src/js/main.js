@@ -68,6 +68,28 @@ function log(message){
 var documentApi;
 var myDocId;
 
+// update parameters for caller
+var callerParameters = {
+  "name" : "caller",
+  "value" : {
+    "signals": []
+  }
+};
+var calleeParameters = {
+  "name" : "callee",
+  "value" : {
+    "signals" : [{
+      "signal_type" : "callee_arrived",
+      "timestamp" : Date.now()
+      }]
+  }
+};
+
+var omletAsSignallingChannel = true ;
+var orderedDataChannel = true;
+
+var processedSignals = {} ;
+
 // RTCPeerConnection object
 var localPeerConnection;
 var remotePeerConnection;
@@ -75,11 +97,6 @@ var remotePeerConnection;
 // dataChannel object
 var dataChannel;
 var dataChannel2;
-
-var omletAsSignallingChannel = true ;
-var orderedDataChannel = true;
-
-var processedSignals = {} ;
 
 // HTML5 <video> elements
 var localVideo = get("localVideo");
@@ -94,6 +111,8 @@ var peerConnectionConstraints = {
     'optional': [{ 'DtlsSrtpKeyAgreement': true }],
     'mandatory': { googIPv6: true }
 };
+
+
 
 
 
@@ -373,18 +392,12 @@ function initConnection(caller, data, video) {
   if (caller) {
     log("[+] Creating localPeerConnection Object.");
 
-    // var options = {
-    //   "optional": [{DtlsSrtpKeyAgreement: true}
-    //         //,{RtpDataChannels: getData}
-    //   ], mandatory: { googIPv6: true }
-    // };
-    
     localPeerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
 
     // Sends ice candidates to the other peer
     localPeerConnection.onicecandidate = onIceCandidate;
     localPeerConnection.oniceconnectionstatechange = function (ice_state) {
-      log("[+] PC1: " + localPeerConnection.iceGatheringState + " " + localPeerConnection.iceConnectionState);
+      log("[+] localPC: " + localPeerConnection.iceGatheringState + " " + localPeerConnection.iceConnectionState);
     }
 
     if(data) {
@@ -418,7 +431,7 @@ function initConnection(caller, data, video) {
 
         remotePeerConnection.addStream(event.stream);
 
-        log("[+] localPeerConnection.onaddstream") ;
+        log("[+] localPeerConnection.onaddstream");
       };
 
       localPeerConnection.onremovestream = handleRemoteStreamRemoved;
@@ -427,13 +440,6 @@ function initConnection(caller, data, video) {
   else {  // Callee
     log("[+] Creating remotePeerConnection Object.");
 
-    // var options = {
-    //   "optional": [
-    //     {DtlsSrtpKeyAgreement: true}
-    //     //,{RtpDataChannels: getData}
-    //   ],
-    //   mandatory: { googIPv6: true }
-    // };
     remotePeerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
 
     // Sends ice candidates to the other peer
@@ -499,7 +505,6 @@ document.getElementById("createButton").addEventListener('click', function() {
 
     documentApi.create(function(d) {
       // create successCallback
-      log("[+] documentApi.create successCallback");
 
       // Document property is a document reference that can be serialized and can be passed to the other calls.
       myDocId = d.Document;
@@ -509,10 +514,9 @@ document.getElementById("createButton").addEventListener('click', function() {
       // The func argument to update is called to generate the document or to update it with the new parameters. 
       // It is passed the old document as the first argument, and the app specified parameters as the second.
       documentApi.update(myDocId, Initialize, InitialDocument(), function() {
-          // update successCallback
-          log("[+] update successCallback, initialize.toString(): " + Initialize.toString());
-          documentApi.get(myDocId, DocumentCreated, errorCallback);
-        }, errorCallback);
+        // update successCallback
+        documentApi.get(myDocId, DocumentCreated, errorCallback);
+      }, errorCallback);
     }, errorCallback);
   }
 });
@@ -525,10 +529,9 @@ document.getElementById("clearButton").addEventListener('click', function() {
   else {
     log("[+] Clearing Document.");
 
-    documentApi.update(myDocId, clear, {}
-     , function() { documentApi.get(myDocId, DocumentCleared); }
-     , function(e) { alert("[-] clear-update; " + JSON.stringify(e)); }
-     );
+    documentApi.update(myDocId, clear, {}, function() { documentApi.get(myDocId, DocumentCleared); }
+    , function(e) { alert("[-] clear-update; " + JSON.stringify(e)); }
+    );
   }
 });
 
@@ -546,59 +549,43 @@ document.getElementById("getDocButton").addEventListener('click', function() {
 
 document.getElementById("joinDataButton").addEventListener('click',function() {
   var caller = false;
-
-  log("[*] Check for other party");
+  var callerParameters = {
+    "name" : "caller", 
+    "value" : {
+      "signals":[]
+    }
+  };
+  var calleeParameters = {
+    "name" : "callee", 
+    "value" : {
+      "signals" : [{
+        "signal_type" : "callee_arrived", 
+        "timestamp" : Date.now()
+      }]
+    }
+  };
 
   if(Object.keys(chatDoc.participants).length  == 0) {
     initConnection(true, true, false);
 
-    try{
-      log("[+] Adding the caller.");
+    log("[+] Adding the caller.");
 
-      documentApi.update(myDocId, addParticipant, {"name": "caller" , "value" : {"signals":[]} }
-       , function() { documentApi.get(myDocId, participantAdded); }
-       , function(e) { alert("[-] Adding caller-update; " + JSON.stringify(e)); }
-      );
-    }
-    catch(err){
-      log("[-] Adding caller; " + err.message);
-    }
+    documentApi.update(myDocId, addParticipant, callerParameters, function() { documentApi.get(myDocId, participantAdded); }
+    , errorCallback);
   }
   else {
-    initConnection(false, true, false) ;
+    initConnection(false, true, false);
 
-    try {
-      log("[+] Adding the callee.");
+    log("[+] Adding the callee.");
 
-      documentApi.update(myDocId, addParticipant, {"name": "callee" , "value" : {"signals":[{"signal_type": "callee_arrived" , "timestamp": Date.now()}]} }
-       , function() { documentApi.get(myDocId, participantAdded); }
-       , function(e) { alert("[-] Adding callee-update; " + JSON.stringify(e)); }
-      );
-    }
-    catch(err) {
-      log("[-] Adding the callee; " + err.message);
-    }
+    documentApi.update(myDocId, addParticipant, calleeParameters, function() { documentApi.get(myDocId, participantAdded); }
+     , errorCallback);
   }
 });
 
 
 document.getElementById("joinAVButton").addEventListener('click',function(){
   var caller = false;
-  var callerParameters = {
-    "name" : "caller",
-    "value" : {
-      "signals": []
-    }
-  };
-  var calleeParameters = {
-    "name" : "callee",
-    "value" : {
-      "signals" : [{
-        "signal_type" : "callee_arrived",
-        "timestamp" : Date.now()
-        }]
-    }
-  };
 
   if(Object.keys(chatDoc.participants).length  == 0) {
     // Caller connection (audio: false, video: true)
@@ -620,24 +607,6 @@ document.getElementById("joinAVButton").addEventListener('click',function(){
 
 
 
-/*
- * Procedure of function call (Omlet is installed.)
- *  1. [Omlet is Ready.]              Omlet.ready : Omlet Start
- *  2. [Initializing DocumentAPI.]    initDocumentAPI() : get documentAPI
- *  3. [Loading document]             _loadDocument() : get documentReference id
- *     [Get documentReference id: ]
- *
- *  4. [Check for other party.]               click eventListener for "joinAVButton"
- *  5. [Creating localPeerConnection Object.] initConnection() : Caller
- *     [Adding the Caller]
- *  6. [Getting updated version.]             ReceiveUpdate() : _loadDocument() -> documentApi.watch(myDocId, ReceiveUpdate);
- *  7. [Participant added]                    participantAdded : documentAPI.get's success callback
- *  8. [Updated Doc Fetched]                  ReceiveUpdatedDoc
- *     [chat id: ]
- *     [people in this conversation: ]
- *
- *  9. [Add local peer stream.]             getLocalMedia() -> localStreaming()
- */
 //////////////////////////////////////////////////////////////////
 //
 //                Omlet Framework code
@@ -672,9 +641,9 @@ function InitialDocument() {
 
   // Particiapnat includes omlet id, connection info
   var initValues = {
-      'chatId' : chatId ,
-      'creator':identity,
-      'participants':{}
+    'chatId' : chatId ,
+    'creator':identity,
+    'participants':{}
   };
 
   return initValues;
@@ -691,12 +660,13 @@ function _loadDocument() {
     myDocId = getDocumentReference();
     log("[+] Get documentReference id: " + myDocId );
 
+    // watch: function(reference, onUpdate, success, error)
     // The updateCallback argument to watch is called every time the document changes, for example
     // because it is being updated by another user. It receives the new document as its only argument.
     documentApi.watch(myDocId, updateCallback, watchSuccessCallback, errorCallback);
 
     // The successful result of get is the document itself.
-    documentApi.get(myDocId, ReceiveDoc);
+    //documentApi.get(myDocId, ReceiveDoc);
     //watchDocument(myDocId, updateCallback);
   } 
   else {
@@ -816,24 +786,19 @@ function getSuccessCallback(doc) {
 }
 
 
-/*
- *  Handler for callback
- */
-function updateCallback(chatDocId) {
-  log("[+] updateCallback. chatDocId: " + chatDocId);
 
+// updateCallback for documentApi.watch
+function updateCallback(chatDocId) {
   //  The successful result of get is the document itself.
-  documentApi.get(chatDocId, getSuccessCallback , function(e) {
-    alert("[-] Error on getting doc: " + JSON.stringify(e));
-  });
+  documentApi.get(chatDocId, getSuccessCallback , errorCallback);
 }
 
-
+// successCallback for documentApi.watch
 function watchSuccessCallback() {
   log("[+] watchSuccessCallback.");
 }
 
-
+// errorCallbackk for all of function
 function errorCallback(error) {
   log("[-] " + error);
 }
@@ -850,7 +815,6 @@ function addSignal(old, params) {
   old.participants[params.name].signals.push(params.signal) ;
   //old.creator =  ;
 
-  //log("[+] Add signal: " + params.signal);    // error: "InvalidMessageTransform"
   return old;
 }
 
