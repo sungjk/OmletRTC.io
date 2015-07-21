@@ -549,21 +549,6 @@ document.getElementById("getDocButton").addEventListener('click', function() {
 
 document.getElementById("joinDataButton").addEventListener('click',function() {
   var caller = false;
-  var callerParameters = {
-    "name" : "caller", 
-    "value" : {
-      "signals":[]
-    }
-  };
-  var calleeParameters = {
-    "name" : "callee", 
-    "value" : {
-      "signals" : [{
-        "signal_type" : "callee_arrived", 
-        "timestamp" : Date.now()
-      }]
-    }
-  };
 
   if(Object.keys(chatDoc.participants).length  == 0) {
     initConnection(true, true, false);
