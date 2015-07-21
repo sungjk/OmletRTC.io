@@ -57,6 +57,22 @@ var calleeParameters = {
       }]
   }
 };
+var params_caller_ice = {
+  "name": "caller" , 
+  "signal" : {
+    "signal_type": "new_ice_candidate",
+    "timestamp":Date.now(), 
+    "candidate": event.candidate
+  }
+};
+var params_callee_ice = {
+  "name" : "callee" , 
+  "signal" : {
+    "signal_type" : "new_ice_candidate",
+    "timestamp" : Date.now(), 
+    "candidate" : event.candidate
+  }
+};
 
 var omletAsSignallingChannel = true ;
 var orderedDataChannel = true;
@@ -214,25 +230,16 @@ function onNewDescriptionCreated_2(description) {
 
 
 
-function onIceCandidate(event){
+function handleIceCandidate(event){
   log("[+] local IceCanddidate is Found.");
 
   if (event.candidate) {
     if ( omletAsSignallingChannel ){
-      //TODO Update the Document
-      var des_obj = {
-        "name": "caller" , 
-        "signal" : {
-          "signal_type": "new_ice_candidate",
-          "timestamp":Date.now(), 
-          "candidate": event.candidate
-        } 
-      };
-
-      documentApi.update(myDocId, addSignal, des_obj , function() { log("[+] Add local ICE Signal."); }
-       , function(e) { alert("error: " + JSON.stringify(e)); }
-       );
-    } else {
+      // update: function(reference, func, parameters, success, error)
+      documentApi.update(myDocId, addSignal, params_caller_ice , function() { log("[+] Add local ice signal."); }
+       , errorCallback);
+    } 
+    else {
     }
   }
 }
@@ -242,12 +249,11 @@ function onIceCandidate2(event){
 
   if (event.candidate) {
     if ( omletAsSignallingChannel ){
-      //TODO Update the Document
-      var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
-      documentApi.update(myDocId, addSignal, des_obj , function() { log("[+] Add remote ICE Signal."); }
-       , function(e) { alert("error: " + JSON.stringify(e)); }
-       );
-    } else {
+      // update: function(reference, func, parameters, success, error)
+      documentApi.update(myDocId, addSignal, params_callee_ice , function() { log("[+] Add remote ice signal."); }
+      , errorCallback);
+    } 
+    else {
     }
   }
 }
@@ -452,7 +458,7 @@ function initConnection(caller, data, video) {
     localPeerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
 
     // Sends ice candidates to the other peer
-    localPeerConnection.onicecandidate = onIceCandidate;
+    localPeerConnection.onicecandidate = handleIceCandidate;
     localPeerConnection.oniceconnectionstatechange = function (ice_state) {
       log("[+] localPC: " + localPeerConnection.iceGatheringState + " " + localPeerConnection.iceConnectionState);
     }
@@ -528,20 +534,20 @@ function initConnection(caller, data, video) {
       // remotePeerConnection.addStream(localStream);
 
 
-      // remotePeerConnection.onaddstream = function (event) {
-      //   var remoteMedia = get("remoteVideo");
+      remotePeerConnection.onaddstream = function (event) {
+        var remoteMedia = get("remoteVideo");
 
-      //   if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
-      //   else            remoteMedia.src = event.stream;
+        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+        else            remoteMedia.src = event.stream;
 
-      //   remoteMedia.autoplay = true;
-      //   remoteMedia.play();
+        remoteMedia.autoplay = true;
+        remoteMedia.play();
 
-      //   remotePeerConnection.addStream(event.stream);
-      //   log("[+] remotePeerConnection.onaddstream");
-      // };
+        remotePeerConnection.addStream(event.stream);
+        log("[+] remotePeerConnection.onaddstream");
+      };
 
-      remotePeerConnection.onaddstream = remoteStreaming;
+      //remotePeerConnection.onaddstream = remoteStreaming;
       //remotePeerConnection.onaddstream = handleAddRemoteStream;
       remotePeerConnection.onremovestream = handleRemoveStream;
     }
@@ -758,15 +764,12 @@ function errorCallback(error) {
 
 function addParticipant(old, params) {
   old.participants[params.name] = params.value ;
-
   return old;
 }
 
-
+// Add signal if anyone participate
 function addSignal(old, params) {
-  old.participants[params.name].signals.push(params.signal) ;
-  //old.creator =  ;
-
+  old.participants[params.name].signals.push(params.signal);
   return old;
 }
 
