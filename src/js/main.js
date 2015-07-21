@@ -882,7 +882,7 @@ function DocumentCreated(doc) {
         noun: "poll",
         displayTitle: "OmletRTC",
         displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-        displayText: 'Client: ' + ip() + '\nServer:' + location.host + '\ncallbackUrl' + window.location.href,
+        displayText: "callbackUrl: " + window.location.href,
         json: doc,
         callback: callbackurl
       });
