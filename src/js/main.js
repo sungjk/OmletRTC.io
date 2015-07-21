@@ -475,27 +475,27 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      //getLocalMedia();
-      navigator.getUserMedia(constraints, tempLocalStreaming, errorCallback);
-      localPeerConnection.addStream(localStream);
+      getLocalMedia();
+      // navigator.getUserMedia(constraints, tempLocalStreaming, errorCallback);
+      // localPeerConnection.addStream(localStream);
 
 
 
 
-      // localPeerConnection.onaddstream = function (event) {
-      //   var remoteMedia = get("remoteVideo");
+      localPeerConnection.` = function (event) {
+        var remoteMedia = get("remoteVideo");
 
-      //   if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
-      //   else            remoteMedia.src = event.stream;
+        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+        else            remoteMedia.src = event.stream;
 
-      //   remoteMedia.autoplay = true;
-      //   remoteMedia.play();
+        remoteMedia.autoplay = true;
+        remoteMedia.play();
 
-      //   remotePeerConnection.addStream(event.stream);
+        remotePeerConnection.addStream(event.stream);
 
-      //   log("[+] localPeerConnection.onaddstream");
-      // };
-      localPeerConnection.onaddstream = handleAddRemoteStream;
+        log("[+] localPeerConnection.onaddstream");
+      };
+      //localPeerConnection.onaddstream = handleAddRemoteStream;
       localPeerConnection.onremovestream = handleRemoveStream;
     }
   }
@@ -525,26 +525,26 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      //getLocalMedia();
-      navigator.getUserMedia(constraints, tempLocalStreaming, errorCallback);
-      remotePeerConnection.addStream(localStream);
+      getLocalMedia();
+      // navigator.getUserMedia(constraints, tempLocalStreaming, errorCallback);
+      // remotePeerConnection.addStream(localStream);
 
 
 
 
-      // remotePeerConnection.onaddstream = function (event) {
-      //   var remoteMedia = get("remoteVideo");
+      remotePeerConnection.onaddstream = function (event) {
+        var remoteMedia = get("remoteVideo");
 
-      //   if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
-      //   else            remoteMedia.src = event.stream;
+        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+        else            remoteMedia.src = event.stream;
 
-      //   remoteMedia.autoplay = true;
-      //   remoteMedia.play();
+        remoteMedia.autoplay = true;
+        remoteMedia.play();
 
-      //   remotePeerConnection.addStream(event.stream);
-      //   log("[+] remotePeerConnection.onaddstream");
-      // };
-      remotePeerConnection.onaddstream = handleAddRemoteStream;
+        remotePeerConnection.addStream(event.stream);
+        log("[+] remotePeerConnection.onaddstream");
+      };
+      // remotePeerConnection.onaddstream = handleAddRemoteStream;
       remotePeerConnection.onremovestream = handleRemoveStream;
     }
   }
