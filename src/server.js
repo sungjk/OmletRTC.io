@@ -229,7 +229,9 @@ app.get('/css/android_phone.css', function(req,res){
 	res.sendFile(__dirname + '/css/android_phone.css');
 });
 
-
+app.get('/css/main_style.css', function(req,res){
+	res.sendFile(__dirname + '/css/main_style.css');
+});
 
 /*
 app.get('/webRTCBench.html',function(req,res){
