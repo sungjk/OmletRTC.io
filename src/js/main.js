@@ -475,9 +475,9 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      getLocalMedia();
-      //tempLocalStreaming();
-      //localPeerConnection.addStream(localStream);
+      //getLocalMedia();
+      tempLocalStreaming();
+      localPeerConnection.addStream(localStream);
 
 
 
@@ -525,9 +525,9 @@ function initConnection(caller, data, video) {
     }
 
     if(video) {
-      getLocalMedia();
-      //tempLocalStreaming();
-      //remotePeerConnection.addStream(localStream);
+      //getLocalMedia();
+      tempLocalStreaming();
+      remotePeerConnection.addStream(localStream);
 
 
 
