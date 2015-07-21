@@ -541,7 +541,7 @@ function initConnection(caller, data, video) {
       //   log("[+] remotePeerConnection.onaddstream");
       // };
 
-      remotePeerConnection.onaddstream = getRemoteMedia;
+      remotePeerConnection.onaddstream = remoteStreaming;
       //remotePeerConnection.onaddstream = handleAddRemoteStream;
       remotePeerConnection.onremovestream = handleRemoveStream;
     }
