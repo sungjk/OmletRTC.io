@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta content="IE=edge" http-equiv="X-UA-Compatible">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <meta content="" name="description">
+  <meta content="" name="author">
+  <script src="https://omlet.me/a/lib/handlebars.js"></script>
+  <script src="https://omlet.me/a/lib/base64.js"></script>
+  <script src="https://omlet.me/a/js/yeouiju.js"></script>
+  <script src="https://omlet.me/a/js/omlet.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+  <script src="https://omlet.me/a/lib/jquery-cookie.js"></script><!-- Latest compiled and minified CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel=
+  "stylesheet"><!-- Optional theme -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css" rel=
+  "stylesheet"><!-- Latest compiled and minified JavaScript -->
+
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script><!-- Custom styles for this template -->
+  <link href="css/main_style.css" rel="stylesheet">
+
+  <title></title>
+</head>
+
+<body>
+  <div class="site-wrapper">
+    <div class="site-wrapper-inner">
+      <div class="cover-container">
+        <div class="masthead clearfix">
+          <div class="inner">
+            <h3 class="masthead-brand">Private Space for you</h3>
+
+            <ul class="nav masthead-nav">
+              <li class="active">
+                <a data-toggle="tab" href="#about" id="about-tab">About</a>
+              </li>
+
+              <li class="">
+                <a data-toggle="tab" href="#video_calling" id="video_calling-tab">Video Calling</a>
+              </li>
+
+              <li class="">
+                <a data-toggle="tab" href="#file_sharing" id="file_sharing-tab">File Sharing</a>
+              </li>
+
+              <!--Add video record tab-->
+              <li class="">
+                  <a data-toggle="tab" href="#video_recording" id="video_recording-tab">Video Recording</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tab-content">
+          <div class="tab-pane active fade in" id="about">
+            <div class="inner cover">
+              <h1 class="cover-heading">Be free from watching</h1>
+
+              <p class="lead">Your data is not stored in server at all.<br>
+              Enjoy your private space with your friends!</p>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="video_calling">
+            <div class="inner cover">
+              <p class="lead">Feel free to see your friend!</p>
+              <button class="btn btn-default" id="createButton">Way to go</button>
+              <br>
+              <hr>
+              <h2>Space for development</h2>
+              <!-- Insert existing code for test-->
+              <button class="btn btn-default" id="createButton">Create a Conversation</button>
+              <button class="btn btn-default" id="clearButton">Clear Document</button>
+              <button class="btn btn-default" id="getDocButton">Get Document</button>
+              <h3>Console for dev</h3>
+              <textarea id="console" readonly style="width: 100%; min-height:100px;resize: none"></textarea>
+              <br/>
+              <br/>
+              <button class="btn btn-default" id="joinAVButton">Join the A/V transfer session</button>
+              <button class="btn btn-default" id="joinDataButton">Join the data transfer session</button>
+              <!--If you checked this button, You can record your chat (@TODO)-->
+              <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off">
+                  Record
+              </button>
+              <br><br>
+              <h3>local view</h3>
+              <div style="border:1px solid white"><video id="localVideo"></div><br>
+              <h3>remote view</h3>
+              <div style="border:1px solid white"><video id="remoteVideo"></div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="file_sharing">
+            <div class="inner cover">
+              <p class="lead">You're allowed to send large file!</p>
+              <a class="btn btn-default" href="#" role="button">Way to go</a>
+            </div>
+          </div>
+
+          <!-- Add contents Video_recording-->
+          <div class="tab-pane fade" id="video_recording">
+              <div class="inner cover">
+                  <p class="lead">You can record your video!</p>
+                  <a class="btn btn-default" href="#" role="button">Record</a>
+              </div>
+          </div>
+        </div>
+
+        <div class="mastfoot">
+          <div class="inner">
+            <p style="display:inline">
+              Developed by <a href="https://github.com/UCIUROP2015/UCI_UROP_WEBRTC">us</a> through <a href="http://www.urop.uci.edu/">UROP at UCI</a><p class="visible-xs" style="display:inline"></p> and Cover template by <a href="https://twitter.com/mdo">@mdo</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <!-- <script src="../../dist/js/bootstrap.min.js"></script> -->
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <!-- <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script> -->
+  <script src="js/adapter.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
