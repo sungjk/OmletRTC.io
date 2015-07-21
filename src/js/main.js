@@ -556,6 +556,10 @@ function initConnection(caller, data, video) {
       //remotePeerConnection.onaddstream = remoteStreaming;
       //remotePeerConnection.onaddstream = handleAddRemoteStream;
       remotePeerConnection.onremovestream = handleRemoveStream;
+
+      documentApi.watch(myDocId, updateCallback, watchSuccessCallback, errorCallback);
+      // The successful result of get is the document itself.
+      documentApi.get(myDocId, ReceiveDoc);
     }
   }
 }
@@ -707,14 +711,16 @@ function getSuccessCallback(doc) {
     } 
     else if (signal.signal_type === "new_description") {
       log("[+] Remote peer is setting remote description");
+
+      // signal.sdp : 
       remotePeerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp), function () {
-          log("[+] Remote peer is checking for offer.");
+        log("[+] Remote peer is checking for offer.");
           
-          if (remotePeerConnection.remoteDescription.type == "offer") {
-            log("[+] Remote peer is creating answer.");
-            remotePeerConnection.createAnswer(onNewDescriptionCreated_2, logError);
-          }
-        }, logError);
+        if (remotePeerConnection.remoteDescription.type == "offer") {
+          log("[+] Remote peer is creating answer.");
+          remotePeerConnection.createAnswer(onNewDescriptionCreated_2, errorCallback);
+        }
+      }, errorCallback);
     }
   }
 
@@ -728,7 +734,7 @@ function getSuccessCallback(doc) {
 
     if (signal.signal_type === "callee_arrived") {
         log("[+] Callee is arrived") ;
-        localPeerConnection.createOffer(onNewDescriptionCreated, logError);
+        localPeerConnection.createOffer(onNewDescriptionCreated, errorCallback);
     }
     else if (signal.signal_type === "new_ice_candidate") {
       log("[+] localPeerConnection.addIceCandidate.") ;
@@ -736,7 +742,10 @@ function getSuccessCallback(doc) {
     } 
     else if (signal.signal_type === "new_description") {
       log("[+] localPeerConnection.setRemoteDescription.");
-      localPeerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp), function () {}, logError);
+
+      localPeerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp), function () {
+
+      }, errorCallback);
     }
   }
 }
