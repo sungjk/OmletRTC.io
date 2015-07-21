@@ -66,7 +66,7 @@ function log(message){
 
 // document id for omlet
 var documentApi;
-var myDocId ;
+var myDocId;
 
 // RTCPeerConnection object
 var localPeerConnection;
@@ -134,7 +134,7 @@ function onNewDescriptionCreated(description) {
           "timestamp": Date.now(),  
           "sdp": description
         } 
-      } ;
+      };
 
       documentApi.update(myDocId, addSignal, des_obj 
         , function() { log("[+] Add signal."); }
@@ -489,7 +489,7 @@ function get(id){
 }
 
 
-document.getElementById("createButton").addEventListener('click',function(){
+document.getElementById("createButton").addEventListener('click', function() {
   if(!Omlet.isInstalled()) {
     log("[-] Omlet is not installed.");
   }
@@ -498,30 +498,27 @@ document.getElementById("createButton").addEventListener('click',function(){
     log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
 
     documentApi.create(function(d) {
-      log("[+] Function call: documentApi.create");
+      // create successCallback
+      log("[+] documentApi.create successCallback");
 
+      // Document property is a document reference that can be serialized and can be passed to the other calls.
       myDocId = d.Document;
       location.hash = "#/docId/" + myDocId;
 
+
+      // The func argument to update is called to generate the document or to update it with the new parameters. 
+      // It is passed the old document as the first argument, and the app specified parameters as the second.
       documentApi.update(myDocId, Initialize, InitialDocument(), function() {
           // update successCallback
           log("[+] update successCallback, initialize.toString(): " + Initialize.toString());
-          documentApi.get(myDocId, DocumentCreated, function(e) {
-            log("[-] update->get errorCallback: " + e);
-          });
-        }, function(e) {
-          // update errorCallback
-          log("[-] update errorCallback: " + JSON.stringify(e));
-        });
-    }, function(e) {
-      // create errorCallback
-      log("[-] create errorCallback: " + JSON.stringify(e));
-    });
+          documentApi.get(myDocId, DocumentCreated, errorCallback);
+        }, errorCallback);
+    }, errorCallback);
   }
 });
 
 
-document.getElementById("clearButton").addEventListener('click',function(){
+document.getElementById("clearButton").addEventListener('click', function() {
   if(!Omlet.isInstalled()) {
     log("[-] Omlet is not installed.");
   }
@@ -536,7 +533,7 @@ document.getElementById("clearButton").addEventListener('click',function(){
 });
 
 
-document.getElementById("getDocButton").addEventListener('click',function(){
+document.getElementById("getDocButton").addEventListener('click', function() {
   if(!Omlet.isInstalled()) {
     log("[-] Omlet is not installed.");
   }
@@ -552,7 +549,7 @@ document.getElementById("joinDataButton").addEventListener('click',function() {
 
   log("[*] Check for other party");
 
-  if(Object.keys(chatDoc.participants).length  == 0){
+  if(Object.keys(chatDoc.participants).length  == 0) {
     initConnection(true, true, false);
 
     try{
@@ -641,6 +638,16 @@ document.getElementById("joinAVButton").addEventListener('click',function(){
 //
 /////////////////////////////////////////////////////////////////
 
+/*
+Omlet.document = {
+  create: function(success, error),
+  get: function(reference, success, error),
+  update: function(reference, func, parameters, success, error),
+  watch: function(reference, onUpdate, success, error),
+  unwatch: function(reference, success, error)
+}
+*/
+
 function initDocumentAPI() {
   if (!Omlet.isInstalled())  {
     log("[-] Omlet is not installed." );
@@ -678,12 +685,36 @@ function _loadDocument() {
     myDocId = getDocumentReference();
     log("[+] Get documentReference id: " + myDocId );
 
-    documentApi.watch(myDocId, updateCallback, responseCallback, errorCallback);
+    // The updateCallback argument to watch is called every time the document changes, for example
+    // because it is being updated by another user. It receives the new document as its only argument.
+    documentApi.watch(myDocId, updateCallback, watchSuccessCallback, errorCallback);
+
+    // The successful result of get is the document itself.
     documentApi.get(myDocId, ReceiveDoc);
+    //watchDocument(myDocId, updateCallback);
   } 
   else {
     log("[-] Document is not found." );
   }
+}
+
+
+function hasDocument() {
+  var docIdParam = window.location.hash.indexOf("/docId/");
+  return (docIdParam != -1);
+}
+
+
+function getDocumentReference() {
+  var docIdParam = window.location.hash.indexOf("/docId/");
+  if (docIdParam == -1) return false;
+
+  var docId = window.location.hash.substring(docIdParam+7);
+  var end = docId.indexOf("/");
+
+  if (end != -1)
+    docId = docId.substring(0, end);
+  return docId;
 }
 
 
@@ -693,6 +724,7 @@ function watchDocument(docref, OnUpdate) {
       log("[-] Wrong document.");
     }
     else {
+      //  The successful result of get is the document itself.
       documentApi.get(updatedDocRef, OnUpdate);
     }
   }, function(result) {
@@ -781,42 +813,23 @@ function getSuccessCallback(doc) {
 /*
  *  Handler for callback
  */
-
 function updateCallback(chatDocId) {
   log("[+] updateCallback. chatDocId: " + chatDocId);
 
+  //  The successful result of get is the document itself.
   documentApi.get(chatDocId, getSuccessCallback , function(e) {
     alert("[-] Error on getting doc: " + JSON.stringify(e));
   });
 }
 
 
-function responseCallback() {
-  log("[+] responseCallback.");
+function watchSuccessCallback() {
+  log("[+] watchSuccessCallback.");
 }
 
 
 function errorCallback(error) {
   log("[-] " + error);
-}
-
-
-function hasDocument() {
-  var docIdParam = window.location.hash.indexOf("/docId/");
-  return (docIdParam != -1);
-}
-
-
-function getDocumentReference() {
-  var docIdParam = window.location.hash.indexOf("/docId/");
-  if (docIdParam == -1) return false;
-
-  var docId = window.location.hash.substring(docIdParam+7);
-  var end = docId.indexOf("/");
-
-  if (end != -1)
-    docId = docId.substring(0, end);
-  return docId;
 }
 
 
@@ -862,7 +875,6 @@ function participantAdded(doc) {
 function DocumentCreated(doc) {
     //var callbackurl = window.location.href.replace("chat-maker.html" , "webrtc-data.html") ;
     var callbackurl = "http://203.246.112.144:3310/chat-maker-media.html#/docId/" + myDocId;
-    log(callbackurl);
 
     if(Omlet.isInstalled()) {
       var rdl = Omlet.createRDL({
