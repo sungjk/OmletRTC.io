@@ -476,7 +476,7 @@ function initConnection(caller, data, video) {
 
     if(video) {
       //getLocalMedia();
-      tempLocalStreaming();
+      navigator.getUserMedia(constraints, tempLocalStreaming, errorCallback);
       localPeerConnection.addStream(localStream);
 
 
@@ -526,7 +526,7 @@ function initConnection(caller, data, video) {
 
     if(video) {
       //getLocalMedia();
-      tempLocalStreaming();
+      navigator.getUserMedia(constraints, tempLocalStreaming, errorCallback);
       remotePeerConnection.addStream(localStream);
 
 
@@ -841,7 +841,6 @@ document.getElementById("createButton").addEventListener('click', function() {
 
     documentApi.create(function(d) {
       // create successCallback
-      navigator.getUserMedia(constraints, tempLocalStreaming, errorCallback);
 
       // Document property is a document reference that can be serialized and can be passed to the other calls.
       myDocId = d.Document;
