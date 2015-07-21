@@ -584,31 +584,37 @@ document.getElementById("joinDataButton").addEventListener('click',function() {
 
 document.getElementById("joinAVButton").addEventListener('click',function(){
   var caller = false;
-  log("[*] Check for other party.");
+  var callerParameters = {
+    "name" : "caller",
+    "value" : {
+      "signals": []
+    }
+  };
+  var calleeParameters = {
+    "name" : "callee",
+    "value" : {
+      "signals" : [{
+        "signal_type" : "callee_arrived",
+        "timestamp" : Date.now()
+        }]
+    }
+  };
 
   if(Object.keys(chatDoc.participants).length  == 0) {
+    // Caller connection (audio: false, video: true)
     initConnection(true, false, true);
 
-    try {
-      log("[+] Adding the caller.");
-      documentApi.update(myDocId, addParticipant, {"name": "caller" , "value" : {"signals":[]} }
-       , function() { documentApi.get(myDocId, participantAdded); }
-       , function(e) { alert("[-] Adding caller-update; " + JSON.stringify(e)); }
-       );
-    }
-    catch(err){
-      log("[-] Adding caller; " + err.message);
-    }
+    log("[+] Adding the caller.");
+    documentApi.update(myDocId, addParticipant, callerParameters, function() { documentApi.get(myDocId, participantAdded); }
+    , errorCallback);
   }
   else {
+    // Callee connection (audio: false, video: true)
     initConnection(false, false, true) ;
 
     log("[+] Adding the callee.");
-
-    documentApi.update(myDocId, addParticipant, {"name": "callee" , "value" : {"signals":[{"signal_type": "callee_arrived" , "timestamp": Date.now()}]} }
-     , function() { documentApi.get(myDocId, participantAdded); }
-     , function(e) { alert("[-] Adding callee-update; " + JSON.stringify(e)); }
-    );
+    documentApi.update(myDocId, addParticipant, calleeParameters, function() { documentApi.get(myDocId, participantAdded); }
+    , errorCallback);
   }
 });
 
@@ -882,7 +888,7 @@ function DocumentCreated(doc) {
         noun: "poll",
         displayTitle: "OmletRTC",
         displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-        displayText: "callbackUrl: " + window.location.href,
+        displayText: 'Client: ' + ip() + '\nServer:' + location.host,
         json: doc,
         callback: callbackurl
       });
