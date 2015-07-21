@@ -702,7 +702,7 @@ function getSuccessCallback(doc) {
           
           if (remotePeerConnection.remoteDescription.type == "offer") {
             log("[+] Remote peer is creating answer.");
-            remotePeerConnection.createAnswer(onNewDescription`_2, logError);
+            remotePeerConnection.createAnswer(onNewDescriptionCreated_2, logError);
           }
         }, logError);
     }
