@@ -71,9 +71,23 @@ var remotePeerConnection;
 var dataChannel;
 var dataChannel2;
 
+// attach video number
+var attachVideoNumber = 0;
+
 // HTML5 <video> elements
 var localVideo = get("localVideo");
 var remoteVideo = get("remoteVideo");
+var thirdVideo = get("thirdVideo");
+
+// streams
+var localStream;
+var remoteStream;
+var thirdStream;
+
+var constraints = { 
+  audio: false,
+  video: true 
+};
 
 // PeerConnection ICE protocol configuration (either Firefox or Chrome)
 var peerConnectionConfig = detectedBrowser === 'Chrome' ? 
@@ -329,6 +343,13 @@ function onMessage2(msg){
  *
  *****************************************/
 
+function tempLocalStreaming(stream) {
+  localStream = stream;
+  attachMediaStream(localVideo, stream);
+  console.log('Adding local stream.');
+}
+
+
  // Function for local streaming
 function localStreaming(stream) {
   var localMedia = get("localVideo")
@@ -376,6 +397,35 @@ function getRemoteMedia() {
     video: true
   }, remoteStreaming, mediaErrorCallback);
   //navigator.getUserMedia(srcConstraints, remoteStreaming, logError);
+}
+
+// Handler to be called in case of adding stream
+function handleAddRemoteStream(event) {
+    console.log('[+] Added stream.');
+
+    if (attachVideoNumber == 0) {
+        attachMediaStream(remoteVideo, event.stream);
+        console.log('Remote stream attached!!.');
+        remoteStream = event.stream;
+        attachVideoNumber++;
+    }
+    else if (attachVideoNumber == 1) {
+        attachMediaStream(thirdVideo, event.stream);
+        console.log('Third stream attached!!.');
+        thirdStream = event.stream;
+        attachVideoNumber++;
+    }
+    // else if (attachVideoNumber == 2) {
+    //     attachMediaStream(forthVideo, event.stream);
+    //     console.log('Forth stream attached!!.');
+    //     forthStream = event.stream;
+    //     attachVideoNumber++;
+    // } else if (attachVideoNumber == 3) {
+    //     attachMediaStream(fifthVideo, event.stream);
+    //     console.log('Forth stream attached!!.');
+    //     fifthStream = event.stream;
+    //     attachVideoNumber++;
+    // }
 }
 
 // Handler to be called in case of removing stream
@@ -426,21 +476,26 @@ function initConnection(caller, data, video) {
 
     if(video) {
       getLocalMedia();
+      //tempLocalStreaming();
+      //localPeerConnection.addStream(localStream);
 
-      localPeerConnection.onaddstream = function (event) {
-        var remoteMedia = get("remoteVideo");
 
-        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
-        else            remoteMedia.src = event.stream;
 
-        remoteMedia.autoplay = true;
-        remoteMedia.play();
 
-        remotePeerConnection.addStream(event.stream);
+      // localPeerConnection.onaddstream = function (event) {
+      //   var remoteMedia = get("remoteVideo");
 
-        log("[+] localPeerConnection.onaddstream");
-      };
+      //   if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+      //   else            remoteMedia.src = event.stream;
 
+      //   remoteMedia.autoplay = true;
+      //   remoteMedia.play();
+
+      //   remotePeerConnection.addStream(event.stream);
+
+      //   log("[+] localPeerConnection.onaddstream");
+      // };
+      localPeerConnection.onaddstream = handleAddRemoteStream;
       localPeerConnection.onremovestream = handleRemoveStream;
     }
   }
@@ -471,19 +526,25 @@ function initConnection(caller, data, video) {
 
     if(video) {
       getLocalMedia();
+      //tempLocalStreaming();
+      //remotePeerConnection.addStream(localStream);
 
-      remotePeerConnection.onaddstream = function (event) {
-        var remoteMedia = get("remoteVideo");
 
-        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
-        else            remoteMedia.src = event.stream;
 
-        remoteMedia.autoplay = true;
-        remoteMedia.play();
 
-        remotePeerConnection.addStream(event.stream);
-        log("[+] remotePeerConnection.onaddstream");
-      };
+      // remotePeerConnection.onaddstream = function (event) {
+      //   var remoteMedia = get("remoteVideo");
+
+      //   if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+      //   else            remoteMedia.src = event.stream;
+
+      //   remoteMedia.autoplay = true;
+      //   remoteMedia.play();
+
+      //   remotePeerConnection.addStream(event.stream);
+      //   log("[+] remotePeerConnection.onaddstream");
+      // };
+      remotePeerConnection.onaddstream = handleAddRemoteStream;
       remotePeerConnection.onremovestream = handleRemoveStream;
     }
   }
@@ -491,111 +552,6 @@ function initConnection(caller, data, video) {
 
 
 
-//////////////////////////////////////////////////////////////////
-//
-//             Application Code for event handling
-//
-/////////////////////////////////////////////////////////////////
-
-function get(id){
-  return document.getElementById(id);
-}
-
-
-document.getElementById("createButton").addEventListener('click', function() {
-  if(!Omlet.isInstalled()) {
-    log("[-] Omlet is not installed.");
-  }
-  else {
-    log("[+] Omlet is installed.");
-    log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
-
-    documentApi.create(function(d) {
-      // create successCallback
-
-      // Document property is a document reference that can be serialized and can be passed to the other calls.
-      myDocId = d.Document;
-      location.hash = "#/docId/" + myDocId;
-
-      // update: function(reference, func, parameters, success, error)
-      // The func argument to update is called to generate the document or to update it with the new parameters. 
-      // It is passed the old document as the first argument, and the app specified parameters as the second.
-      documentApi.update(myDocId, Initialize, InitialDocument(), function() {
-        // update successCallback
-        documentApi.get(myDocId, DocumentCreated, errorCallback);
-      }, errorCallback);
-    }, errorCallback);
-  }
-});
-
-
-document.getElementById("clearButton").addEventListener('click', function() {
-  if(!Omlet.isInstalled()) {
-    log("[-] Omlet is not installed.");
-  }
-  else {
-    log("[+] Clearing Document.");
-
-    documentApi.update(myDocId, clear, {}, function() { documentApi.get(myDocId, DocumentCleared); }
-    , function(e) { alert("[-] clear-update; " + JSON.stringify(e)); }
-    );
-  }
-});
-
-
-document.getElementById("getDocButton").addEventListener('click', function() {
-  if(!Omlet.isInstalled()) {
-    log("[-] Omlet is not installed.");
-  }
-  else {
-    log("[+] Getting Document.");
-    documentApi.get(myDocId, ReceiveDoc);
-  }
-});
-
-
-document.getElementById("joinDataButton").addEventListener('click',function() {
-  var caller = false;
-
-  if(Object.keys(chatDoc.participants).length  == 0) {
-    initConnection(true, true, false);
-
-    log("[+] Adding the caller.");
-
-    documentApi.update(myDocId, addParticipant, callerParameters, function() { documentApi.get(myDocId, participantAdded); }
-    , errorCallback);
-  }
-  else {
-    initConnection(false, true, false);
-
-    log("[+] Adding the callee.");
-
-    documentApi.update(myDocId, addParticipant, calleeParameters, function() { documentApi.get(myDocId, participantAdded); }
-     , errorCallback);
-  }
-});
-
-
-document.getElementById("joinAVButton").addEventListener('click',function(){
-  var caller = false;
-
-  if(Object.keys(chatDoc.participants).length  == 0) {
-    // Caller connection (audio: false, video: true)
-    initConnection(true, false, true);
-
-    log("[+] Adding the caller.");
-    documentApi.update(myDocId, addParticipant, callerParameters, function() { documentApi.get(myDocId, participantAdded); }
-    , errorCallback);
-  }
-  else {
-    // Callee connection (audio: false, video: true)
-    initConnection(false, false, true) ;
-
-    log("[+] Adding the callee.");
-    documentApi.update(myDocId, addParticipant, calleeParameters, function() { documentApi.get(myDocId, participantAdded); }
-    , errorCallback);
-  }
-});
 
 
 
@@ -733,7 +689,7 @@ function getSuccessCallback(doc) {
     if (signal.timestamp in processedSignals)
       continue;
 
-    processedSignals[signal.timestamp] = 1 ;
+    processedSignals[signal.timestamp] = 1;
 
     if (signal.signal_type === "new_ice_candidate") {
       log("[+] Remote peer is adding ICE.");
@@ -746,7 +702,7 @@ function getSuccessCallback(doc) {
           
           if (remotePeerConnection.remoteDescription.type == "offer") {
             log("[+] Remote peer is creating answer.");
-            remotePeerConnection.createAnswer(onNewDescriptionCreated_2, logError);
+            remotePeerConnection.createAnswer(onNewDescription`_2, logError);
           }
         }, logError);
     }
@@ -770,7 +726,6 @@ function getSuccessCallback(doc) {
     } 
     else if (signal.signal_type === "new_description") {
       log("[+] localPeerConnection.setRemoteDescription.");
-      log(signal.sdp);
       localPeerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp), function () {}, logError);
     }
   }
@@ -797,7 +752,7 @@ function watchSuccessCallback() {
   log("[+] watchSuccessCallback.");
 }
 
-// errorCallbackk for all of function
+// errorCallback for all of function
 function errorCallback(error) {
   log("[-] " + error);
 }
@@ -859,6 +814,115 @@ function DocumentCreated(doc) {
       Omlet.exit(rdl);
     }
 }
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+//
+//             Application Code for event handling
+//
+/////////////////////////////////////////////////////////////////
+
+function get(id){
+  return document.getElementById(id);
+}
+
+
+document.getElementById("createButton").addEventListener('click', function() {
+  if(!Omlet.isInstalled()) {
+    log("[-] Omlet is not installed.");
+  }
+  else {
+    log("[+] Omlet is installed.");
+    log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
+
+    documentApi.create(function(d) {
+      // create successCallback
+      navigator.getUserMedia(constraints, tempLocalStreaming, errorCallback);
+
+      // Document property is a document reference that can be serialized and can be passed to the other calls.
+      myDocId = d.Document;
+      location.hash = "#/docId/" + myDocId;
+
+      // update: function(reference, func, parameters, success, error)
+      // The func argument to update is called to generate the document or to update it with the new parameters. 
+      // It is passed the old document as the first argument, and the app specified parameters as the second.
+      documentApi.update(myDocId, Initialize, InitialDocument(), function() {
+        // update successCallback
+        documentApi.get(myDocId, DocumentCreated, errorCallback);
+      }, errorCallback);
+    }, errorCallback);
+  }
+});
+
+
+document.getElementById("clearButton").addEventListener('click', function() {
+  if(!Omlet.isInstalled()) {
+    log("[-] Omlet is not installed.");
+  }
+  else {
+    log("[+] Clearing Document.");
+
+    documentApi.update(myDocId, clear, {}, function() { documentApi.get(myDocId, DocumentCleared); }
+    , function(e) { alert("[-] clear-update; " + JSON.stringify(e)); }
+    );
+  }
+});
+
+
+document.getElementById("getDocButton").addEventListener('click', function() {
+  if(!Omlet.isInstalled()) {
+    log("[-] Omlet is not installed.");
+  }
+  else {
+    log("[+] Getting Document.");
+    documentApi.get(myDocId, ReceiveDoc);
+  }
+});
+
+
+document.getElementById("joinDataButton").addEventListener('click',function() {
+  if(Object.keys(chatDoc.participants).length  == 0) {
+    initConnection(true, true, false);
+
+    log("[+] Adding the caller.");
+
+    documentApi.update(myDocId, addParticipant, callerParameters, function() { documentApi.get(myDocId, participantAdded); }
+    , errorCallback);
+  }
+  else {
+    initConnection(false, true, false);
+
+    log("[+] Adding the callee.");
+
+    // update: function(reference, func, parameters, success, error),
+    documentApi.update(myDocId, addParticipant, calleeParameters, function() { documentApi.get(myDocId, participantAdded); }
+    , errorCallback);
+  }
+});
+
+
+document.getElementById("joinAVButton").addEventListener('click',function(){
+  if(Object.keys(chatDoc.participants).length  == 0) {
+    // Caller connection (audio: false, video: true)
+    initConnection(true, false, true);
+
+    log("[+] Adding the caller.");
+    documentApi.update(myDocId, addParticipant, callerParameters, function() { documentApi.get(myDocId, participantAdded); }
+    , errorCallback);
+  }
+  else {
+    // Callee connection (audio: false, video: true)
+    initConnection(false, false, true) ;
+
+    log("[+] Adding the callee.");
+    documentApi.update(myDocId, addParticipant, calleeParameters, function() { documentApi.get(myDocId, participantAdded); }
+    , errorCallback);
+  }
+});
 
 
 
