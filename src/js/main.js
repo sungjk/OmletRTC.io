@@ -651,7 +651,7 @@ function _loadDocument() {
     documentApi.watch(myDocId, updateCallback, watchSuccessCallback, errorCallback);
 
     // The successful result of get is the document itself.
-    //documentApi.get(myDocId, ReceiveDoc);
+    documentApi.get(myDocId, ReceiveDoc);
     //watchDocument(myDocId, updateCallback);
   } 
   else {
