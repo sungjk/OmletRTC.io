@@ -401,17 +401,17 @@ function getRemoteMedia() {
 
 // Handler to be called in case of adding stream
 function handleAddRemoteStream(event) {
-    console.log('[+] Added stream.');
+    log('[+] Added stream.');
 
     if (attachVideoNumber == 0) {
         attachMediaStream(remoteVideo, event.stream);
-        console.log('Remote stream attached!!.');
+        log('Remote stream attached!!.');
         remoteStream = event.stream;
         attachVideoNumber++;
     }
     else if (attachVideoNumber == 1) {
         attachMediaStream(thirdVideo, event.stream);
-        console.log('Third stream attached!!.');
+        log('Third stream attached!!.');
         thirdStream = event.stream;
         attachVideoNumber++;
     }
