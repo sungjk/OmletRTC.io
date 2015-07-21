@@ -528,19 +528,21 @@ function initConnection(caller, data, video) {
       // remotePeerConnection.addStream(localStream);
 
 
-      remotePeerConnection.onaddstream = function (event) {
-        var remoteMedia = get("remoteVideo");
+      // remotePeerConnection.onaddstream = function (event) {
+      //   var remoteMedia = get("remoteVideo");
 
-        if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
-        else            remoteMedia.src = event.stream;
+      //   if (window.URL) remoteMedia.src = window.URL.createObjectURL(event.stream);
+      //   else            remoteMedia.src = event.stream;
 
-        remoteMedia.autoplay = true;
-        remoteMedia.play();
+      //   remoteMedia.autoplay = true;
+      //   remoteMedia.play();
 
-        remotePeerConnection.addStream(event.stream);
-        log("[+] remotePeerConnection.onaddstream");
-      };
-      // remotePeerConnection.onaddstream = handleAddRemoteStream;
+      //   remotePeerConnection.addStream(event.stream);
+      //   log("[+] remotePeerConnection.onaddstream");
+      // };
+
+      remotePeerConnection.onaddstream = getRemoteMedia;
+      //remotePeerConnection.onaddstream = handleAddRemoteStream;
       remotePeerConnection.onremovestream = handleRemoveStream;
     }
   }
