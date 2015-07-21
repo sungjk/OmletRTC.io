@@ -1,61 +1,34 @@
-/*
- * Procedure of function call (Omlet is not installed.)
+/*********************************************************************************
+ *
+ *  Procedure of function call (Omlet is not installed.)
+ *
  *  1. [Omlet is Ready.]              Omlet.ready : Omlet Start
  *     [Doc is not found.]
  *     [Initializing DocumentAPI to use traditional style.]
  *  2. [Loading document]             _loadDocument() : get documentReference id
  *     [Document ***NOT*** found]
- */
+ *
+ *********************************************************************************/
 
-
-/*
- * Procedure of function call (Omlet is installed.)
+/*********************************************************************************
+ *
+ *  Procedure of function call (Omlet is installed.)
+ *
  *  1. [Omlet is Ready.]              Omlet.ready : Omlet Start
  *  2. [Initializing DocumentAPI.]    initDocumentAPI() : get documentAPI
  *  3. [Loading document]             _loadDocument() : get documentReference id
  *     [Get documentReference id: ]
  *
- *  4. [Check for other party.]               click eventListener for "joinAVButton"
- *  5. [Creating localPeerConnection Object.] initConnection() : Caller
- *     [Adding the Caller]
- *  6. [Getting updated version.]             ReceiveUpdate() : _loadDocument() -> documentApi.watch(myDocId, ReceiveUpdate);
- *  7. [Participant added]                    participantAdded : documentAPI.get's success callback
- *  8. [Updated Doc Fetched]                  ReceiveUpdatedDoc
+ *  4. [Creating localPeerConnection Object.] initConnection() : Caller
+ *  5. [Call local's getUserMedia.]           getLocalMedia)() : Caller
+ *  6. [Adding the Caller]                    $("joinAVButton").addEventListener('click',function() : before called  documentApi.update() 
+ *  7. [Participant added. docId: ]           participantAdded : documentAPI.get's success callback
+ *  8. [Updated Doc Fetched]                  getSuccessCallback
  *     [chat id: ]
  *     [people in this conversation: ]
+ *  9. [Add local peer stream.]               localStreaming() : after local addStream
  *
- *  9. [Add local peer stream.]             getLocalMedia() -> localStreaming()
- */
-
-
-
-//////////////////////////////////////////////////////////////////
-//
-//                Log console
-//
-/////////////////////////////////////////////////////////////////
-
-if (typeof console  != "undefined")
-    if (typeof console.log != 'undefined')
-        console.olog = console.log;
-    else
-        console.olog = function() {};
-
-console.log = function(message) {
-  console.olog(message);
-  $('#debugDiv').append('<p>' + message + '</p>');
-};
-
-console.error = console.debug = console.info = console.log
-
-
-function log(message){
-  var logArea = get("console");
-  logArea.value += "\n" + message ;
-  logArea.scrollTop = logArea.scrollHeight;
-}
-
-
+ *********************************************************************************/
 
 
 //////////////////////////////////////////////////////////////////
@@ -113,6 +86,33 @@ var peerConnectionConstraints = {
 };
 
 
+
+
+//////////////////////////////////////////////////////////////////
+//
+//                Log console
+//
+/////////////////////////////////////////////////////////////////
+
+if (typeof console  != "undefined")
+    if (typeof console.log != 'undefined')
+        console.olog = console.log;
+    else
+        console.olog = function() {};
+
+console.log = function(message) {
+  console.olog(message);
+  $('#debugDiv').append('<p>' + message + '</p>');
+};
+
+console.error = console.debug = console.info = console.log
+
+
+function log(message){
+  var logArea = get("console");
+  logArea.value += "\n" + message ;
+  logArea.scrollTop = logArea.scrollHeight;
+}
 
 
 
@@ -320,13 +320,16 @@ function onMessage2(msg){
 
 
 
-/*
- * Function for media & streaming
+ /*****************************************
  *
- * @author Seongjung Jeremy Kim
- * @since  2015.07.18
+ *  Function for media & streaming
  *
- */
+ *  @author Seongjung Jeremy Kim
+ *  @since  2015.07.18
+ *
+ *****************************************/
+
+ // Function for local streaming
 function localStreaming(stream) {
   var localMedia = get("localVideo")
   if (window.URL) localMedia.src = window.URL.createObjectURL(stream);
@@ -339,6 +342,7 @@ function localStreaming(stream) {
   log("[+] Add local peer stream.") ;
 }
 
+// Function for remote streaming
 function remoteStreaming(stream) {
   var remoteMedia = get("remoteVideo");
 
@@ -352,7 +356,7 @@ function remoteStreaming(stream) {
   log("[+] Add remote peer stream.");
 }
 
-
+// Function for local getUserMedia
 function getLocalMedia(){
   log("[+] Call local's getUserMedia.");
 
@@ -363,7 +367,7 @@ function getLocalMedia(){
   //navigator.getUserMedia(srcConstraints, localStreaming, logError);
 }
 
-
+// Function for remote getUserMedia
 function getRemoteMedia() {
   log("[+] Call remote's getUserMedia.");
 
@@ -374,19 +378,22 @@ function getRemoteMedia() {
   //navigator.getUserMedia(srcConstraints, remoteStreaming, logError);
 }
 
-
-function handleRemoteStreamRemoved() {
-    log('[+] Remote remote stream');
+// Handler to be called in case of removing stream
+function handleRemoveStream() {
+    log('[+] Removed stream.');
 }
 
-
-// Callback to be called in case of failure...
+// Callback to be called in case of failure
 function mediaErrorCallback(error){
   log("[-] navigator.getUserMedia; " + error);
 }
 
 
-//////////// Establishing Connection ////////////
+/*****************************************
+ *
+ *  Function for establishing Connection
+ *
+ *****************************************/
 function initConnection(caller, data, video) {
   // Caller
   if (caller) {
@@ -434,7 +441,7 @@ function initConnection(caller, data, video) {
         log("[+] localPeerConnection.onaddstream");
       };
 
-      localPeerConnection.onremovestream = handleRemoteStreamRemoved;
+      localPeerConnection.onremovestream = handleRemoveStream;
     }
   }
   else {  // Callee
@@ -477,7 +484,7 @@ function initConnection(caller, data, video) {
         remotePeerConnection.addStream(event.stream);
         log("[+] remotePeerConnection.onaddstream");
       };
-      remotePeerConnection.onremovestream = handleRemoteStreamRemoved;
+      remotePeerConnection.onremovestream = handleRemoveStream;
     }
   }
 }
@@ -486,7 +493,7 @@ function initConnection(caller, data, video) {
 
 //////////////////////////////////////////////////////////////////
 //
-//                Appication Code for event
+//             Application Code for event handling
 //
 /////////////////////////////////////////////////////////////////
 
@@ -619,6 +626,25 @@ function initDocumentAPI() {
 }
 
 
+function _loadDocument() {
+  if (hasDocument()) {
+    myDocId = getDocumentReference();
+    log("[+] Get documentReference id: " + myDocId );
+
+    // watch: function(reference, onUpdate, success, error)
+    // The updateCallback argument to watch is called every time the document changes, for example
+    // because it is being updated by another user. It receives the new document as its only argument.
+    documentApi.watch(myDocId, updateCallback, watchSuccessCallback, errorCallback);
+
+    // The successful result of get is the document itself.
+    documentApi.get(myDocId, ReceiveDoc);
+    //watchDocument(myDocId, updateCallback);
+  } 
+  else {
+    log("[-] Document is not found." );
+  }
+}
+
 function InitialDocument() {
   var chatId = 100;
   var identity = Omlet.getIdentity();
@@ -637,26 +663,6 @@ function InitialDocument() {
 
 function Initialize(old, params) {
   return params;
-}
-
-
-function _loadDocument() {
-  if (hasDocument()) {
-    myDocId = getDocumentReference();
-    log("[+] Get documentReference id: " + myDocId );
-
-    // watch: function(reference, onUpdate, success, error)
-    // The updateCallback argument to watch is called every time the document changes, for example
-    // because it is being updated by another user. It receives the new document as its only argument.
-    documentApi.watch(myDocId, updateCallback, watchSuccessCallback, errorCallback);
-
-    // The successful result of get is the document itself.
-    documentApi.get(myDocId, ReceiveDoc);
-    //watchDocument(myDocId, updateCallback);
-  } 
-  else {
-    log("[-] Document is not found." );
-  }
 }
 
 
@@ -771,6 +777,14 @@ function getSuccessCallback(doc) {
 }
 
 
+/*****************************************
+ *
+ *  Callback function for documentApi
+ *
+ *  @author Seongjung Jeremy Kim
+ *  @since  2015.07.20
+ *
+ *****************************************/
 
 // updateCallback for documentApi.watch
 function updateCallback(chatDocId) {
@@ -820,7 +834,7 @@ function DocumentCleared(doc) {
 
 
 function participantAdded(doc) {
-  log("[+] Participant added. docId:");
+  log("[+] Participant added. docId: " + doc.chatId);
   //chatDoc = doc ;
   //log( JSON.stringify(doc));
   //log( "people in this conversation: " + Object.keys(doc.participants).length );
@@ -829,7 +843,7 @@ function participantAdded(doc) {
 
 function DocumentCreated(doc) {
     //var callbackurl = window.location.href.replace("chat-maker.html" , "webrtc-data.html") ;
-    var callbackurl = "http://203.246.112.144:3310/chat-maker-media.html#/docId/" + myDocId;
+    var callbackurl = "http://203.246.112.144:3310/index.html#/docId/" + myDocId;
 
     if(Omlet.isInstalled()) {
       var rdl = Omlet.createRDL({
