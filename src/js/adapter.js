@@ -153,32 +153,7 @@ var server = {
 // Look after different browser vendors' ways of calling the getUserMedia() API method:
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-/*
-  if (window.URL) localMedia.src = window.URL.createObjectURL(stream);
-  else            localMedia.src = stream;
-  
-  localMedia.autoplay = true;
-  localMedia.play();
-*/
 
-// Attach a media stream to an element.
-// attachMediaStream = function(element, stream) {
-//   if (typeof element.srcObject !== 'undefined') {
-//     element.srcObject = stream;
-//     element.play();
-//   }
-//   else if (typeof element.mozSrcObject !== 'undefined') {
-//     element.mozSrcObject = stream;
-//     element.play();
-//   }
-//   else if (typeof element.src !== 'undefined') {
-//     element.src = URL.createObjectURL(stream);
-//     element.play();
-//   }         
-//   else {
-//     console.log('Error attaching stream to element.');
-//   }
-// };
 
 attachMediaStream = function(element, stream) {
   if (window.URL) element.src = window.URL.createObjectURL(stream);

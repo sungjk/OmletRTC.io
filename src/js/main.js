@@ -480,8 +480,6 @@ function initConnection(caller, data, video) {
       // localPeerConnection.addStream(localStream);
 
 
-
-
       localPeerConnection.onaddstream = function (event) {
         var remoteMedia = get("remoteVideo");
 
@@ -528,8 +526,6 @@ function initConnection(caller, data, video) {
       getLocalMedia();
       // navigator.getUserMedia(constraints, tempLocalStreaming, errorCallback);
       // remotePeerConnection.addStream(localStream);
-
-
 
 
       remotePeerConnection.onaddstream = function (event) {
