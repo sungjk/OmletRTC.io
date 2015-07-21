@@ -57,22 +57,7 @@ var calleeParameters = {
       }]
   }
 };
-var params_caller_ice = {
-  "name": "caller" , 
-  "signal" : {
-    "signal_type": "new_ice_candidate",
-    "timestamp":Date.now(), 
-    "candidate": event.candidate
-  }
-};
-var params_callee_ice = {
-  "name" : "callee" , 
-  "signal" : {
-    "signal_type" : "new_ice_candidate",
-    "timestamp" : Date.now(), 
-    "candidate" : event.candidate
-  }
-};
+
 
 var omletAsSignallingChannel = true ;
 var orderedDataChannel = true;
@@ -86,6 +71,9 @@ var remotePeerConnection;
 // dataChannel object
 var dataChannel;
 var dataChannel2;
+
+// sessionDescription constraints
+var sdpConstraints = {};
 
 // attach video number
 var attachVideoNumber = 0;
@@ -167,9 +155,9 @@ function logError(error){
 }
 
 
-function onNewDescriptionCreated(description) {
-  localPeerConnection.setLocalDescription(description, function () {
-    log("[+] Set local description.");
+function onNewDescriptionCreated(sessionDescription) {
+  localPeerConnection.setLocalDescription(sessionDescription, function () {
+    log("[+] Set local sessionDescription.");
 
     // Send it to the other peer
     if ( omletAsSignallingChannel ){
@@ -181,7 +169,7 @@ function onNewDescriptionCreated(description) {
         "signal" : {
           "signal_type": "new_description",
           "timestamp": Date.now(),  
-          "sdp": description
+          "sdp": sessionDescription
         } 
       };
 
@@ -197,9 +185,9 @@ function onNewDescriptionCreated(description) {
 }
 
 
-function onNewDescriptionCreated_2(description) {
-  remotePeerConnection.setLocalDescription(description, function () {
-    log("[+] Set remote description.");
+function onNewDescriptionCreated_2(sessionDescription) {
+  remotePeerConnection.setLocalDescription(sessionDescription, function () {
+    log("[+] Set remote sessionDescription.");
 
     // Send it to the other peer
     if (omletAsSignallingChannel) {
@@ -209,7 +197,7 @@ function onNewDescriptionCreated_2(description) {
         "signal" : {
           "signal_type": "new_description",
           "timestamp":Date.now(),  
-          "sdp": description
+          "sdp": sessionDescription
         } 
       };
 
@@ -222,7 +210,7 @@ function onNewDescriptionCreated_2(description) {
         JSON.stringify({
           channel: get('channelId').value,
           signal_type: "new_description",
-          sdp: description
+          sdp: sessionDescription
         }));
     }
   }, logError);
@@ -232,6 +220,15 @@ function onNewDescriptionCreated_2(description) {
 
 function handleIceCandidate(event){
   log("[+] local IceCanddidate is Found.");
+
+  var params_caller_ice = {
+    "name": "caller" , 
+    "signal" : {
+      "signal_type": "new_ice_candidate",
+      "timestamp":Date.now(), 
+      "candidate": event.candidate
+    }
+  };
 
   if (event.candidate) {
     if ( omletAsSignallingChannel ){
@@ -246,6 +243,15 @@ function handleIceCandidate(event){
 
 function onIceCandidate2(event){
   log("[+] Remote IceCandidate is Found.");
+
+  var params_callee_ice = {
+    "name" : "callee" , 
+    "signal" : {
+      "signal_type" : "new_ice_candidate",
+      "timestamp" : Date.now(), 
+      "candidate" : event.candidate
+    }
+  };
 
   if (event.candidate) {
     if ( omletAsSignallingChannel ){
