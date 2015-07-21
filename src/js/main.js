@@ -505,7 +505,7 @@ document.getElementById("createButton").addEventListener('click', function() {
       myDocId = d.Document;
       location.hash = "#/docId/" + myDocId;
 
-
+      // update: function(reference, func, parameters, success, error)
       // The func argument to update is called to generate the document or to update it with the new parameters. 
       // It is passed the old document as the first argument, and the app specified parameters as the second.
       documentApi.update(myDocId, Initialize, InitialDocument(), function() {
@@ -865,7 +865,7 @@ function DocumentCleared(doc) {
 
 
 function participantAdded(doc) {
-  log("[+] Participant added");
+  log("[+] Participant added. docId:");
   //chatDoc = doc ;
   //log( JSON.stringify(doc));
   //log( "people in this conversation: " + Object.keys(doc.participants).length );
@@ -882,7 +882,7 @@ function DocumentCreated(doc) {
         noun: "poll",
         displayTitle: "OmletRTC",
         displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-        displayText: 'Client: ' + ip() + '\n' + 'Server:' + location.host,
+        displayText: 'Client: ' + ip() + '\nServer:' + location.host + '\ncallbackUrl' + window.location.href,
         json: doc,
         callback: callbackurl
       });
