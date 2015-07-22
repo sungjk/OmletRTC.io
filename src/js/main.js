@@ -556,10 +556,6 @@ function initConnection(caller, data, video) {
       //remotePeerConnection.onaddstream = remoteStreaming;
       //remotePeerConnection.onaddstream = handleAddRemoteStream;
       remotePeerConnection.onremovestream = handleRemoveStream;
-
-      documentApi.watch(myDocId, updateCallback, watchSuccessCallback, errorCallback);
-      // The successful result of get is the document itself.
-      documentApi.get(myDocId, ReceiveDoc);
     }
   }
 }
@@ -608,7 +604,7 @@ function _loadDocument() {
 
     // The successful result of get is the document itself.
     documentApi.get(myDocId, ReceiveDoc);
-    //watchDocument(myDocId, updateCallback);
+    watchDocument(myDocId, updateCallback);
   } 
   else {
     log("[-] Document is not found." );
