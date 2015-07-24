@@ -128,9 +128,6 @@ var param_join = {
 var param_clear = {
   message : 'clear'
 };
-var param_usermedia = {
-  message : 'user_media'
-};
 
 
 
@@ -729,8 +726,6 @@ function handleMessage(doc) {
   // create
   if (chatDoc.message === 'join') {
     log('[+] chatDoc.message === join');
-  }
-  else if (chatDoc.message === 'user_media') {
     start(false, true); 
   }
   else if (chatDoc.type === 'offer') {
