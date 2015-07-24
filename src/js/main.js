@@ -962,6 +962,11 @@ function create() {
     log("[+] Omlet is installed.");
     log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
 
+    
+    // change disabled property 
+    joinDataButton.disabled = false;
+    joinAVButton.disabled = false;
+
     documentApi.create(function(d) {
       // create successCallback
 
@@ -975,11 +980,6 @@ function create() {
       documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
         // update successCallback
         documentApi.get(myDocId, DocumentCreated, errorCallback);
-
-        // // change disabled property 
-        // joinDataButton.disabled = false;
-        // joinAVButton.disabled = false;
-
       }, errorCallback);
     }, errorCallback);
   }
