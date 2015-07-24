@@ -962,10 +962,6 @@ function create() {
     log("[+] Omlet is installed.");
     log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
 
-    // change disabled property 
-    // joinDataButton.disabled = false;
-    // joinAVButton.disabled = false;
-
     documentApi.create(function(d) {
       // create successCallback
 
@@ -976,9 +972,14 @@ function create() {
       // update: function(reference, func, parameters, success, error)
       // The func argument to update is called to generate the document or to update it with the new parameters. 
       // It is passed the old document as the first argument, and the app specified parameters as the second.
-      documentApi.update(myDocId, Initialize, initConnectionInfo, function() {
+      documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
         // update successCallback
         documentApi.get(myDocId, DocumentCreated, errorCallback);
+
+        // // change disabled property 
+        // joinDataButton.disabled = false;
+        // joinAVButton.disabled = false;
+
       }, errorCallback);
     }, errorCallback);
   }
