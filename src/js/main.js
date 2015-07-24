@@ -963,9 +963,9 @@ function create() {
     log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
 
     // change disabled property 
-    joinDataButton.disabled = false;
-    joinAVButton.disabled = false;
-    
+    // joinDataButton.disabled = false;
+    // joinAVButton.disabled = false;
+
     documentApi.create(function(d) {
       // create successCallback
 
