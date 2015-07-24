@@ -363,11 +363,11 @@ function handleDataChannelState() {
     // dataChannelSend.disabled = false;
     // dataChannelSend.focus();
     // dataChannelSend.placeholder = "";
-    joinDataButton.disabled = false;
+    // joinDataButton.disabled = false;
   } 
   else {
     // dataChannelSend.disabled = true;
-    joinDataButton.disabled = true;
+    // joinDataButton.disabled = true;
   }
 }
 
@@ -612,8 +612,8 @@ function stop() {
   dataChannel
   peerConnection = null;
 
-  joinDataButton.disabled = true;
-  joinAVButton.disabled = true;
+  // joinDataButton.disabled = true;
+  // joinAVButton.disabled = true;
 }
 
 
@@ -964,8 +964,8 @@ function create() {
 
     
     // change disabled property 
-    joinDataButton.disabled = false;
-    joinAVButton.disabled = false;
+    // joinDataButton.disabled = false;
+    // joinAVButton.disabled = false;
 
     documentApi.create(function(d) {
       // create successCallback
