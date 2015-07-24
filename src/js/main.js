@@ -128,13 +128,6 @@ var param_join = {
 var param_clear = {
   message : 'clear'
 };
-var param_iceCandidate = {
-  message : 'candidate',
-  sdpMid : event.candidate.sdpMid,
-  sdpMLineIndex : event.candidate.sdpMLineIndex,
-  candidate : event.candidate.candidates,
-  timestamp : Date.now()
-};
 var param_usermedia = {
   message : 'user_media'
 };
@@ -234,6 +227,14 @@ function setLocalSessionDescription(sessionDescription) {
 // ICE candidates management
 function handleIceCandidate(event) {
   log('[+] handleIceCandidate event: ' + event.candidate);
+
+  var param_iceCandidate = {
+    message : 'candidate',
+    sdpMid : event.candidate.sdpMid,
+    sdpMLineIndex : event.candidate.sdpMLineIndex,
+    candidate : event.candidate.candidates,
+    timestamp : Date.now()
+  };
 
   if (event.candidate) {
     // update: function(reference, func, parameters, success, error)
