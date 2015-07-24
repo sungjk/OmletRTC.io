@@ -98,7 +98,7 @@ var constraints = {
 };
 
 // PeerConnection ICE protocol configuration (either Firefox or Chrome)
-var peerConnectionConfig = webrtcDetectedBrowser === 'Chrome' ? 
+var peerConnectionConfig = detectedBrowser === 'Chrome' ? 
     { 'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
     { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
 
@@ -364,6 +364,21 @@ function handleDataChannelState() {
  *
  *****************************************/
 
+
+// From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
+function handleUserMedia(stream) {
+  localStream = stream;
+  attachMediaStream(localVideo, stream);
+  
+  console.log('[+] Adding local stream.');
+
+  // sendMessage('got user media');
+  documentApi.update(myDocId, addMessage, param_usermedia, function() { 
+    documentApi.get(myDocId, participantAdded, errorCallback); 
+  }, errorCallback);
+}
+
+
  // Function for local streaming
 function localStreaming(stream) {
   var localMedia = get("localVideo")
@@ -417,33 +432,6 @@ function mediaErrorCallback(error){
 }
 
 
-
-//////////////////////////////////////////////////////////////////
-//
-//                Editing~~~~~~~~~~~~~~~~~~~ 
-// joinAVButton 클릭 시 localStream 초기화하는 작업
-/////////////////////////////////////////////////////////////////
-
-
-// From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
-function handleUserMedia(stream) {
-  localStream = stream;
-  attachMediaStream(localVideo, stream);
-  
-  console.log('[+] Adding local stream.');
-
-  // sendMessage('got user media');
-  documentApi.update(myDocId, addMessage, param_usermedia, function() { 
-    documentApi.get(myDocId, participantAdded, errorCallback); 
-  }, errorCallback);
-}
-
-
-//////////////////////////////////////////////////////////////////
-//
-//                Editing~~~~~~~~~~~~~~~~~~~ 
-//
-/////////////////////////////////////////////////////////////////
 
 
  /*****************************************
