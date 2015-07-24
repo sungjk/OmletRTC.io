@@ -558,6 +558,7 @@ function start(data, video) {
   log('[+] start.');
 
   if (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
+    log('[+] create peerConnection.');
     createPeerConnection(data, video);
     isStarted = true;
 
@@ -723,8 +724,11 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  // create
-  if (chatDoc.message === 'join') {
+  if (chatDoc.message === 'create') {
+    log('[+] chatDoc.message === create');
+    isChannelReady = true;
+  }
+  else if (chatDoc.message === 'join') {
     log('[+] chatDoc.message === join');
     start(false, true); 
   }
@@ -840,7 +844,8 @@ function addMessage(old, parameters) {
     old.sdpMLineIndex = '';
     old.sdpMid = '';
   }
-  else if (parameters === sessionDescription) {
+
+  if (parameters === sessionDescription) {
     old.sdp = sessionDescription; 
   }
 
@@ -1017,7 +1022,6 @@ function joinAV() {
   }
   else if (chatDoc.numOfUser == 1) {  // second person
     log('[+] Another peer made join room.');
-    isChannelReady = true;
 
     // Call getUserMedia()
     navigator.getUserMedia(constraints, handleUserMedia, errorCallback);
