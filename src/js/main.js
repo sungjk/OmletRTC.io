@@ -962,16 +962,16 @@ function create() {
     log("[+] Omlet is installed.");
     log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
 
+    // change disabled property 
+    joinDataButton.disabled = false;
+    joinAVButton.disabled = false;
+    
     documentApi.create(function(d) {
       // create successCallback
 
       // Document property is a document reference that can be serialized and can be passed to the other calls.
       myDocId = d.Document;
       location.hash = "#/docId/" + myDocId;
-
-      // change disabled property 
-      joinDataButton.disabled = false;
-      joinAVButton.disabled = false;
 
       // update: function(reference, func, parameters, success, error)
       // The func argument to update is called to generate the document or to update it with the new parameters. 
