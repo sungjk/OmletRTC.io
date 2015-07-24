@@ -131,7 +131,6 @@ var param_clear = {
 var param_usermedia = {
   message : 'user_media'
 };
-var param_sdp = sessionDescription;
 
 
 
@@ -218,6 +217,8 @@ function createAnswer() {
 function setLocalSessionDescription(sessionDescription) {
   peerConnection.setLocalDescription(sessionDescription, function () {
     log("[+] Set LocalSessionDescription.");
+
+    var param_sdp = sessionDescription;
 
     documentApi.update(myDocId, addMessage, param_sdp, updateSuccessCallback, errorCallback);
   }, errorCallback);
