@@ -726,10 +726,11 @@ function handleMessage(doc) {
 
   if (chatDoc.message === 'create') {
     log('[+] chatDoc.message === create');
-    isChannelReady = true;
   }
   else if (chatDoc.message === 'join') {
     log('[+] chatDoc.message === join');
+    isChannelReady = true;
+
     start(false, true); 
   }
   else if (chatDoc.type === 'offer') {
@@ -1005,13 +1006,13 @@ function getDocument() {
 
 
 function joinAV() {
-  isInitiator = true;
-
   if (chatDoc.numOfUser == 0) { // first person
-    log('[+] Getting user media with constraints');
-
+    // 이부분도 수정 예정. isInitiator는 dataChannel용임
+    isInitiator = true;
+    
     // Call getUserMedia()
     navigator.getUserMedia(constraints, handleUserMedia, errorCallback);
+    log('[+] Getting user media with constraints');
 
     // only video
     start(false, true);
@@ -1025,6 +1026,7 @@ function joinAV() {
 
     // Call getUserMedia()
     navigator.getUserMedia(constraints, handleUserMedia, errorCallback);
+    log('[+] Getting user media with constraints');
 
     documentApi.update(myDocId, addMessage, param_join, function() { 
       documentApi.get(myDocId, participantAdded, errorCallback); 
