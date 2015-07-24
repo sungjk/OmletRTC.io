@@ -824,7 +824,7 @@ function successCallback() {
 
 // errorCallback for all of function
 function errorCallback(error) {
-  log("[-] " + JSON.stringify(error));
+  log("[-] " + error.message);
 }
 
 
@@ -962,7 +962,7 @@ function create() {
     log("[+] Omlet is installed.");
     log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
 
-    
+
     // change disabled property 
     // joinDataButton.disabled = false;
     // joinAVButton.disabled = false;
