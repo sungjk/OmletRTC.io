@@ -824,7 +824,7 @@ function successCallback() {
 
 // errorCallback for all of function
 function errorCallback(error) {
-  log("[-] " + error.message);
+  log("[-] " + error);
 }
 
 
