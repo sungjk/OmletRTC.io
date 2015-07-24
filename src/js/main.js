@@ -593,7 +593,7 @@ Omlet.document = {
 function start(data, video) {
   log('[+] start.');
 
-  if (!isStarted && typeof localStream != 'undefined') && isChannelReady) {
+  if (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
     createPeerConnection(data, video);
     isStarted = true;
 
