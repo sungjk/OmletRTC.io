@@ -992,7 +992,7 @@ function clearDocument() {
     log("[+] Clearing Document.");
     stop();
 
-    documentApi.update(myDocId, addMessage, param_clear function() { documentApi.get(myDocId, DocumentCleared, errorCallback); }
+    documentApi.update(myDocId, addMessage, param_clear, function() { documentApi.get(myDocId, DocumentCleared, errorCallback); }
     , errorCallback);
   }
 }
