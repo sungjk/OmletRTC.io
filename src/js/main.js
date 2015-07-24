@@ -332,26 +332,9 @@ function tryParseJSON (jsonString){
 
 
 function onMessage(msg){
-  log("DC1 received:" + msg.data) ;
+  log("[+] data received: " + msg.data) ;
 }
 
-function onMessage2(msg){
-  log("DC2 received:" + msg.data) ;
-}
-
-
-
-
-//////////////////////////////////////////////////////////////////
-//
-//                Edit datachannel message handler ~~~~~~~~~~~~~~~~~
-//
-/////////////////////////////////////////////////////////////////
-
-
-function handleMessage(msg) {
-  log('[+] received: ' + msg.data + '\n');
-}
 
 
 function handleDataChannelState() {
@@ -370,13 +353,6 @@ function handleDataChannelState() {
     // joinDataButton.disabled = true;
   }
 }
-
-
-//////////////////////////////////////////////////////////////////
-//
-//                Edit datachannel message handler ~~~~~~~~~~~~~~~~~
-//
-/////////////////////////////////////////////////////////////////
 
 
  /*****************************************
@@ -452,7 +428,7 @@ function mediaErrorCallback(error){
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
   localStream = stream;
-  attachMediaStream(localVideo, localStream);
+  attachMediaStream(localVideo, stream);
   
   console.log('[+] Adding local stream.');
 
@@ -553,9 +529,10 @@ function createPeerConnection(data, video) {
     try {
       dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
       dataChannel.onerror = errorCallback;
-      dataChannel.onmessage = handleMessage;
+      dataChannel.onmessage = onMessage;
       dataChannel.onopen = handleDataChannelState;
       dataChannel.onclose = handleDataChannelState;
+
     }
     catch (e) {
       log('[-] Failed to create data channel.\n' + e.message);
@@ -1041,8 +1018,8 @@ function getDocument() {
     log("[-] Omlet is not installed.");
   }
   else {
-    log("[+] Getting Document.");
     documentApi.get(myDocId, ReceiveDoc, errorCallback);
+    log("[+] Getting Document. DocId: " + myDocId);
   }
 }
 
@@ -1050,11 +1027,12 @@ function getDocument() {
 function joinAV() {
   isInitiator = true;
 
-  // Call getUserMedia()
-  navigator.getUserMedia(constraints, handleUserMedia, errorCallback);
-  log('[+] Getting user media with constraints');
-
   if (chatDoc.numOfUser == 0) { // first person
+    log('[+] Getting user media with constraints');
+
+    // Call getUserMedia()
+    navigator.getUserMedia(constraints, handleUserMedia, errorCallback);
+
     // only video
     start(false, true);
 
