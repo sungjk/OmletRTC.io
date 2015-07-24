@@ -603,6 +603,26 @@ function initDocumentAPI() {
 }
 
 
+function DocumentCreated(doc) {
+    //var callbackurl = window.location.href.replace("chat-maker.html" , "webrtc-data.html") ;
+    var callbackurl = "http://203.246.112.144:3310/index.html#/docId/" + myDocId;
+
+    if(Omlet.isInstalled()) {
+      var rdl = Omlet.createRDL({
+        appName: "OmletRTC",
+        noun: "poll",
+        displayTitle: "OmletRTC",
+        displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
+        displayText: 'Client: ' + ip() + '\nServer:' + location.host,
+        json: doc,
+        callback: callbackurl
+      });
+
+      Omlet.exit(rdl);
+    }
+}
+
+
 function _loadDocument() {
   if (hasDocument()) {
     myDocId = getDocumentReference();
@@ -707,12 +727,11 @@ function handleMessage(doc) {
     return ;
 
   // create
-
   if (chatDoc.message === 'join') {
     log('[+] chatDoc.message === join');
-
-    navigator.getUserMedia(constraints, handleUserMedia, errorCallback);
-    log('[+] Getting user media with constraints.');
+  }
+  else if (chatDoc.message === 'user_media') {
+    start(false, true); 
   }
   else if (chatDoc.type === 'offer') {
     log('[+] chatDoc.type === offer')
@@ -720,7 +739,7 @@ function handleMessage(doc) {
     if (!isStarted) { 
       //checkAndStart(); // dataChannel인지 AV인지
       // 일단 AV로 돌려
-      start(false, true); 
+      start(false, true);
     }
 
     // The setRemoteDescription() method instructs the RTCPeerConnection to apply the supplied RTCSessionDescription 
@@ -849,12 +868,6 @@ function msgClear(old, parameters) {
 
 
 
-//////////////////////////////////////////////////////////////////
-//
-//                addsignal Edit ~~~~~~~~~~~~~~~~~~~ 
-//
-/////////////////////////////////////////////////////////////////
-
 function DocumentCleared(doc) {
   log("[+] Document cleared");
   log("[+] User in this conversation: " + doc.numOfUser);
@@ -866,24 +879,7 @@ function participantAdded(doc) {
 }
 
 
-function DocumentCreated(doc) {
-    //var callbackurl = window.location.href.replace("chat-maker.html" , "webrtc-data.html") ;
-    var callbackurl = "http://203.246.112.144:3310/index.html#/docId/" + myDocId;
 
-    if(Omlet.isInstalled()) {
-      var rdl = Omlet.createRDL({
-        appName: "OmletRTC",
-        noun: "poll",
-        displayTitle: "OmletRTC",
-        displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-        displayText: 'Client: ' + ip() + '\nServer:' + location.host,
-        json: doc,
-        callback: callbackurl
-      });
-
-      Omlet.exit(rdl);
-    }
-}
 
 
 
