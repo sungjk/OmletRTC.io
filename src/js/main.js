@@ -825,7 +825,7 @@ function errorCallback(error) {
 
 // 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
-  if (parameters.message !== '')  old.message = parameters.message;
+  if (parameters.message !== 'undefined')  old.message = parameters.message;
 
   if (parameters.message === 'create' || parameters.message === 'join') {
     old.numOfUser = old.numOfUser + 1;
@@ -877,10 +877,6 @@ function DocumentCleared(doc) {
 function participantAdded(doc) {
   log("[+] docId: " + doc.chatId + ', numOfUser: ' + doc.numOfUser);
 }
-
-
-
-
 
 
 
