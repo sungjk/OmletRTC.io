@@ -828,8 +828,6 @@ function addMessage(old, parameters) {
   log('[+] parameters.message: ' + parameters.message);
   log('[+] parameters: ' + JSON.stringify(parameters));
 
-  if (parameters.message !== 'undefined')   old.message = parameters.message;
-  
   if (parameters.message === 'usermedia') { //'create' || parameters.message === 'join'){
     old.numOfUser = old.numOfUser + 1;
   }
@@ -848,6 +846,8 @@ function addMessage(old, parameters) {
     old.sdpMLineIndex = '';
     old.sdpMid = '';
   }
+  else  // parameters.message !== 'undefined'
+    old.message = parameters.message;
 
   if (parameters === sessionDescription) {
     old.sdp = sessionDescription; 
