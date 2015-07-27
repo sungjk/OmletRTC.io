@@ -219,7 +219,10 @@ function setLocalSessionDescription(sessionDescription) {
   peerConnection.setLocalDescription(sessionDescription, function () {
     log("[+] Set LocalSessionDescription.");
 
-    var param_sdp = sessionDescription;
+    var param_sdp = {
+      message : 'sessionDescription',
+      sessionDescription : sessionDescription
+    };
 
     documentApi.update(myDocId, addMessage, param_sdp, updateSuccessCallback
       , function (error) {
@@ -783,9 +786,8 @@ function addMessage(old, parameters) {
     old.sdpMLineIndex = '';
     old.sdpMid = '';
   }
-  
-  if (parameters === sessionDescription) {
-    old.sessionDescription = parameters; 
+  else if (parameters.message === 'sessionDescription') {
+    old.sessionDescription = parameters.sessionDescription; 
   }
 
   old.timestamp = Date.now();
