@@ -418,7 +418,7 @@ function handleRemoteStreamRemoved(event) {
 // PeerConnection management
 function createPeerConnection(data, video) {
   try {
-    peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
+    peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
     peerConnection.addStream(localStream);
     peerConnection.onicecandidate = handleIceCandidate;
     peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
@@ -426,7 +426,7 @@ function createPeerConnection(data, video) {
     //   log("[+] localPC: " + localPeerConnection.iceGatheringState + " " + localPeerConnection.iceConnectionState);
     // }
 
-    log('[+] Created RTCPeerConnnection with:\n' + 'config: ' + JSON.stringify(pc_config) + '\nconstraints: ' + JSON.stringify(pc_constraints));
+    log('[+] Created RTCPeerConnnection with:\n' + 'config: ' + JSON.stringify(peerConnectionConfig) + '\nconstraints: ' + JSON.stringify(peerConnectionConstraints));
   }
   catch (e) {
     log('[-] Failed to create RTCPeerConnection.\n ' + e.message);
@@ -784,9 +784,9 @@ function addMessage(old, parameters) {
     old.sdpMid = '';
   }
   
-  // if (parameters === sessionDescription) {
-  //   old.sdp = sessionDescription; 
-  // }
+  if (parameters === sessionDescription) {
+    old.sessionDescription = parameters; 
+  }
 
   old.timestamp = Date.now();
 
