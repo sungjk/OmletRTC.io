@@ -9,6 +9,7 @@ var getUserMedia = null;
 var connectStreamToSrc = null;
 var onMessage = null ;
 var detectedBrowser = null;
+var attachMediaStream = null;
 
 var width = screen.availWidth / 2;
 var height = screen.availHeight / 2;
@@ -155,15 +156,27 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 
 
 
-attachMediaStream = function(element, stream) {
-  if (window.URL) element.src = window.URL.createObjectURL(stream);
-  else            element.src = stream;
+// attachMediaStream = function(element, stream) {
+//   if (window.URL) element.src = window.URL.createObjectURL(stream);
+//   else            element.src = stream;
   
-  element.autoplay = true;
-  element.play();  
+//   element.autoplay = true;
+//   element.play();  
+// };
+
+
+// Attach a media stream to an element.
+attachMediaStream = function(element, stream) {
+  if (typeof element.srcObject !== 'undefined') {
+    element.srcObject = stream;
+  } else if (typeof element.mozSrcObject !== 'undefined') {
+    element.mozSrcObject = stream;
+  } else if (typeof element.src !== 'undefined') {
+    element.src = URL.createObjectURL(stream);
+  } else {
+    console.log('Error attaching stream to element.');
+  }
 };
-
-
 
 
 
