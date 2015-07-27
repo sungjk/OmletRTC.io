@@ -205,13 +205,17 @@ function onAddIceCandidateError(error) {
 // Create Offer
 function createOffer() {
     log('[+] Creating Offer.');
-    peerConnection.createOffer(setLocalSessionDescription, errorCallback, sdpConstraints);
+    peerConnection.createOffer(setLocalSessionDescription, function (error) {
+      log('[-] createOffer: ' + error);
+    }, sdpConstraints);
 }
 
 // Create Answer
 function createAnswer() {
     log('[+] Creating Answer to peer.');
-    peerConnection.createAnswer(setLocalSessionDescription, errorCallback, sdpConstraints);
+    peerConnection.createAnswer(setLocalSessionDescription, function (error) {
+      log('[+] createAnswer: ' + error);
+    }, sdpConstraints);
 }
 
 // Success handler for createOffer and createAnswer
