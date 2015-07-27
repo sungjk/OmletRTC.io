@@ -489,7 +489,7 @@ if (typeof window === 'undefined' || !window.navigator) {
     log('spec:   ' + JSON.stringify(c)); // whitespace for alignment
     c.audio = constraintsToChrome(c.audio);
     c.video = constraintsToChrome(c.video);
-    
+
     log('chrome: ' + JSON.stringify(c));
     return navigator.webkitGetUserMedia(c, onSuccess, onError);
   };
@@ -502,7 +502,7 @@ if (typeof window === 'undefined' || !window.navigator) {
     } else if (typeof element.src !== 'undefined') {
       element.src = URL.createObjectURL(stream);
     } else {
-      console.log('Error attaching stream to element.');
+      log('Error attaching stream to element.');
     }
   };
 
