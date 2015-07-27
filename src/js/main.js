@@ -352,6 +352,7 @@ function handleDataChannelState() {
 }
 
 
+
  /*****************************************
  *
  *  Function for media & streaming
@@ -364,70 +365,23 @@ function handleDataChannelState() {
 
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
-  localStream = stream;
-  attachMediaStream(localVideo, stream);
-  
-  console.log('[+] Adding local stream.');
-
-  // sendMessage('got user media');
-  documentApi.update(myDocId, addMessage, param_usermedia, function() { 
-    documentApi.get(myDocId, participantAdded, errorCallback); 
-  }, errorCallback);
-}
-
-
- // Function for local streaming
-function localStreaming(stream) {
+  // attachMediaStream(localVideo, stream);
   var localMedia = get("localVideo")
+  
   if (window.URL) localMedia.src = window.URL.createObjectURL(stream);
   else            localMedia.src = stream;
   
   localMedia.autoplay = true;
   localMedia.play();
 
-  localPeerConnection.addStream(stream);
-  log("[+] Add local peer stream.") ;
+  console.log('[+] Adding local stream.');
+  localStream = stream;
+
+  // sendMessage('got user media');
+  documentApi.update(myDocId, addMessage, param_usermedia, function() { 
+    documentApi.get(myDocId, participantAdded, errorCallback); 
+  }, errorCallback);
 }
-
-// Function for remote streaming
-function remoteStreaming(stream) {
-  var remoteMedia = get("remoteVideo");
-
-  if (window.URL) remoteMedia.src = window.URL.createObjectURL(stream);
-  else            remoteMedia.src = stream;
-
-  remoteMedia.autoplay = true;
-  remoteMedia.play();
-
-  remotePeerConnection.addStream(stream);
-  log("[+] Add remote peer stream.");
-}
-
-// Function for local getUserMedia
-function getLocalMedia(){
-  log("[+] Call local's getUserMedia.");
-
-  navigator.getUserMedia({ 
-    audio: false, 
-    video: true
-  }, localStreaming, mediaErrorCallback);
-}
-
-// Function for remote getUserMedia
-function getRemoteMedia() {
-  log("[+] Call remote's getUserMedia.");
-
-  navigator.getUserMedia({
-    audio: false,
-    video: true
-  }, remoteStreaming, mediaErrorCallback);
-}
-
-// Callback to be called in case of failure
-function mediaErrorCallback(error){
-  log("[-] navigator.getUserMedia; " + error);
-}
-
 
 
 
@@ -443,7 +397,16 @@ function mediaErrorCallback(error){
 // Handler to be called in case of adding remote stream
 function handleRemoteStreamAdded(event) { 
   log('[+] Remote stream added.'); 
-  attachMediaStream(remoteVideo, event.stream); 
+  //attachMediaStream(remoteVideo, event.stream); 
+
+  var remoteMedia = get("remoteVideo");
+
+  if (window.URL) remoteMedia.src = window.URL.createObjectURL(stream);
+  else            remoteMedia.src = stream;
+
+  remoteMedia.autoplay = true;
+  remoteMedia.play();
+
   log('[+] Remote stream attached.'); 
   remoteStream = event.stream;
 }
@@ -454,34 +417,62 @@ function handleRemoteStreamRemoved(event) {
 }
 
 
-// // Handler to be called in case of adding stream
-// function handleAddRemoteStream(event) {
-//     log('[+] Added stream.');
 
-//     if (attachVideoNumber == 0) {
-//         attachMediaStream(remoteVideo, event.stream);
-//         log('Remote stream attached!!.');
-//         remoteStream = event.stream;
-//         attachVideoNumber++;
-//     }
-//     else if (attachVideoNumber == 1) {
-//         attachMediaStream(thirdVideo, event.stream);
-//         log('Third stream attached!!.');
-//         thirdStream = event.stream;
-//         attachVideoNumber++;
-//     }
-//     // else if (attachVideoNumber == 2) {
-//     //     attachMediaStream(forthVideo, event.stream);
-//     //     console.log('Forth stream attached!!.');
-//     //     forthStream = event.stream;
-//     //     attachVideoNumber++;
-//     // } else if (attachVideoNumber == 3) {
-//     //     attachMediaStream(fifthVideo, event.stream);
-//     //     console.log('Forth stream attached!!.');
-//     //     fifthStream = event.stream;
-//     //     attachVideoNumber++;
-//     // }
+
+//  // Function for local streaming
+// function localStreaming(stream) {
+//   var localMedia = get("localVideo")
+//   if (window.URL) localMedia.src = window.URL.createObjectURL(stream);
+//   else            localMedia.src = stream;
+  
+//   localMedia.autoplay = true;
+//   localMedia.play();
+
+
+//   localPeerConnection.addStream(stream);
+//   log("[+] Add local peer stream.") ;
 // }
+
+// // Function for remote streaming
+// function remoteStreaming(stream) {
+//   var remoteMedia = get("remoteVideo");
+
+//   if (window.URL) remoteMedia.src = window.URL.createObjectURL(stream);
+//   else            remoteMedia.src = stream;
+
+//   remoteMedia.autoplay = true;
+//   remoteMedia.play();
+
+//   remotePeerConnection.addStream(stream);
+//   log("[+] Add remote peer stream.");
+// }
+
+// // Function for local getUserMedia
+// function getLocalMedia(){
+//   log("[+] Call local's getUserMedia.");
+
+//   navigator.getUserMedia({ 
+//     audio: false, 
+//     video: true
+//   }, localStreaming, mediaErrorCallback);
+// }
+
+// // Function for remote getUserMedia
+// function getRemoteMedia() {
+//   log("[+] Call remote's getUserMedia.");
+
+//   navigator.getUserMedia({
+//     audio: false,
+//     video: true
+//   }, remoteStreaming, mediaErrorCallback);
+// }
+
+// // Callback to be called in case of failure
+// function mediaErrorCallback(error){
+//   log("[-] navigator.getUserMedia; " + error);
+// }
+
+
 
 
 
