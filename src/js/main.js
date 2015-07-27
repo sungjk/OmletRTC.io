@@ -119,6 +119,9 @@ var peerConnectionConstraints = {
  *
  ****************************************************************/
 
+var param_usermedia = {
+  message : 'usermedia'
+};
 var param_create = {
   message : 'create'
 };
@@ -128,6 +131,7 @@ var param_join = {
 var param_clear = {
   message : 'clear'
 };
+
 
 
 
@@ -366,9 +370,9 @@ function handleDataChannelState() {
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
   log('[+] Local stream added.'); 
-  attachMediaStream(localVideo, stream);
-  console.log('[+] Local stream attached.');
   localStream = stream;
+  attachMediaStream(localVideo, localStream);
+  log('[+] Local stream attached.');
   
   // sendMessage('got user media');
   documentApi.update(myDocId, addMessage, param_usermedia, function() { 
@@ -379,6 +383,7 @@ function handleUserMedia(stream) {
     log('[-] handleUserMedia-update: ' + error);
   });
 }
+
 
 
 
@@ -825,7 +830,7 @@ function addMessage(old, parameters) {
 
   if (parameters.message !== 'undefined')   old.message = parameters.message;
   
-  if (parameters.message === 'create' || parameters.message === 'join'){
+  if (parameters.message === 'usermedia') { //'create' || parameters.message === 'join'){
     old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'candidate') {
