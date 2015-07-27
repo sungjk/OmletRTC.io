@@ -815,14 +815,28 @@ function errorCallback(error) {
  *
  *****************************************/
 
+
+// var info = {
+//   'chatId' : chatId,
+//   'creator' : identity,
+//   'message' : '',
+//   'numOfUser' : numOfUser,
+//   'sessionDescription' : '',
+//   'candidate' : '',
+//   'sdpMLineIndex' : '',
+//   'sdpMid' : '',
+//   'timestamp' : Date.now()
+// };
+
 // 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
   log('[+] parameters.message: ' + parameters.message);
   log('[+] parameters: ' + JSON.stringify(parameters));
 
-  if (parameters.message === 'undefined')  old.message = parameters.message;
-
-  if (parameters.message === 'create' || parameters.message === 'join') {
+  if (parameters.message === 'undefined'){
+    old.message = parameters.message;
+  }
+  else if (parameters.message === 'create' || parameters.message === 'join'){
     old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'candidate') {
@@ -831,8 +845,8 @@ function addMessage(old, parameters) {
     old.sdpMid = parameters.sdpMid;
   }
   else if (parameters.message === 'clear') {
-    old.chatId = chatId;
-    old.creator = identity;
+    old.chatId = old.chatId;
+    old.creator = old.creator;
     old.message = '';
     old.numOfUser = 0;
     old.sessionDescription = '';
@@ -1020,24 +1034,13 @@ function joinAV() {
     // only video
     start(false, true);
 
-    // documentApi.update(myDocId, addMessage, param_create, function() { 
-    //   documentApi.get(myDocId, participantAdded, function (error) {
-    //     log("[-] joinAV-update-get-1: " + error);
-    //   }); 
-    // }, function (error) {
-    //   log("[-] joinAV-update-1: " + error);
-    // });
-
-
-
-    documentApi.update(myDocId, addMessage, param_join, function() { 
+    documentApi.update(myDocId, addMessage, param_create, function() { 
       documentApi.get(myDocId, participantAdded, function (error) {
-        log("[-] joinAV-update-get-2: " + error);
+        log("[-] joinAV-update-get-1: " + error);
       }); 
     }, function (error) {
-      log("[-] joinAV-update-2: " + error);
-    });  
-
+      log("[-] joinAV-update-1: " + error);
+    });
   }
   else if (chatDoc.numOfUser == 1) {  // second person
     log('[+] Another peer made join room.');
