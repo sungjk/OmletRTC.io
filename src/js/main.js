@@ -825,15 +825,15 @@ function errorCallback(error) {
 
 // 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
-  if (parameters.message === 'usermedia') { //'create' || parameters.message === 'join'){
+  if (parameters.message == 'usermedia') { //'create' || parameters.message === 'join'){
     old.numOfUser = old.numOfUser + 1;
   }
-  else if (parameters.message === 'candidate') {
+  else if (parameters.message == 'candidate') {
     old.candidate = parameters.candidate;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
     old.sdpMid = parameters.sdpMid;
   }
-  else if (parameters.message === 'clear') {
+  else if (parameters.message == 'clear') {
     old.chatId = old.chatId;
     old.creator = old.creator;
     old.message = '';
@@ -846,7 +846,7 @@ function addMessage(old, parameters) {
   else  // parameters.message !== 'undefined'
     old.message = parameters.message;
 
-  if (parameters === sessionDescription) {
+  if (parameters == sessionDescription) {
     old.sdp = sessionDescription; 
   }
 
