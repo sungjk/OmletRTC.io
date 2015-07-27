@@ -673,8 +673,8 @@ function handleMessage(doc) {
   else if (chatDoc.message === 'usermedia') {
     log('[+] chatDoc.message === usermedia'); 
   }
-  else if (chatDoc.type === 'offer') {
-    log('[+] chatDoc.type === offer')
+  else if (chatDoc.sessionDescription.type === 'offer') {
+    log('[+] chatDoc.sessionDescription.type === offer')
 
     if (!isStarted) { 
       //checkAndStart(); // dataChannel인지 AV인지
@@ -685,13 +685,17 @@ function handleMessage(doc) {
     // The setRemoteDescription() method instructs the RTCPeerConnection to apply the supplied RTCSessionDescription 
     // as the remote offer or answer. This API changes the local media state. When the method is invoked, 
     // the user agent must follow the processing model of setLocalDescription(), with the following additional conditions:
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc), successCallback, errorCallback); 
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), successCallback, function (error) {
+      log('[-] handleMessage-setRemoteDescription-offer: ' + error);
+    }); 
     createAnswer();
   } 
-  else if (chatDoc.type === 'answer' && isStarted) { 
+  else if (chatDoc.sessionDescription.type === 'answer' && isStarted) { 
     log('[+] chatDoc.type === answer')
 
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc), successCallback, errorCallback);
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), successCallback, function (error) {
+      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
+    });
   } 
   else if (chatDoc.message === 'candidate' && isStarted) {
     log('[+] chatDoc.message === candidate')
