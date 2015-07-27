@@ -825,9 +825,6 @@ function errorCallback(error) {
 
 // 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
-  log('[+] parameters.message: ' + parameters.message);
-  log('[+] parameters: ' + JSON.stringify(parameters));
-
   if (parameters.message === 'usermedia') { //'create' || parameters.message === 'join'){
     old.numOfUser = old.numOfUser + 1;
   }
