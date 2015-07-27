@@ -658,10 +658,12 @@ function handleMessage(doc) {
   }
   else if (chatDoc.message === 'join') {
     log('[+] chatDoc.message === join');
+    isChannelReady = true;
+
+    start(false, true); 
   }
   else if (chatDoc.message === 'usermedia') {
-    log('[+] chatDoc.message === usermedia');
-    start(false, true); 
+    log('[+] chatDoc.message === usermedia'); 
   }
   else if (chatDoc.type === 'offer') {
     log('[+] chatDoc.type === offer')
@@ -699,11 +701,7 @@ function handleMessage(doc) {
 
     sessionTerminated();
   }
-
 }
-
-
-
 
 
 /*****************************************
