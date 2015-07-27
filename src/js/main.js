@@ -129,8 +129,9 @@ var param_clear = {
   message : 'clear'
 };
 var param_usermedia = {
-  message : 'user_media'
+  message : 'usermedia'
 };
+
 
 
 
@@ -364,9 +365,9 @@ function handleDataChannelState() {
  *
  *****************************************/
 
+
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
-  log('[+] Local stream added.'); 
   localStream = stream;
   attachMediaStream(localVideo, stream);
   
@@ -459,6 +460,7 @@ function handleRemoteStreamAdded(event) {
 function handleRemoteStreamRemoved(event) {
   log('[+] Remote stream removed. Event: ', event);
 }
+
 
 
 
@@ -619,7 +621,6 @@ function _loadDocument() {
 }
 
 
-
 function getDocumentReference() {
   var docIdParam = window.location.hash.indexOf("/docId/");
   if (docIdParam == -1) return false;
@@ -704,19 +705,12 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.message === 'create') {
-    log('[+] chatDoc.message === create');
-  }
-  else if (chatDoc.message === 'join') {
+  // create
+  if (chatDoc.message === 'join') {
     log('[+] chatDoc.message === join');
-
-    isChannelReady = true;
-    start(false, true); 
   }
   else if (chatDoc.message === 'usermedia') {
-    log('[+] chatDoc.message === usermedia');
-
-    //start(false, true); 
+    start(false, true); 
   }
   else if (chatDoc.type === 'offer') {
     log('[+] chatDoc.type === offer')
@@ -759,6 +753,8 @@ function handleMessage(doc) {
 
 
 
+
+
 /*****************************************
  *
  *  Callback function for documentApi
@@ -771,9 +767,7 @@ function handleMessage(doc) {
 // updateCallback for documentApi.watch
 function updateCallback(chatDocId) {
   //  The successful result of get is the document itself.
-  documentApi.get(chatDocId, handleMessage, function (error) {
-    log("[-] updateCallback-get: " + error);
-  });
+  documentApi.get(chatDocId, handleMessage , errorCallback);
 }
 
 // successCallback for documentApi.watch
@@ -812,7 +806,7 @@ function errorCallback(error) {
 function addMessage(old, parameters) {
   if (parameters.message !== 'undefined')  old.message = parameters.message;
 
-  if (parameters.message === 'usermedia') {
+  if (parameters.message === 'create' || parameters.message === 'join') {
     old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'candidate') {
@@ -838,6 +832,7 @@ function addMessage(old, parameters) {
 
   return old;
 }
+
 
 
 // Message for clear document.
@@ -902,30 +897,28 @@ function create() {
     log("[+] Omlet is installed.");
     log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
 
+
     // change disabled property 
     // joinDataButton.disabled = false;
     // joinAVButton.disabled = false;
 
-    documentApi.create(function(d) { // create successCallback
+    documentApi.create(function(d) {
+      // create successCallback
+
       // Document property is a document reference that can be serialized and can be passed to the other calls.
       myDocId = d.Document;
       location.hash = "#/docId/" + myDocId;
 
+      // update: function(reference, func, parameters, success, error)
+      // The func argument to update is called to generate the document or to update it with the new parameters. 
+      // It is passed the old document as the first argument, and the app specified parameters as the second.
       documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
         // update successCallback
-        documentApi.get(myDocId, DocumentCreated, function(error) {
-          log("[-] create-update-get: " + error);
-        });
-      }, function (error) {
-        log("[-] create-update: " + error);
-      });
-    }, function (error) {
-      log("[-] create: " + error);
-    });
+        documentApi.get(myDocId, DocumentCreated, errorCallback);
+      }, errorCallback);
+    }, errorCallback);
   }
 }
-
-
 
 
 function clearDocument() {
@@ -993,7 +986,7 @@ function joinAV() {
   if (chatDoc.numOfUser == 0) { // first person
     // 이부분도 수정 예정. isInitiator는 dataChannel용임
     isInitiator = true;
-
+    
     // Call getUserMedia()
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
       log("[-] joinAV-getUserMedia-1: " + error);
@@ -1010,11 +1003,9 @@ function joinAV() {
     }, function (error) {
       log("[-] joinAV-update-1: " + error);
     });
-
   }
   else if (chatDoc.numOfUser == 1) {  // second person
     log('[+] Another peer made join room.');
-    isChannelReady = true;
 
     // Call getUserMedia()
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
@@ -1035,7 +1026,6 @@ function joinAV() {
     return;
   }
 }
-
 
 
 //////////////////////////////////////////////////////////////////
