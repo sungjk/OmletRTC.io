@@ -221,8 +221,13 @@ function setLocalSessionDescription(sessionDescription) {
 
     var param_sdp = sessionDescription;
 
-    documentApi.update(myDocId, addMessage, param_sdp, updateSuccessCallback, errorCallback);
-  }, errorCallback);
+    documentApi.update(myDocId, addMessage, param_sdp, updateSuccessCallback
+      , function (error) {
+        log("[-] setLocalSessionDescription-update: " + error);
+      });
+  }, function (error) {
+    log("[-] setLocalDescription: " + error);
+  });
 }
 
 
@@ -880,8 +885,13 @@ function clearDocument() {
     log("[+] Clearing Document.");
     stop();
 
-    documentApi.update(myDocId, addMessage, param_clear, function() { documentApi.get(myDocId, DocumentCleared, errorCallback); }
-    , errorCallback);
+    documentApi.update(myDocId, addMessage, param_clear, function() { documentApi.get(myDocId, DocumentCleared
+      , function (error) {
+        log("[-] clearDocument-update-get: " + error);
+      });
+    }, function (error) {
+      log("[-] clearDocument-update: " + error);
+    });
   }
 }
 
