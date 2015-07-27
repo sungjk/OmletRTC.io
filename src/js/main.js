@@ -129,7 +129,7 @@ var param_clear = {
   message : 'clear'
 };
 var param_usermedia = {
-  message : 'usermedia'
+  message : 'user_media'
 };
 
 
@@ -373,7 +373,7 @@ function handleUserMedia(stream) {
   
   console.log('[+] Adding local stream.');
 
-  // update document message; 'usermedia'
+  // update document message; 'user_media'
   documentApi.update(myDocId, addMessage, param_usermedia, function() { 
     documentApi.get(myDocId, participantAdded, function (error) {
       log('[-] handleUserMedia-update-get: ' + error);
@@ -709,7 +709,7 @@ function handleMessage(doc) {
   if (chatDoc.message === 'join') {
     log('[+] chatDoc.message === join');
   }
-  else if (chatDoc.message === 'usermedia') {
+  else if (chatDoc.message === 'user_media') {
     start(false, true); 
   }
   else if (chatDoc.type === 'offer') {
@@ -806,7 +806,7 @@ function errorCallback(error) {
 function addMessage(old, parameters) {
   if (parameters.message !== 'undefined')  old.message = parameters.message;
 
-  if (parameters.message === 'usermedia')
+  if (parameters.message === 'user_media')
     continue;
   if (parameters.message === 'create' || parameters.message === 'join') {
     old.numOfUser = old.numOfUser + 1;
