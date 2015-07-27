@@ -806,6 +806,8 @@ function errorCallback(error) {
 function addMessage(old, parameters) {
   if (parameters.message !== 'undefined')  old.message = parameters.message;
 
+  if (parameters.message === 'usermedia')
+    continue;
   if (parameters.message === 'create' || parameters.message === 'join') {
     old.numOfUser = old.numOfUser + 1;
   }
