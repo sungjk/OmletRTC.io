@@ -98,7 +98,7 @@ var constraints = {
 };
 
 // PeerConnection ICE protocol configuration (either Firefox or Chrome)
-var peerConnectionConfig = detectedBrowser === 'Chrome' ? 
+var peerConnectionConfig = webrtcDetectedBrowser === 'Chrome' ? 
     { 'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
     { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
 
