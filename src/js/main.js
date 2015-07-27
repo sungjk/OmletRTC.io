@@ -817,7 +817,7 @@ function errorCallback(error) {
 
 // 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
-  if (parameters.message !== 'undefined')  old.message = parameters.message;
+  if (parameters.message === 'undefined')  old.message = parameters.message;
 
   if (parameters.message === 'create' || parameters.message === 'join') {
     old.numOfUser = old.numOfUser + 1;
@@ -929,9 +929,15 @@ function create() {
       // It is passed the old document as the first argument, and the app specified parameters as the second.
       documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
         // update successCallback
-        documentApi.get(myDocId, DocumentCreated, errorCallback);
-      }, errorCallback);
-    }, errorCallback);
+        documentApi.get(myDocId, DocumentCreated, function(error) {
+          log("[-] create-update-get: " + error);
+        });
+      }, function (error) {
+        log("[-] create-update: " + error);
+      });
+    }, function (error) {
+      log("[-] create: " + error);
+    });
   }
 }
 
@@ -1003,26 +1009,38 @@ function joinAV() {
     isInitiator = true;
     
     // Call getUserMedia()
-    navigator.getUserMedia(constraints, handleUserMedia, errorCallback);
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] joinAV-getUserMedia-1: " + error);
+    });
     log('[+] Getting user media with constraints');
 
     // only video
     start(false, true);
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
-      documentApi.get(myDocId, participantAdded, errorCallback); 
-    }, errorCallback);
+      documentApi.get(myDocId, participantAdded, function (error) {
+        log("[-] joinAV-update-get-1: " + error);
+      }); 
+    }, function (error) {
+      log("[-] joinAV-update-1: " + error);
+    });
   }
   else if (chatDoc.numOfUser == 1) {  // second person
     log('[+] Another peer made join room.');
 
     // Call getUserMedia()
-    navigator.getUserMedia(constraints, handleUserMedia, errorCallback);
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] joinAV-getUserMedia-2: " + error);
+    });
     log('[+] Getting user media with constraints');
 
     documentApi.update(myDocId, addMessage, param_join, function() { 
-      documentApi.get(myDocId, participantAdded, errorCallback); 
-    }, errorCallback);  
+      documentApi.get(myDocId, participantAdded, function (error) {
+        log("[-] joinAV-update-get-2: " + error);
+      }); 
+    }, function (error) {
+      log("[-] joinAV-update-2: " + error);
+    });  
   }
   else {
     log('[-] Channel is full.');
