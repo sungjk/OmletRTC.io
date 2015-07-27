@@ -365,6 +365,7 @@ function handleDataChannelState() {
 
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
+  localStream = stream;
   // attachMediaStream(localVideo, stream);
   var localMedia = get("localVideo")
   
@@ -375,7 +376,6 @@ function handleUserMedia(stream) {
   localMedia.play();
 
   console.log('[+] Adding local stream.');
-  localStream = stream;
 
   // sendMessage('got user media');
   documentApi.update(myDocId, addMessage, param_usermedia, function() { 
@@ -1020,13 +1020,24 @@ function joinAV() {
     // only video
     start(false, true);
 
-    documentApi.update(myDocId, addMessage, param_create, function() { 
+    // documentApi.update(myDocId, addMessage, param_create, function() { 
+    //   documentApi.get(myDocId, participantAdded, function (error) {
+    //     log("[-] joinAV-update-get-1: " + error);
+    //   }); 
+    // }, function (error) {
+    //   log("[-] joinAV-update-1: " + error);
+    // });
+
+
+
+    documentApi.update(myDocId, addMessage, param_join, function() { 
       documentApi.get(myDocId, participantAdded, function (error) {
-        log("[-] joinAV-update-get-1: " + error);
+        log("[-] joinAV-update-get-2: " + error);
       }); 
     }, function (error) {
-      log("[-] joinAV-update-1: " + error);
-    });
+      log("[-] joinAV-update-2: " + error);
+    });  
+
   }
   else if (chatDoc.numOfUser == 1) {  // second person
     log('[+] Another peer made join room.');
