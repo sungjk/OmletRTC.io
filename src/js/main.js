@@ -706,7 +706,10 @@ function handleMessage(doc) {
     return ;
 
   // create
-  if (chatDoc.message === 'join') {
+  if (chatDoc.message === 'create') {
+    log('[+] chatDoc.message === create');
+  }
+  else if (chatDoc.message === 'join') {
     log('[+] chatDoc.message === join');
   }
   else if (chatDoc.message === 'user_media') {
