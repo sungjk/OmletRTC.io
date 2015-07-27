@@ -129,7 +129,7 @@ var param_clear = {
   message : 'clear'
 };
 var param_usermedia = {
-  message : 'user_media'
+  message : 'usermedia'
 };
 
 
@@ -373,7 +373,7 @@ function handleUserMedia(stream) {
   
   console.log('[+] Adding local stream.');
 
-  // update document message; 'user_media'
+  // update document message; 'usermedia'
   documentApi.update(myDocId, addMessage, param_usermedia, function() { 
     documentApi.get(myDocId, participantAdded, function (error) {
       log('[-] handleUserMedia-update-get: ' + error);
@@ -382,60 +382,6 @@ function handleUserMedia(stream) {
     log('[-] handleUserMedia-update: ' + error);
   });
 }
-
-
- // Function for local streaming
-function localStreaming(stream) {
-  var localMedia = get("localVideo")
-  if (window.URL) localMedia.src = window.URL.createObjectURL(stream);
-  else            localMedia.src = stream;
-  
-  localMedia.autoplay = true;
-  localMedia.play();
-
-  localPeerConnection.addStream(stream);
-  log("[+] Add local peer stream.") ;
-}
-
-// Function for remote streaming
-function remoteStreaming(stream) {
-  var remoteMedia = get("remoteVideo");
-
-  if (window.URL) remoteMedia.src = window.URL.createObjectURL(stream);
-  else            remoteMedia.src = stream;
-
-  remoteMedia.autoplay = true;
-  remoteMedia.play();
-
-  remotePeerConnection.addStream(stream);
-  log("[+] Add remote peer stream.");
-}
-
-// Function for local getUserMedia
-function getLocalMedia(){
-  log("[+] Call local's getUserMedia.");
-
-  navigator.getUserMedia({ 
-    audio: false, 
-    video: true
-  }, localStreaming, mediaErrorCallback);
-}
-
-// Function for remote getUserMedia
-function getRemoteMedia() {
-  log("[+] Call remote's getUserMedia.");
-
-  navigator.getUserMedia({
-    audio: false,
-    video: true
-  }, remoteStreaming, mediaErrorCallback);
-}
-
-// Callback to be called in case of failure
-function mediaErrorCallback(error){
-  log("[-] navigator.getUserMedia; " + error);
-}
-
 
 
 
@@ -534,6 +480,7 @@ Omlet.document = {
 
 function start(data, video) {
   log('[+] start.');
+  log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', isChannelReady: ' + isChannelReady);
 
   if (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
     createPeerConnection(data, video);
@@ -712,7 +659,8 @@ function handleMessage(doc) {
   else if (chatDoc.message === 'join') {
     log('[+] chatDoc.message === join');
   }
-  else if (chatDoc.message === 'user_media') {
+  else if (chatDoc.message === 'usermedia') {
+    log('[+] chatDoc.message === usermedia');
     start(false, true); 
   }
   else if (chatDoc.type === 'offer') {
@@ -809,7 +757,7 @@ function errorCallback(error) {
 function addMessage(old, parameters) {
   if (parameters.message !== 'undefined')  old.message = parameters.message;
 
-  // if (parameters.message === 'user_media')
+  // if (parameters.message === 'usermedia')
   //   continue;
   else if (parameters.message === 'create' || parameters.message === 'join') {
     old.numOfUser = old.numOfUser + 1;
