@@ -365,22 +365,19 @@ function handleDataChannelState() {
 
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
+  log('[+] Local stream added.'); 
+  attachMediaStream(localVideo, stream);
+  console.log('[+] Local stream attached.');
   localStream = stream;
-  // attachMediaStream(localVideo, stream);
-  var localMedia = get("localVideo")
   
-  if (window.URL) localMedia.src = window.URL.createObjectURL(stream);
-  else            localMedia.src = stream;
-  
-  localMedia.autoplay = true;
-  localMedia.play();
-
-  console.log('[+] Adding local stream.');
-
   // sendMessage('got user media');
   documentApi.update(myDocId, addMessage, param_usermedia, function() { 
-    documentApi.get(myDocId, participantAdded, errorCallback); 
-  }, errorCallback);
+    documentApi.get(myDocId, participantAdded, function (error) {
+      log('[-] handleUserMedia-update-get: ' + error);
+    }); 
+  }, function (error) {
+    log('[-] handleUserMedia-update: ' + error);
+  });
 }
 
 
@@ -397,16 +394,7 @@ function handleUserMedia(stream) {
 // Handler to be called in case of adding remote stream
 function handleRemoteStreamAdded(event) { 
   log('[+] Remote stream added.'); 
-  //attachMediaStream(remoteVideo, event.stream); 
-
-  var remoteMedia = get("remoteVideo");
-
-  if (window.URL) remoteMedia.src = window.URL.createObjectURL(stream);
-  else            remoteMedia.src = stream;
-
-  remoteMedia.autoplay = true;
-  remoteMedia.play();
-
+  attachMediaStream(remoteVideo, event.stream); 
   log('[+] Remote stream attached.'); 
   remoteStream = event.stream;
 }
@@ -780,7 +768,9 @@ function handleMessage(doc) {
 // updateCallback for documentApi.watch
 function updateCallback(chatDocId) {
   //  The successful result of get is the document itself.
-  documentApi.get(chatDocId, handleMessage , errorCallback);
+  documentApi.get(chatDocId, handleMessage, function (error) {
+    log("[-] updateCallback-get: " + error);
+  });
 }
 
 // successCallback for documentApi.watch
@@ -833,10 +823,9 @@ function addMessage(old, parameters) {
   log('[+] parameters.message: ' + parameters.message);
   log('[+] parameters: ' + JSON.stringify(parameters));
 
-  if (parameters.message === 'undefined'){
-    old.message = parameters.message;
-  }
-  else if (parameters.message === 'create' || parameters.message === 'join'){
+  if (parameters.message !== 'undefined')   old.message = parameters.message;
+  
+  if (parameters.message === 'create' || parameters.message === 'join'){
     old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'candidate') {
