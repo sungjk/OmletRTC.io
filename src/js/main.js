@@ -757,7 +757,7 @@ function addMessage(old, parameters) {
 
   // if (parameters.message === 'usermedia')
   //   continue;
-  else if (parameters.message === 'create' || parameters.message === 'join') {
+  if (parameters.message === 'create' || parameters.message === 'join') {
     old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'candidate') {
