@@ -364,18 +364,22 @@ function handleDataChannelState() {
  *
  *****************************************/
 
-
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
+  log('[+] Local stream added.'); 
   localStream = stream;
   attachMediaStream(localVideo, stream);
   
   console.log('[+] Adding local stream.');
 
-  // sendMessage('got user media');
+  // update document message; 'usermedia'
   documentApi.update(myDocId, addMessage, param_usermedia, function() { 
-    documentApi.get(myDocId, participantAdded, errorCallback); 
-  }, errorCallback);
+    documentApi.get(myDocId, participantAdded, function (error) {
+      log('[-] handleUserMedia-update-get: ' + error);
+    }); 
+  }, function (error) {
+    log('[-] handleUserMedia-update: ' + error);
+  });
 }
 
 
@@ -455,37 +459,6 @@ function handleRemoteStreamAdded(event) {
 function handleRemoteStreamRemoved(event) {
   log('[+] Remote stream removed. Event: ', event);
 }
-
-
-// // Handler to be called in case of adding stream
-// function handleAddRemoteStream(event) {
-//     log('[+] Added stream.');
-
-//     if (attachVideoNumber == 0) {
-//         attachMediaStream(remoteVideo, event.stream);
-//         log('Remote stream attached!!.');
-//         remoteStream = event.stream;
-//         attachVideoNumber++;
-//     }
-//     else if (attachVideoNumber == 1) {
-//         attachMediaStream(thirdVideo, event.stream);
-//         log('Third stream attached!!.');
-//         thirdStream = event.stream;
-//         attachVideoNumber++;
-//     }
-//     // else if (attachVideoNumber == 2) {
-//     //     attachMediaStream(forthVideo, event.stream);
-//     //     console.log('Forth stream attached!!.');
-//     //     forthStream = event.stream;
-//     //     attachVideoNumber++;
-//     // } else if (attachVideoNumber == 3) {
-//     //     attachMediaStream(fifthVideo, event.stream);
-//     //     console.log('Forth stream attached!!.');
-//     //     fifthStream = event.stream;
-//     //     attachVideoNumber++;
-//     // }
-// }
-
 
 
 
@@ -631,15 +604,20 @@ function _loadDocument() {
     // watch: function(reference, onUpdate, success, error)
     // The updateCallback argument to watch is called every time the document changes, for example
     // because it is being updated by another user. It receives the new document as its only argument.
-    documentApi.watch(myDocId, updateCallback, watchSuccessCallback, errorCallback);
+    documentApi.watch(myDocId, updateCallback, watchSuccessCallback, function (error) {
+      log('[-] _loadDocument-watch: ' + error);
+    });
 
     // The successful result of get is the document itself.
-    documentApi.get(myDocId, ReceiveDoc, errorCallback);
+    documentApi.get(myDocId, ReceiveDoc, function (error) {
+      log('[-] _loadDocument-get: ' + error);
+    });
   } 
   else {
     log("[-] Document is not found." );
   }
 }
+
 
 
 function getDocumentReference() {
@@ -726,12 +704,19 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  // create
-  if (chatDoc.message === 'join') {
-    log('[+] chatDoc.message === join');
+  if (chatDoc.message === 'create') {
+    log('[+] chatDoc.message === create');
   }
-  else if (chatDoc.message === 'user_media') {
+  else if (chatDoc.message === 'join') {
+    log('[+] chatDoc.message === join');
+
+    isChannelReady = true;
     start(false, true); 
+  }
+  else if (chatDoc.message === 'usermedia') {
+    log('[+] chatDoc.message === usermedia');
+
+    //start(false, true); 
   }
   else if (chatDoc.type === 'offer') {
     log('[+] chatDoc.type === offer')
@@ -774,8 +759,6 @@ function handleMessage(doc) {
 
 
 
-
-
 /*****************************************
  *
  *  Callback function for documentApi
@@ -788,7 +771,9 @@ function handleMessage(doc) {
 // updateCallback for documentApi.watch
 function updateCallback(chatDocId) {
   //  The successful result of get is the document itself.
-  documentApi.get(chatDocId, handleMessage , errorCallback);
+  documentApi.get(chatDocId, handleMessage, function (error) {
+    log("[-] updateCallback-get: " + error);
+  });
 }
 
 // successCallback for documentApi.watch
@@ -827,7 +812,7 @@ function errorCallback(error) {
 function addMessage(old, parameters) {
   if (parameters.message !== 'undefined')  old.message = parameters.message;
 
-  if (parameters.message === 'create' || parameters.message === 'join') {
+  if (parameters.message === 'usermedia') {
     old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'candidate') {
@@ -853,7 +838,6 @@ function addMessage(old, parameters) {
 
   return old;
 }
-
 
 
 // Message for clear document.
@@ -918,28 +902,30 @@ function create() {
     log("[+] Omlet is installed.");
     log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
 
-
     // change disabled property 
     // joinDataButton.disabled = false;
     // joinAVButton.disabled = false;
 
-    documentApi.create(function(d) {
-      // create successCallback
-
+    documentApi.create(function(d) { // create successCallback
       // Document property is a document reference that can be serialized and can be passed to the other calls.
       myDocId = d.Document;
       location.hash = "#/docId/" + myDocId;
 
-      // update: function(reference, func, parameters, success, error)
-      // The func argument to update is called to generate the document or to update it with the new parameters. 
-      // It is passed the old document as the first argument, and the app specified parameters as the second.
       documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
         // update successCallback
-        documentApi.get(myDocId, DocumentCreated, errorCallback);
-      }, errorCallback);
-    }, errorCallback);
+        documentApi.get(myDocId, DocumentCreated, function(error) {
+          log("[-] create-update-get: " + error);
+        });
+      }, function (error) {
+        log("[-] create-update: " + error);
+      });
+    }, function (error) {
+      log("[-] create: " + error);
+    });
   }
 }
+
+
 
 
 function clearDocument() {
@@ -1004,31 +990,45 @@ function getDocument() {
 
 
 function joinAV() {
-  isInitiator = true;
-
   if (chatDoc.numOfUser == 0) { // first person
-    log('[+] Getting user media with constraints');
+    // 이부분도 수정 예정. isInitiator는 dataChannel용임
+    isInitiator = true;
 
     // Call getUserMedia()
-    navigator.getUserMedia(constraints, handleUserMedia, errorCallback);
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] joinAV-getUserMedia-1: " + error);
+    });
+    log('[+] Getting user media with constraints');
 
     // only video
     start(false, true);
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
-      documentApi.get(myDocId, participantAdded, errorCallback); 
-    }, errorCallback);
+      documentApi.get(myDocId, participantAdded, function (error) {
+        log("[-] joinAV-update-get-1: " + error);
+      }); 
+    }, function (error) {
+      log("[-] joinAV-update-1: " + error);
+    });
+
   }
   else if (chatDoc.numOfUser == 1) {  // second person
     log('[+] Another peer made join room.');
     isChannelReady = true;
 
     // Call getUserMedia()
-    navigator.getUserMedia(constraints, handleUserMedia, errorCallback);
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] joinAV-getUserMedia-2: " + error);
+    });
+    log('[+] Getting user media with constraints');
 
     documentApi.update(myDocId, addMessage, param_join, function() { 
-      documentApi.get(myDocId, participantAdded, errorCallback); 
-    }, errorCallback);  
+      documentApi.get(myDocId, participantAdded, function (error) {
+        log("[-] joinAV-update-get-2: " + error);
+      }); 
+    }, function (error) {
+      log("[-] joinAV-update-2: " + error);
+    });  
   }
   else {
     log('[-] Channel is full.');
