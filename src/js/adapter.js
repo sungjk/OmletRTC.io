@@ -156,13 +156,13 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 
 
 
-// attachMediaStream = function(element, stream) {
-//   if (window.URL) element.src = window.URL.createObjectURL(stream);
-//   else            element.src = stream;
+attachMediaStream = function(element, stream) {
+  if (window.URL) element.src = window.URL.createObjectURL(stream);
+  else            element.src = stream;
   
-//   element.autoplay = true;
-//   element.play();  
-// };
+  element.autoplay = true;
+  element.play();  
+};
 
 
 
