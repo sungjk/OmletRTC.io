@@ -783,9 +783,10 @@ function addMessage(old, parameters) {
     old.sdpMLineIndex = '';
     old.sdpMid = '';
   }
-  else if (parameters === sessionDescription) {
-    old.sdp = sessionDescription; 
-  }
+  
+  // if (parameters === sessionDescription) {
+  //   old.sdp = sessionDescription; 
+  // }
 
   old.timestamp = Date.now();
 
