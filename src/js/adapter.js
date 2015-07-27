@@ -8,7 +8,7 @@ var RTCPeerConnection = null;
 var getUserMedia = null;
 var connectStreamToSrc = null;
 var onMessage = null ;
-var detectedBrowser = null;
+var webrtcDetectedBrowser = null;
 var attachMediaStream = null;
 
 var width = screen.availWidth / 2;
@@ -86,7 +86,7 @@ if (navigator.getUserMedia) {
     getUserMedia = navigator.getUserMedia.bind(navigator);
 } else if (navigator.mozGetUserMedia) {
     // early Firefox
-    detectedBrowser = "Firefox" ;
+    webrtcDetectedBrowser = "Firefox" ;
     RTCPeerConnection = mozRTCPeerConnection;
     RTCSessionDescription = mozRTCSessionDescription;
     RTCIceCandidate = mozRTCIceCandidate;
@@ -111,7 +111,7 @@ if (navigator.getUserMedia) {
     };
 }
 else if (navigator.webkitGetUserMedia) {
-    detectedBrowser = "Chrome" ;
+    webrtcDetectedBrowser = "Chrome" ;
     RTCPeerConnection = webkitRTCPeerConnection;
     getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
 } else {
@@ -140,7 +140,7 @@ function gotSources(sourceInfos) {
         }
     }
 }
-if (detectedBrowser == "Chrome") {
+if (webrtcDetectedBrowser == "Chrome") {
     MediaStreamTrack.getSources(gotSources);
 }
 var server = {
@@ -156,13 +156,13 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 
 
 
-attachMediaStream = function(element, stream) {
-  if (window.URL) element.src = window.URL.createObjectURL(stream);
-  else            element.src = stream;
+// attachMediaStream = function(element, stream) {
+//   if (window.URL) element.src = window.URL.createObjectURL(stream);
+//   else            element.src = stream;
   
-  element.autoplay = true;
-  element.play();  
-};
+//   element.autoplay = true;
+//   element.play();  
+// };
 
 
 
