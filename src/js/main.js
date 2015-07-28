@@ -55,12 +55,10 @@ var orderedDataChannel = true;
 
 // RTCPeerConnection object
 var peerConnection;
-var localPeerConnection;
-var remotePeerConnection;
 
 // dataChannel object
 var dataChannel;
-var dataChannel2;
+var receiveChannel;
 
 // sessionDescription constraints
 var sdpConstraints = {};
@@ -81,7 +79,7 @@ var attachVideoNumber = 0;
 var createButton = get("createButton");
 var clearButton = get("clearButton");
 var getDocButton = get("getDocButton");
-var joinDataButton = get("joinDataButton");
+//var joinDataButton = get("joinDataButton");
 var joinAVButton = get("joinAVButton");
 
 // var localVideo = get("localVideo");
@@ -89,6 +87,10 @@ var joinAVButton = get("joinAVButton");
 
 var localVideo = getQuery("#localVideo");
 var remoteVideo = getQuery("#remoteVideo");
+
+var joinDataButton = get("joinDataButton");
+var sendTextarea = get("dataChannelSend");
+var receiveTextarea = get("dataChannelReceive");
 
 
 // Flags...
@@ -267,43 +269,55 @@ function handleIceCandidateChange(ice_state) {
 
 
 function onMessage(msg){
+  log('[+] Received message: ' + msg.data); 
+  receiveTextarea.value += msg.data + '\n';
+}
+
+
+function gotReceiveChannel(event) {
   log("[+] data received: " + msg.data) ;
+
+  receiveChannel = event.channel;
+  receiveChannel.onmessage = handleMessage; 
+  receiveChannel.onopen = handleReceiveChannelStateChange; 
+  receiveChannel.onclose = handleReceiveChannelStateChange;
 }
 
 
-
-function handleDataChannelState() {
+function handleDataChannelStateChange() {
   var readyState = dataChannel.readyState;
-
   log('[+] DataChannel state is: ' + readyState);
-  // If channel ready, enable user's input
-  if (readyState == "open") {
-    // dataChannelSend.disabled = false;
-    // dataChannelSend.focus();
-    // dataChannelSend.placeholder = "";
-    // joinDataButton.disabled = false;
-  } 
-  else {
-    // dataChannelSend.disabled = true;
-    // joinDataButton.disabled = true;
-  }
-}
 
-function handleSendChannelStateChange() {
-  var readyState = sendChannel.readyState;
-  trace('Send channel state is: ' + readyState);
   // If channel ready, enable user's input
   if (readyState == "open") {
     dataChannelSend.disabled = false;
     dataChannelSend.focus();
     dataChannelSend.placeholder = "";
-    sendButton.disabled = false;
-  } else {
+    joinDataButton.disabled = false;
+  } 
+  else {
     dataChannelSend.disabled = true;
-    sendButton.disabled = true;
+    joinDataButton.disabled = true;
   }
 }
 
+
+
+function handleReceiveChannelStateChange() {
+  var readyState = receiveChannel.readyState; 
+  trace('Receive channel state is: ' + readyState); // If channel ready, enable user's input
+  
+  if (readyState == "open") {
+    dataChannelSend.disabled = false; 
+    dataChannelSend.focus(); 
+    dataChannelSend.placeholder = ""; 
+    joinDataButton.disabled = false;
+  } 
+  else {
+    dataChannelSend.disabled = true;
+    joinDataButton.disabled = true; 
+  }
+}
 
 
  /*****************************************
@@ -376,79 +390,55 @@ function createPeerConnection(data, video) {
     return;
   }
 
-  // peerConnection.onaddstream = handleRemoteStreamAdded;
-  // peerConnection.onremovestream = handleRemoteStreamRemoved;
+  peerConnection.onaddstream = handleRemoteStreamAdded;
+  peerConnection.onremovestream = handleRemoteStreamRemoved;
 
-  // if (isInitiator) { 
-  //   try {
-  //     // Create a reliable data channel
-  //     dataChannel = peerConnection.createDataChannel("datachannel", {reliable: true});
-  //   } 
-  //   catch (e) {
-  //     log('[-] Failed to create data channel.\n' + e.message);
-  //     return;
-  //   }
+  if (isInitiator) { 
+    try {
+      // Create a reliable data channel
+      dataChannel = peerConnection.createDataChannel("datachannel", {reliable: true});
+    } 
+    catch (e) {
+      log('[-] Failed to create data channel.\n' + e.message);
+      return;
+    }
 
-  //   dataChannel.onopen = handleDataChannelState;
-  //   dataChannel.onmessage = onMessage;
-  //   dataChannel.onclose = handleDataChannelState;
-  // } 
-  // else { // Joiner
-  //   peerConnection.ondatachannel = gotReceiveChannel;
-  // }
+    dataChannel.onopen = handleDataChannelStateChange;
+    dataChannel.onmessage = onMessage;
+    dataChannel.onclose = handleDataChannelStateChange;
+  } 
+  else { // Joiner
+    peerConnection.ondatachannel = gotReceiveChannel;
+  }
 
 
   // 원래 내꺼 소스
 
   // data: true
-  if(data) {
-    log("[+] Creating data channel.");
+  // if(data) {
+  //   log("[+] Creating data channel.");
 
-    var dataChannelOptions = {
-      ordered: true
-    };
-    try {
-      dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
-      dataChannel.onerror = errorCallback;
-      dataChannel.onmessage = onMessage;
-      dataChannel.onopen = handleDataChannelState;
-      dataChannel.onclose = handleDataChannelState;
-
-    }
-    catch (e) {
-      log('[-] Failed to create data channel.\n' + e.message);
-      return;
-    }
-  }
-
-  // video: true
-  if(video) {
-    peerConnection.onaddstream = handleRemoteStreamAdded;
-    peerConnection.onremovestream = handleRemoteStreamRemoved;
-  }
-
-
-
-
-  // if (isInitiator) {
+  //   var dataChannelOptions = {
+  //     ordered: true
+  //   };
   //   try {
   //     dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
-  //     dataChannel.onmessage = handleMessage;
+  //     dataChannel.onerror = errorCallback;
+  //     dataChannel.onmessage = onMessage;
   //     dataChannel.onopen = handleDataChannelState;
   //     dataChannel.onclose = handleDataChannelState;
-  //     dataChannel.onerror = function (error) {
-  //       log('[-] createPeerConnection-dataChannel.onopen: ' + error);
-  //     };
 
-  //     trace('Created send data channel');
-  //   } 
-  //   catch (error) {
-  //     log('[-] createPeerConnection-dataChannel: ' + error);
   //   }
-  // } 
-  // else { // Joiner
-  //   log('jjjjjoiner');
-  //   pc.ondatachannel = gotReceiveChannel;
+  //   catch (e) {
+  //     log('[-] Failed to create data channel.\n' + e.message);
+  //     return;
+  //   }
+  // }
+
+  // // video: true
+  // if(video) {
+  //   peerConnection.onaddstream = handleRemoteStreamAdded;
+  //   peerConnection.onremovestream = handleRemoteStreamRemoved;
   // }
 }
 
@@ -984,6 +974,19 @@ function getDocument() {
     log("[+] Getting Document. DocId: " + myDocId);
   }
 }
+
+
+
+// Data channel management
+function sendData() {
+  var data = sendTextarea.value; 
+
+  if(isInitiator) dataChannel.send(data); 
+  else            receiveChannel.send(data); 
+
+  log("[+] Sent data: " + data);
+}
+
 
 
 function joinAV() {
