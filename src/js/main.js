@@ -157,7 +157,8 @@ var param_usermedia = {
 createButton.onclick = create;
 clearButton.onclick = clearDocument;
 getDocButton.onclick = getDocument;
-joinDataButton.onclick = joinData;
+//joinDataButton.onclick = joinData;
+joinDataButton.onclick = sendData;
 joinAVButton.onclick = joinAV;
 
 
