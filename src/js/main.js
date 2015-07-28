@@ -31,6 +31,12 @@
  *********************************************************************************/
 
 
+'use strict';
+
+// // Look after different browser vendors' ways of calling the getUserMedia() API method:
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+
 //////////////////////////////////////////////////////////////////
 //
 //                Variables 
@@ -839,6 +845,12 @@ function errorCallback(error) {
  *  @since  2015.07.23
  *
  *****************************************/
+
+
+    // var param_sdp = {
+    //   message : 'sessionDescription',
+    //   sessionDescription : sessionDescription
+    // };
 
 // 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
