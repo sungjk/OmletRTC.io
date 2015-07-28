@@ -228,14 +228,14 @@ function setLocalSessionDescription(sessionDescription) {
       sessionDescription : sessionDescription
     };
 
-    documentApi.update(myDocId, addMessage, param_sdp, updateSuccessCallback
-      , function (error) {
-        log("[-] setLocalSessionDescription-update: " + error);
-      });
+    documentApi.update(myDocId, addMessage, param_sdp, updateSuccessCallback, function (error) {
+      log("[-] setLocalSessionDescription-update: " + error);
+    });
   }, function (error) {
     log("[-] setLocalDescription: " + error);
   });
 }
+
 
 
 // ICE candidates management
@@ -245,8 +245,7 @@ function handleIceCandidate(event) {
   var param_iceCandidate = {
     message : 'candidate',
     sdpMLineIndex : event.candidate.sdpMLineIndex,
-    candidate : event.candidate.candidates,
-    timestamp : Date.now()
+    candidate : event.candidate.candidates
   };
 
   if (event.candidate) {
@@ -257,6 +256,7 @@ function handleIceCandidate(event) {
   } 
   else {
     log('[-] End of candidates.');
+    isStarted = false;
   }
 }
 
@@ -294,29 +294,34 @@ function tryParseJSON (jsonString){
     function onMessage (event) {
       var t_msg = time();
       var blob = event.data;
-    // TODO file transfer
+      // TODO file transfer
 
-    var json = tryParseJSON(blob.toString()) ;
-    if ( json ){
+      var json = tryParseJSON(blob.toString()) ;
+      if ( json ){
         //log( blob.toString() );
-        if( json.message === 'Ping' ){
-          dataChannel.send( JSON.stringify( { message:"Pong" , timestamp: time() }) );
-        } else if (json.message === 'Pong') {
+        if( json.message === 'Ping' ) {
+          dataChannel.send(JSON.stringify({ 
+            message : "Pong", 
+            timestamp : time() 
+          }));
+        } 
+        else if (json.message === 'Pong') {
           log( blob.toString() + " received at " + time() );
-        } else if ( json.message  === 'File') {
-            //log( blob.toString() + " received at " + json.timestamp );
-            receivedFileInfo.name = json.name ;
-            receivedFileInfo.size = json.size;
-            receivedFileInfo.type = json.type ;
-            receivedFileInfo.receivedBytes = 0 ;
+        } 
+        else if ( json.message  === 'File') {
+          //log( blob.toString() + " received at " + json.timestamp );
+          receivedFileInfo.name = json.name ;
+          receivedFileInfo.size = json.size;
+          receivedFileInfo.type = json.type ;
+          receivedFileInfo.receivedBytes = 0 ;
           }
         }
         else {
           log("text received at " + t_msg.toString());
-        //appendDIV(event.data);
-      }
+          //appendDIV(event.data);
+        }
 
-    };
+      };
 
     function dataChannelOpened () {
       log("Datachennel opened");
@@ -368,6 +373,22 @@ function handleDataChannelState() {
   }
 }
 
+function handleSendChannelStateChange() {
+  var readyState = sendChannel.readyState;
+  trace('Send channel state is: ' + readyState);
+  // If channel ready, enable user's input
+  if (readyState == "open") {
+    dataChannelSend.disabled = false;
+    dataChannelSend.focus();
+    dataChannelSend.placeholder = "";
+    sendButton.disabled = false;
+  } else {
+    dataChannelSend.disabled = true;
+    sendButton.disabled = true;
+  }
+}
+
+
 
  /*****************************************
  *
@@ -395,7 +416,6 @@ function handleUserMedia(stream) {
     log('[-] handleUserMedia-update: ' + error);
   });
 }
-
 
 
  /*****************************************
@@ -430,9 +450,6 @@ function createPeerConnection(data, video) {
     peerConnection.addStream(localStream);
     peerConnection.onicecandidate = handleIceCandidate;
     peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-    // function (ice_state) {
-    //   log("[+] localPC: " + localPeerConnection.iceGatheringState + " " + localPeerConnection.iceConnectionState);
-    // }
 
     log('[+] Created RTCPeerConnnection with:\n' + 'config: ' + JSON.stringify(peerConnectionConfig) + '\nconstraints: ' + JSON.stringify(peerConnectionConstraints));
   }
@@ -467,6 +484,30 @@ function createPeerConnection(data, video) {
     peerConnection.onaddstream = handleRemoteStreamAdded;
     peerConnection.onremovestream = handleRemoteStreamRemoved;
   }
+
+
+
+
+  // if (isInitiator) {
+  //   try {
+  //     dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
+  //     dataChannel.onmessage = handleMessage;
+  //     dataChannel.onopen = handleDataChannelState;
+  //     dataChannel.onclose = handleDataChannelState;
+  //     dataChannel.onerror = function (error) {
+  //       log('[-] createPeerConnection-dataChannel.onopen: ' + error);
+  //     };
+
+  //     trace('Created send data channel');
+  //   } 
+  //   catch (error) {
+  //     log('[-] createPeerConnection-dataChannel: ' + error);
+  //   }
+  // } 
+  // else { // Joiner
+  //   log('jjjjjoiner');
+  //   pc.ondatachannel = gotReceiveChannel;
+  // }
 }
 
 
@@ -490,16 +531,19 @@ Omlet.document = {
 }
 */
 
-
 function start(data, video) {
-  log('[+] start.');
-  log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', isChannelReady: ' + isChannelReady);
+  log('[+] <<<<< start >>>>>>');
+  log('[+] isStarted: ' + isStarted);
+  log('[+] localStream: ' + typeof localStream);
+  log('[+] isChannelReady: ' + isChannelReady);
 
   if (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
     createPeerConnection(data, video);
     isStarted = true;
 
-    createOffer();
+    if (isInitiator) {
+      createOffer();
+    }
   }
 }
 
@@ -664,9 +708,11 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  
   if (chatDoc.message === 'create') {
     log('[+] chatDoc.message === create');
+
+    isChannelReady = false;
+    isStarted = false;
     isInitiator = true;
 
     // Call getUserMedia()
@@ -695,7 +741,10 @@ function handleMessage(doc) {
   else if (chatDoc.sessionDescription.type === 'offer') {
     log('[+] chatDoc.sessionDescription.type === offer')
 
-    if (!isStarted) { // && !isInitiator) { 
+    log('[+] isStarted: ' + isStarted);
+    log('[+] isInitiator: ' + isInitiator);
+
+    if (!isStarted && !isInitiator) { 
       //checkAndStart(); // dataChannel인지 AV인지
       // 일단 AV로 돌려
       start(false, true);
