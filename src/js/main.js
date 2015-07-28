@@ -669,15 +669,30 @@ function handleMessage(doc) {
   // create
   if (chatDoc.message === 'create') {
     log('[+] chatDoc.message === create');
+    isInitiator = true;
+
+    // Call getUserMedia()
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] handleMessage-getUserMedia-create: " + error);
+    });
+    log('Getting user media with constraints.');
+
+    start(false, true);
   }
   else if (chatDoc.message === 'join') {
     log('[+] chatDoc.message === join');
     isChannelReady = true;
 
-    start(false, true); 
+    // Call getUserMedia()
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] handleMessage-getUserMedia-join: " + error);
+    });
+    log('[+] Getting user media with constraints.');
   }
   else if (chatDoc.message === 'usermedia') {
     log('[+] chatDoc.message === usermedia'); 
+
+    start(false, true);
   }
   else if (chatDoc.sessionDescription.type === 'offer') {
     log('[+] chatDoc.sessionDescription.type === offer')
@@ -697,7 +712,7 @@ function handleMessage(doc) {
     createAnswer();
   } 
   else if (chatDoc.sessionDescription.type === 'answer' && isStarted) { 
-    log('[+] chatDoc.type === answer')
+    log('[+] chatDoc.sessionDescription.type === answer')
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), successCallback, function (error) {
       log('[-] handleMessage-setRemoteDescription-answer: ' + error);
@@ -965,17 +980,7 @@ function getDocument() {
 
 function joinAV() {
   if (chatDoc.numOfUser == 0) { // first person
-    // 이부분도 수정 예정. isInitiator는 dataChannel용임
-    isInitiator = true;
-    
-    // Call getUserMedia()
-    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] joinAV-getUserMedia-1: " + error);
-    });
-    log('[+] Getting user media with constraints');
-
-    // only video
-    start(false, true);
+    log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
       documentApi.get(myDocId, participantAdded, function (error) {
@@ -987,12 +992,6 @@ function joinAV() {
   }
   else if (chatDoc.numOfUser == 1) {  // second person
     log('[+] Another peer made join room.');
-
-    // Call getUserMedia()
-    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] joinAV-getUserMedia-2: " + error);
-    });
-    log('[+] Getting user media with constraints');
 
     documentApi.update(myDocId, addMessage, param_join, function() { 
       documentApi.get(myDocId, participantAdded, function (error) {
