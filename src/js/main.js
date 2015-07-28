@@ -870,8 +870,6 @@ function addUser(doc) {
 // Clean-up function: collect garbage before unloading browser's window
 window.onbeforeunload = clearDocument;
 
-var room = prompt('Enter room name:');
-
 function get(id){
   return document.getElementById(id);
 }
