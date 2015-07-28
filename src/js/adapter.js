@@ -607,3 +607,17 @@ if (typeof module !== 'undefined') {
     };
   });
 }
+
+
+
+
+// App code
+function get(id){
+  return document.getElementById(id);
+}
+
+function log(message){
+  var logArea = get("console");
+  logArea.value += message + '\n';
+  logArea.scrollTop = logArea.scrollHeight;
+}
