@@ -263,7 +263,7 @@ function handleIceCandidate(event) {
   }
 }
 
-function handleIceCandidateChange(peerConnection) {
+function handleIceCandidateChange(ice_state) {
   log('[+] iceGatheringState: ' + peerConnection.iceGatheringState + ', iceConnectionState: ' + peerConnection.iceConnectionState);
 }
 
