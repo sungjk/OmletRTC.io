@@ -990,7 +990,7 @@ function joinAV() {
       log("[-] joinAV-update-1: " + error);
     });
   }
-  else if (chatDoc.numOfUser == 1) {  // second person
+  else if (chatDoc.numOfUser == 1 && !isStarted) {  // second person
     log('[+] Another peer made join room.');
 
     documentApi.update(myDocId, addMessage, param_join, function() { 
