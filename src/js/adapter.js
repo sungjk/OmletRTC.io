@@ -318,6 +318,8 @@ else {
   log("[-] Browser does not appear to be WebRTC-capable");
 }
 
+// // Look after different browser vendors' ways of calling the getUserMedia() API method:
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 
 
