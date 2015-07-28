@@ -205,11 +205,6 @@ function onAddIceCandidateError(error) {
 }
 
 
-//////////////////////////////////////////////////////////////////
-//
-//                Edit description ~~~~~~~
-//setLocalSessionDescription 에서 param 조정하기
-/////////////////////////////////////////////////////////////////
 
 // Create Offer
 function createOffer() {
@@ -219,32 +214,29 @@ function createOffer() {
     }, sdpConstraints);
 }
 
+
 // Create Answer
 function createAnswer() {
     log('[+] Creating Answer to peer.');
     peerConnection.createAnswer(setLocalSessionDescription, function (error) {
-      log('[+] createAnswer: ' + error);
+      log('[-] createAnswer: ' + error);
     }, sdpConstraints);
 }
 
+
 // Success handler for createOffer and createAnswer
 function setLocalSessionDescription(sessionDescription) {
-  peerConnection.setLocalDescription(sessionDescription, function () {
-    log("[+] Set LocalSessionDescription.");
+  log("[+] Set LocalSessionDescription.");
+  peerConnection.setLocalDescription(sessionDescription);
 
-    var param_sdp = {
-      message : 'sessionDescription',
-      sessionDescription : sessionDescription
-    };
-
-    documentApi.update(myDocId, addMessage, param_sdp, updateSuccessCallback, function (error) {
-      log("[-] setLocalSessionDescription-update: " + error);
-    });
-  }, function (error) {
-    log("[-] setLocalDescription: " + error);
+  var param_sdp = {
+    message : 'sessionDescription',
+    sessionDescription : sessionDescription
+  };
+  documentApi.update(myDocId, addMessage, param_sdp, updateSuccessCallback, function (error) {
+    log("[-] setLocalSessionDescription-update: " + error);
   });
 }
-
 
 
 // ICE candidates management
