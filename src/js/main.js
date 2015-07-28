@@ -244,7 +244,6 @@ function handleIceCandidate(event) {
 
   var param_iceCandidate = {
     message : 'candidate',
-    sdpMid : event.candidate.sdpMid,
     sdpMLineIndex : event.candidate.sdpMLineIndex,
     candidate : event.candidate.candidates,
     timestamp : Date.now()
@@ -610,7 +609,6 @@ function initConnectionInfo() {
     'sessionDescription' : '',
     'candidate' : '',
     'sdpMLineIndex' : '',
-    'sdpMid' : '',
     'timestamp' : Date.now()
   };
 
@@ -666,7 +664,7 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  // create
+  
   if (chatDoc.message === 'create') {
     log('[+] chatDoc.message === create');
     isInitiator = true;
@@ -697,7 +695,7 @@ function handleMessage(doc) {
   else if (chatDoc.sessionDescription.type === 'offer') {
     log('[+] chatDoc.sessionDescription.type === offer')
 
-    if (!isStarted) { 
+    if (!isStarted) { // && !isInitiator) { 
       //checkAndStart(); // dataChannel인지 AV인지
       // 일단 AV로 돌려
       start(false, true);
@@ -722,7 +720,6 @@ function handleMessage(doc) {
     log('[+] chatDoc.message === candidate')
 
     var candidate = new RTCIceCandidate({
-      sdpMid : chatDoc.sdpMid,
       sdpMLineIndex : chatDoc.sdpMLineIndex, 
       candidate : chatDoc.candidate
     }, onAddIceCandidateSuccess, function (error) {
@@ -803,7 +800,6 @@ function addMessage(old, parameters) {
   else if (parameters.message === 'candidate') {
     old.candidate = parameters.candidate;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
-    old.sdpMid = parameters.sdpMid;
   }
   else if (parameters.message === 'clear') {
     old.chatId = chatId;
@@ -813,7 +809,6 @@ function addMessage(old, parameters) {
     old.sessionDescription = '';
     old.candidate = '';
     old.sdpMLineIndex = '';
-    old.sdpMid = '';
   }
   else if (parameters.message === 'sessionDescription') {
     old.sessionDescription = parameters.sessionDescription; 
