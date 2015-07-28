@@ -78,8 +78,11 @@ var getDocButton = get("getDocButton");
 var joinDataButton = get("joinDataButton");
 var joinAVButton = get("joinAVButton");
 
-var localVideo = get("localVideo");
-var remoteVideo = get("remoteVideo");
+// var localVideo = get("localVideo");
+// var remoteVideo = get("remoteVideo");
+
+var localVideo = getQuery("localVideo");
+var remoteVideo = getQuery("remoteVideo");
 
 
 // Flags...
@@ -918,6 +921,10 @@ window.onbeforeunload = clearDocument;
 
 function get(id){
   return document.getElementById(id);
+}
+
+function getQuery(id) {
+  return document.querySelector(id);
 }
 
 
