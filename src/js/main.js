@@ -254,7 +254,7 @@ function handleIceCandidate(event) {
   var param_iceCandidate = {
     message : 'candidate',
     sdpMLineIndex : event.candidate.sdpMLineIndex,
-    candidate : event.candidate.candidates
+    candidate : event.candidate.candidate
   };
 
   if (event.candidate) {
@@ -272,91 +272,6 @@ function handleIceCandidate(event) {
 function handleIceCandidateChange(ice_state) {
   log('[+] iceGatheringState: ' + peerConnection.iceGatheringState + ', iceConnectionState: ' + peerConnection.iceConnectionState);
 }
-
-
-
-//////////////////////////////////////////////////////////////////
-//
-//                Edit handleice ~~~~~~~~~~~~~~~~~
-//
-/////////////////////////////////////////////////////////////////
-
-
-
-function tryParseJSON (jsonString){
-  try {
-    var o = JSON.parse(jsonString);
-
-        // Handle non-exception-throwing cases:
-        // Neither JSON.parse(false) or JSON.parse(1234) throw errors, hence the type-checking,
-        // but... JSON.parse(null) returns 'null', and typeof null === "object",
-        // so we must check for that, too.
-        if (o && typeof o === "object" && o !== null) {
-          return o;
-        }
-      }
-      catch (exception) {
-        return false;
-      }
-    };
-
-    function onMessage (event) {
-      var t_msg = time();
-      var blob = event.data;
-      // TODO file transfer
-
-      var json = tryParseJSON(blob.toString()) ;
-      if ( json ){
-        //log( blob.toString() );
-        if( json.message === 'Ping' ) {
-          dataChannel.send(JSON.stringify({ 
-            message : "Pong", 
-            timestamp : time() 
-          }));
-        } 
-        else if (json.message === 'Pong') {
-          log( blob.toString() + " received at " + time() );
-        } 
-        else if ( json.message  === 'File') {
-          //log( blob.toString() + " received at " + json.timestamp );
-          receivedFileInfo.name = json.name ;
-          receivedFileInfo.size = json.size;
-          receivedFileInfo.type = json.type ;
-          receivedFileInfo.receivedBytes = 0 ;
-          }
-        }
-        else {
-          log("text received at " + t_msg.toString());
-          //appendDIV(event.data);
-        }
-
-      };
-
-    function dataChannelOpened () {
-      log("Datachennel opened");
-
-      get('chatInput').disabled = false;
-      get('chatInput2').disabled = false;
-
-      get('chatInput').onkeypress = function (e) {
-        if (e.keyCode !== 13 || !this.value) return;
-        dataChannel.send("P1: " + this.value);
-        this.value = '';
-        this.focus();
-      };
-
-      get('chatInput2').onkeypress = function (e) {
-       if (e.keyCode !== 13 || !this.value) return;
-       dataChannel2.send("P2: " + this.value);
-       this.value = '';
-       this.focus();
-     };
-
-  //dataChannelOpened = true;
-  //get('sendbtn').onclick = sendFile ;
-  //get('pingbtn').onclick = function() { log("sending ping at " + time() ) ; dataChannel.send( JSON.stringify({message : 'Ping' , timestamp: time() }) ); };
-};
-
 
 
 function onMessage(msg){
@@ -429,6 +344,7 @@ function handleUserMedia(stream) {
 }
 
 
+
  /*****************************************
  *
  *  Handler for add/remove streaming
@@ -453,7 +369,6 @@ function handleRemoteStreamRemoved(event) {
 
 
 
-
 // PeerConnection management
 function createPeerConnection(data, video) {
   try {
@@ -465,9 +380,33 @@ function createPeerConnection(data, video) {
     log('[+] Created RTCPeerConnnection with:\n' + 'config: ' + JSON.stringify(peerConnectionConfig) + '\nconstraints: ' + JSON.stringify(peerConnectionConstraints));
   }
   catch (e) {
-    log('[-] Failed to create RTCPeerConnection.\n ' + e.message);
+    log('[-] Failed to create RTCPeerConnection: ' + e.message);
     return;
   }
+
+  // peerConnection.onaddstream = handleRemoteStreamAdded;
+  // peerConnection.onremovestream = handleRemoteStreamRemoved;
+
+  // if (isInitiator) { 
+  //   try {
+  //     // Create a reliable data channel
+  //     dataChannel = peerConnection.createDataChannel("datachannel", {reliable: true});
+  //   } 
+  //   catch (e) {
+  //     log('[-] Failed to create data channel.\n' + e.message);
+  //     return;
+  //   }
+
+  //   dataChannel.onopen = handleDataChannelState;
+  //   dataChannel.onmessage = onMessage;
+  //   dataChannel.onclose = handleDataChannelState;
+  // } 
+  // else { // Joiner
+  //   peerConnection.ondatachannel = gotReceiveChannel;
+  // }
+
+
+  // 원래 내꺼 소스
 
   // data: true
   if(data) {
@@ -542,8 +481,11 @@ Omlet.document = {
 }
 */
 
+
+
 function start(data, video) {
   log('[+] <<<<< start >>>>>>');
+  log('[+] data: ' + data + ', video: ' + video);
   log('[+] isStarted: ' + isStarted);
   log('[+] localStream: ' + typeof localStream);
   log('[+] isChannelReady: ' + isChannelReady);
@@ -716,11 +658,11 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
+
+
   if (chatDoc.message === 'create') {
     log('[+] chatDoc.message === create');
 
-    isChannelReady = false;
-    isStarted = false;
     isInitiator = true;
 
     // Call getUserMedia()
@@ -741,7 +683,8 @@ function handleMessage(doc) {
     });
     log('[+] Getting user media with constraints.');
   }
-  else if (chatDoc.message === 'usermedia') {
+
+  if (chatDoc.message === 'usermedia') {
     log('[+] chatDoc.message === usermedia'); 
 
     start(false, true);
@@ -761,21 +704,22 @@ function handleMessage(doc) {
     // The setRemoteDescription() method instructs the RTCPeerConnection to apply the supplied RTCSessionDescription 
     // as the remote offer or answer. This API changes the local media state. When the method is invoked, 
     // the user agent must follow the processing model of setLocalDescription(), with the following additional conditions:
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] handleMessage-setRemoteDescription-offer');
-    }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-offer: ' + error);
-    }); 
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription));
+    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+    //   log('[+] handleMessage-setRemoteDescription-offer');
+    // }, function (error) {
+    //   log('[-] handleMessage-setRemoteDescription-offer: ' + error);
+    // }); 
     createAnswer();
   } 
   else if (chatDoc.sessionDescription.type === 'answer' && isStarted) { 
     log('[+] chatDoc.sessionDescription.type === answer')
-
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] handleMessage-setRemoteDescription-answer');
-    }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-    });
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription));
+    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+    //   log('[+] handleMessage-setRemoteDescription-answer');
+    // }, function (error) {
+    //   log('[-] handleMessage-setRemoteDescription-answer: ' + error);
+    // });
   } 
   else if (chatDoc.message === 'candidate' && isStarted) {
     log('[+] chatDoc.message === candidate')
@@ -783,9 +727,15 @@ function handleMessage(doc) {
     var candidate = new RTCIceCandidate({
       sdpMLineIndex : chatDoc.sdpMLineIndex, 
       candidate : chatDoc.candidate
-    }, onAddIceCandidateSuccess, function (error) {
-      log('[-] handleMessage-RTCIceCandidate: ' + error);
     });
+
+
+    // var candidate = new RTCIceCandidate({
+    //   sdpMLineIndex : chatDoc.sdpMLineIndex, 
+    //   candidate : chatDoc.candidate
+    // }, onAddIceCandidateSuccess, function (error) {
+    //   log('[-] handleMessage-RTCIceCandidate: ' + error);
+    // });
     
     peerConnection.addIceCandidate(candidate);
   } 
