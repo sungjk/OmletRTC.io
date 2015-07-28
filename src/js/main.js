@@ -81,8 +81,8 @@ var joinAVButton = get("joinAVButton");
 // var localVideo = get("localVideo");
 // var remoteVideo = get("remoteVideo");
 
-var localVideo = getQuery("localVideo");
-var remoteVideo = getQuery("remoteVideo");
+var localVideo = getQuery("#localVideo");
+var remoteVideo = getQuery("#remoteVideo");
 
 
 // Flags...
