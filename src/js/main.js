@@ -405,10 +405,12 @@ function handleSendChannelStateChange() {
 
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
+  log('[+] >>>>> handleUserMedia <<<<<');
+
   localStream = stream;
   attachMediaStream(localVideo, stream);
   
-  console.log('[+] Adding local stream.');
+  log('[+] Adding local stream.');
 
   // update document message; 'usermedia'
   documentApi.update(myDocId, addMessage, param_usermedia, function() { 
