@@ -409,7 +409,7 @@ function handleUserMedia(stream) {
 
   // update document message; 'usermedia'
   documentApi.update(myDocId, addMessage, param_usermedia, function() { 
-    documentApi.get(myDocId, participantAdded, function (error) {
+    documentApi.get(myDocId, addUser, function (error) {
       log('[-] handleUserMedia-update-get: ' + error);
     }); 
   }, function (error) {
@@ -702,9 +702,6 @@ function ReceiveDoc(doc) {
 function handleMessage(doc) {
   chatDoc = doc;
 
-  log("[+] chat id: " + chatDoc.chatId) ;
-  log("[+] Num of user: " + chatDoc.numOfUser);
-
   if (chatDoc.numOfUser > 2)
     return ;
 
@@ -888,7 +885,7 @@ function DocumentCleared(doc) {
 }
 
 
-function participantAdded(doc) {
+function addUser(doc) {
   log("[+] docId: " + doc.chatId + ', numOfUser: ' + doc.numOfUser);
 }
 
@@ -1027,7 +1024,7 @@ function joinAV() {
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
-      documentApi.get(myDocId, participantAdded, function (error) {
+      documentApi.get(myDocId, {}, function (error) {
         log("[-] joinAV-update-get-1: " + error);
       }); 
     }, function (error) {
@@ -1038,7 +1035,7 @@ function joinAV() {
     log('[+] Another peer made join room.');
 
     documentApi.update(myDocId, addMessage, param_join, function() { 
-      documentApi.get(myDocId, participantAdded, function (error) {
+      documentApi.get(myDocId, {}, function (error) {
         log("[-] joinAV-update-get-2: " + error);
       }); 
     }, function (error) {
