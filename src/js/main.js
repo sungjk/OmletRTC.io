@@ -591,6 +591,12 @@ function getDocumentReference() {
 
 
 
+//
+//
+//  connection Info에서 numOfUser값을 
+//  document 생성할 때 +1 해주기.
+//  numOfUser = 0  -->  numOfUser = 1
+//
 function initConnectionInfo() {
   var chatId = 100;
   var identity = Omlet.getIdentity();
@@ -1032,7 +1038,7 @@ function joinData() {
 
 
 function joinAV() {
-  if (Object.keys(doc.numOfUser).length == 0) { // first person
+  if (Object.keys(chatDoc.numOfUser).length == 0) { // first person
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
@@ -1043,7 +1049,7 @@ function joinAV() {
       log("[-] joinAV-update-1: " + error);
     });
   }
-  else if (Object.keys(doc.numOfUser).length == 1 && !isStarted) {  // second person
+  else if (Object.keys(chatDoc.numOfUser).length == 1 && !isStarted) {  // second person
     log('[+] Another peer made join room.');
 
     documentApi.update(myDocId, addMessage, param_join, function() { 
