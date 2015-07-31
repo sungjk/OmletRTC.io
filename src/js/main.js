@@ -667,10 +667,10 @@ function ReceiveDoc(doc) {
 function handleMessage(doc) {
   chatDoc = doc;
 
-  if (chatDoc.numOfUser != 2)
+  if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.message === 'create') {
+  if (chatDoc.message === 'create' && chatDoc.numOfUser == 1) {
     log('[+] chatDoc.message === create');
 
     isInitiator = true;
@@ -683,7 +683,7 @@ function handleMessage(doc) {
 
     start(false, true);
   }
-  else if (chatDoc.message === 'join') {
+  else if (chatDoc.message === 'join' && chatDoc.numOfUser == 2) {
     log('[+] chatDoc.message === join');
     isChannelReady = true;
 
