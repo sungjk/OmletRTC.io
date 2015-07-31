@@ -1027,12 +1027,35 @@ function getDocument() {
 
 
 
+
+// document.getElementById("joinDataButton").addEventListener('click',function() {
+//   var caller = false;
+
+//   if(Object.keys(chatDoc.participants).length  == 0) {
+//     initConnection(true, true, false);
+
+//     log("[+] Adding the caller.");
+
+//     documentApi.update(myDocId, addParticipant, callerParameters, function() { documentApi.get(myDocId, participantAdded); }
+//     , errorCallback);
+//   }
+//   else {
+//     initConnection(false, true, false);
+
+//     log("[+] Adding the callee.");
+
+//     documentApi.update(myDocId, addParticipant, calleeParameters, function() { documentApi.get(myDocId, participantAdded); }
+//      , errorCallback);
+//   }
+// });
+
+
 //
 //  initialize 할 떄 numOfUser를 1로 바꿔주게 되면
 //  joinAV 핸들링 할 때 first person을 chatDoc.numOfUser == 1로 바꿔줘야할듯
 //
 function joinAV() {
-  if (chatDoc.numOfUser == 0) { // first person
+  if (Object.keys(chatDoc.numOfUser) == 0) { // first person
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
@@ -1043,7 +1066,7 @@ function joinAV() {
       log("[-] joinAV-update-1: " + error);
     });
   }
-  else if (chatDoc.numOfUser == 1 && !isStarted) {  // second person
+  else if (Object.keys(chatDoc.numOfUser) == 1 && !isStarted) {  // second person
     log('[+] Another peer made join room.');
 
     documentApi.update(myDocId, addMessage, param_join, function() { 
