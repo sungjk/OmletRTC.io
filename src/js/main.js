@@ -667,7 +667,7 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.message === 'create') {
+  if (chatDoc.message === 'create' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === create');
 
     isInitiator = true;
@@ -680,7 +680,7 @@ function handleMessage(doc) {
 
     start(false, true);
   }
-  else if (chatDoc.message === 'join') {
+  else if (chatDoc.message === 'join' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.message === join');
     isChannelReady = true;
 
@@ -1040,7 +1040,7 @@ function joinAV() {
   log("[+] my name: " + Omlet.getIdentity().name);
 
   //if (chatDoc.numOfUser === 0 ) { // first person
-  if (chatDoc.creator.name == Omlet.getIdentity().name) {
+  if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
