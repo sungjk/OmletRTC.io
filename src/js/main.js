@@ -590,6 +590,7 @@ function initConnectionInfo() {
 
   // Connection info
   var info = {
+    'flag' : true,
     'chatId' : chatId,
     'creator' : identity,
     'message' : '',
@@ -815,6 +816,7 @@ function addMessage(old, parameters) {
   //   continue;
   if (parameters.message === 'create') {// || parameters.message === 'join') {
     //old.numOfUser.push();
+    old.flag = false;
     old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'join') {
@@ -1031,11 +1033,8 @@ function joinData() {
 
 
 function joinAV() {
-  log('[+] FeedMembers: ' + Omlet.getFeedMembers());
-  log('[+] Identity: ' + Omlet.getIdentity());
-  
-
-  if (chatDoc.creator == Omlet.getIdentity()) {//chatDoc.numOfUser === 0) { // first person
+  //if (chatDoc.numOfUser === 0 ) { // first person
+  if (chatDoc.flag) {
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
