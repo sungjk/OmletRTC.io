@@ -591,16 +591,10 @@ function getDocumentReference() {
 
 
 
-//
-//
-//  connection Info에서 numOfUser값을 
-//  document 생성할 때 +1 해주기.
-//  numOfUser = 0  -->  numOfUser = 1
-//
 function initConnectionInfo() {
   var chatId = 100;
   var identity = Omlet.getIdentity();
-  var numOfUser = 0;
+  //var numOfUser = 0;
 
   // var initValues = {
   //   'chatId' : chatId ,
@@ -614,7 +608,7 @@ function initConnectionInfo() {
     'creator' : identity,
     // 'users' : {},
     'message' : '',
-    'numOfUser' : numOfUser,
+    'numOfUser' : {},
     'sessionDescription' : '',
     'candidate' : '',
     'sdpMLineIndex' : '',
@@ -667,10 +661,13 @@ function ReceiveDoc(doc) {
 function handleMessage(doc) {
   chatDoc = doc;
 
-  if (chatDoc.numOfUser > 2)
+  if (Object.keys(chatDoc.numOfUser).length > 2)
     return ;
 
-  if (chatDoc.message === 'create' && chatDoc.numOfUser == 1) {
+  // if (chatDoc.numOfUser > 2)
+  //   return ;
+
+  if (chatDoc.message === 'create') {
     log('[+] chatDoc.message === create');
 
     isInitiator = true;
@@ -683,7 +680,7 @@ function handleMessage(doc) {
 
     start(false, true);
   }
-  else if (chatDoc.message === 'join' && chatDoc.numOfUser == 2) {
+  else if (chatDoc.message === 'join') {
     log('[+] chatDoc.message === join');
     isChannelReady = true;
 
@@ -818,10 +815,16 @@ function addMessage(old, parameters) {
   // if (parameters.message === 'usermedia')
   //   continue;
   if (parameters.message === 'create') {// || parameters.message === 'join') {
-    old.numOfUser = old.numOfUser + 1;
+    old.numOfUser.push();
+    //Object.keys(chatDoc.numOfUser).length
+    //old.participants[params.name].signals.push(params.signal) ;
+
+    //old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'join') {
-    old.numOfUser = old.numOfUser + 1;
+    old.numOfUser.push();
+
+    //old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'candidate') {
     old.candidate = parameters.candidate;
@@ -831,7 +834,7 @@ function addMessage(old, parameters) {
     old.chatId = chatId;
     old.creator = identity;
     old.message = '';
-    old.numOfUser = 0;
+    old.numOfUser = {};
     old.sessionDescription = '';
     old.candidate = '';
     old.sdpMLineIndex = '';
@@ -851,7 +854,7 @@ function addMessage(old, parameters) {
 function msgClear(old, parameters) {
   old.chatId = '';
   old.creator = '';
-  old.numOfUser = 0;
+  old.numOfUser = {};
   old.message = 'clear';
 
   return old;
@@ -861,12 +864,12 @@ function msgClear(old, parameters) {
 
 function DocumentCleared(doc) {
   log("[+] Document cleared");
-  log("[+] User in this conversation: " + doc.numOfUser);
+  log("[+] User in this conversation: " + Object.keys(doc.numOfUser).length); // doc.numOfUser);
 }
 
 
 function addUser(doc) {
-  log("[+] docId: " + doc.chatId + ', numOfUser: ' + doc.numOfUser);
+  log("[+] docId: " + doc.chatId + ', numOfUser: ' + Object.keys(doc.numOfUser).length); //doc.numOfUser);
 }
 
 
@@ -956,6 +959,17 @@ function clearDocument() {
 }
 
 
+function getDocument() {
+  if(!Omlet.isInstalled()) {
+    log("[-] Omlet is not installed.");
+  }
+  else {
+    documentApi.get(myDocId, ReceiveDoc, errorCallback);
+    log("[+] Getting Document. DocId: " + myDocId);
+  }
+}
+
+
 function joinData() {
   // if(Object.keys(chatDoc.participants).length  == 0) {
   //   initConnection(true, true, false);
@@ -992,19 +1006,6 @@ function joinData() {
 }
 
 
-function getDocument() {
-  if(!Omlet.isInstalled()) {
-    log("[-] Omlet is not installed.");
-  }
-  else {
-    documentApi.get(myDocId, ReceiveDoc, errorCallback);
-    log("[+] Getting Document. DocId: " + myDocId);
-  }
-}
-
-
-
-
 
 //////////////////////////////////////////////////////////////////
 //
@@ -1030,36 +1031,8 @@ function getDocument() {
 /////////////////////////////////////////////////////////////////
 
 
-
-
-// document.getElementById("joinDataButton").addEventListener('click',function() {
-//   var caller = false;
-
-//   if(Object.keys(chatDoc.participants).length  == 0) {
-//     initConnection(true, true, false);
-
-//     log("[+] Adding the caller.");
-
-//     documentApi.update(myDocId, addParticipant, callerParameters, function() { documentApi.get(myDocId, participantAdded); }
-//     , errorCallback);
-//   }
-//   else {
-//     initConnection(false, true, false);
-
-//     log("[+] Adding the callee.");
-
-//     documentApi.update(myDocId, addParticipant, calleeParameters, function() { documentApi.get(myDocId, participantAdded); }
-//      , errorCallback);
-//   }
-// });
-
-
-//
-//  initialize 할 떄 numOfUser를 1로 바꿔주게 되면
-//  joinAV 핸들링 할 때 first person을 chatDoc.numOfUser == 1로 바꿔줘야할듯
-//
 function joinAV() {
-  if (chatDoc.numOfUser == 0) { // first person
+  if (Object.keys(doc.numOfUser).length == 0) { // first person
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
@@ -1070,7 +1043,7 @@ function joinAV() {
       log("[-] joinAV-update-1: " + error);
     });
   }
-  else if (chatDoc.numOfUser == 1 && !isStarted) {  // second person
+  else if (Object.keys(doc.numOfUser).length == 1 && !isStarted) {  // second person
     log('[+] Another peer made join room.');
 
     documentApi.update(myDocId, addMessage, param_join, function() { 
