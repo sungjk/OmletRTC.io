@@ -701,7 +701,7 @@ function handleMessage(doc) {
     log('[+] isStarted: ' + isStarted);
     log('[+] isInitiator: ' + isInitiator);
 
-    if (!isStarted) && !isInitiator) { 
+    if (!isInitiator && !isStarted) {
       //checkAndStart(); // dataChannel인지 AV인지
       // 일단 AV로 돌려
       start(false, true);
