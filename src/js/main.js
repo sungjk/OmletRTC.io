@@ -612,9 +612,7 @@ function initConnectionInfo() {
   var info = {
     'chatId' : chatId,
     'creator' : identity,
-    'users' : {}
-
-
+    // 'users' : {},
     'message' : '',
     'numOfUser' : numOfUser,
     'sessionDescription' : '',
