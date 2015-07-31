@@ -1,3 +1,21 @@
+/*
+
+1. initConnectionInfo() 에서 info value 수정
+//  initialize 할 떄 numOfUser를 1로 바꿔주게 되면
+//  joinAV 핸들링 할 때 first person을 chatDoc.numOfUser == 1로 바꿔줘야할듯
+
+2. joinAV() 에서 first person, second person 핸들링 값 수정
+//  connection Info에서 numOfUser값을 
+//  document 생성할 때 +1 해주기.
+//  numOfUser = 0  -->  numOfUser = 1
+
+
+- 둘 다 조인한 후 한쪽에서 joinAV누르면 둘 다 getUserMedia 실행되는지 원본 소스와 비교하기
+
+*/
+
+
+
 /*********************************************************************************
  *
  *  Procedure of function call (Omlet is not installed.)
@@ -48,11 +66,6 @@ var documentApi;
 var myDocId;
 var chatDoc;
 
-
-var omletAsSignallingChannel = true ;
-var orderedDataChannel = true;
-
-
 // RTCPeerConnection object
 var peerConnection;
 
@@ -89,8 +102,8 @@ var localVideo = getQuery("#localVideo");
 var remoteVideo = getQuery("#remoteVideo");
 
 var joinDataButton = get("joinDataButton");
-var sendTextarea = get("dataChannelSend");
-var receiveTextarea = get("dataChannelReceive");
+// var sendTextarea = get("dataChannelSend");
+// var receiveTextarea = get("dataChannelReceive");
 
 
 // Flags...
@@ -158,7 +171,7 @@ createButton.onclick = create;
 clearButton.onclick = clearDocument;
 getDocButton.onclick = getDocument;
 //joinDataButton.onclick = joinData;
-joinDataButton.onclick = sendData;
+//joinDataButton.onclick = sendData;
 joinAVButton.onclick = joinAV;
 
 
@@ -391,56 +404,58 @@ function createPeerConnection(data, video) {
     return;
   }
 
-  peerConnection.onaddstream = handleRemoteStreamAdded;
-  peerConnection.onremovestream = handleRemoteStreamRemoved;
+  // 원래 내꺼 소스
 
-  if (isInitiator) { 
+  // video: true
+  if(video) {
+    peerConnection.onaddstream = handleRemoteStreamAdded;
+    peerConnection.onremovestream = handleRemoteStreamRemoved;
+  }
+
+  // data: true
+  if(data) {
+    log("[+] Creating data channel.");
+
+    var dataChannelOptions = {
+      ordered: true
+    };
     try {
-      // Create a reliable data channel
-      dataChannel = peerConnection.createDataChannel("datachannel", {reliable: true});
-    } 
+      dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
+      dataChannel.onerror = errorCallback;
+      dataChannel.onmessage = onMessage;
+      dataChannel.onopen = handleDataChannelState;
+      dataChannel.onclose = handleDataChannelState;
+
+    }
     catch (e) {
       log('[-] Failed to create data channel.\n' + e.message);
       return;
     }
-
-    dataChannel.onopen = handleDataChannelStateChange;
-    dataChannel.onmessage = onMessage;
-    dataChannel.onclose = handleDataChannelStateChange;
-  } 
-  else { // Joiner
-    peerConnection.ondatachannel = gotReceiveChannel;
   }
 
 
-  // 원래 내꺼 소스
 
-  // data: true
-  // if(data) {
-  //   log("[+] Creating data channel.");
+  // peerConnection.onaddstream = handleRemoteStreamAdded;
+  // peerConnection.onremovestream = handleRemoteStreamRemoved;
 
-  //   var dataChannelOptions = {
-  //     ordered: true
-  //   };
+  // if (isInitiator) { 
   //   try {
-  //     dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
-  //     dataChannel.onerror = errorCallback;
-  //     dataChannel.onmessage = onMessage;
-  //     dataChannel.onopen = handleDataChannelState;
-  //     dataChannel.onclose = handleDataChannelState;
-
-  //   }
+  //     // Create a reliable data channel
+  //     dataChannel = peerConnection.createDataChannel("datachannel", {reliable: true});
+  //   } 
   //   catch (e) {
   //     log('[-] Failed to create data channel.\n' + e.message);
   //     return;
   //   }
+
+  //   dataChannel.onopen = handleDataChannelStateChange;
+  //   dataChannel.onmessage = onMessage;
+  //   dataChannel.onclose = handleDataChannelStateChange;
+  // } 
+  // else { // Joiner
+  //   peerConnection.ondatachannel = gotReceiveChannel;
   // }
 
-  // // video: true
-  // if(video) {
-  //   peerConnection.onaddstream = handleRemoteStreamAdded;
-  //   peerConnection.onremovestream = handleRemoteStreamRemoved;
-  // }
 }
 
 
@@ -575,6 +590,13 @@ function getDocumentReference() {
 }
 
 
+
+//
+//
+//  connection Info에서 numOfUser값을 
+//  document 생성할 때 +1 해주기.
+//  numOfUser = 0  -->  numOfUser = 1
+//
 function initConnectionInfo() {
   var chatId = 100;
   var identity = Omlet.getIdentity();
@@ -978,18 +1000,37 @@ function getDocument() {
 
 
 
-// Data channel management
-function sendData() {
-  var data = sendTextarea.value; 
-
-  if(isInitiator) dataChannel.send(data); 
-  else            receiveChannel.send(data); 
-
-  log("[+] Sent data: " + data);
-}
 
 
+//////////////////////////////////////////////////////////////////
+//
+//             edit 
+//
+/////////////////////////////////////////////////////////////////
 
+// // Data channel management
+// function sendData() {
+//   var data = sendTextarea.value; 
+
+//   if(isInitiator) dataChannel.send(data); 
+//   else            receiveChannel.send(data); 
+
+//   log("[+] Sent data: " + data);
+// }
+
+
+//////////////////////////////////////////////////////////////////
+//
+//             edit
+//
+/////////////////////////////////////////////////////////////////
+
+
+
+//
+//  initialize 할 떄 numOfUser를 1로 바꿔주게 되면
+//  joinAV 핸들링 할 때 first person을 chatDoc.numOfUser == 1로 바꿔줘야할듯
+//
 function joinAV() {
   if (chatDoc.numOfUser == 0) { // first person
     log('[+] Create a room.');
