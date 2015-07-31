@@ -1031,7 +1031,7 @@ function joinData() {
 
 
 function joinAV() {
-  if (chatDoc.creator === Omlet.getIdentity()) {//chatDoc.numOfUser === 0) { // first person
+  if (chatDoc.creator == Omlet.getIdentity()) {//chatDoc.numOfUser === 0) { // first person
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
