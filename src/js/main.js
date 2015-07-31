@@ -576,6 +576,35 @@ function _loadDocument() {
 }
 
 
+
+function initConnectionInfo() {
+  var chatId = 100;
+  var identity = Omlet.getIdentity();
+  var numOfUser = 0;
+
+  // var initValues = {
+  //   'chatId' : chatId ,
+  //   'creator':identity,
+  //   'participants':{}
+  // };
+
+  // Connection info
+  var info = {
+    'chatId' : chatId,
+    'creator' : identity,
+    'message' : '',
+    'numOfUser' : numOfUser,
+    'sessionDescription' : '',
+    'candidate' : '',
+    'sdpMLineIndex' : '',
+    'timestamp' : Date.now()
+  };
+
+  return info;
+}
+
+
+
 function getDocumentReference() {
   var docIdParam = window.location.hash.indexOf("/docId/");
   if (docIdParam == -1) return false;
@@ -588,42 +617,6 @@ function getDocumentReference() {
 
   return docId;
 }
-
-
-
-//
-//
-//  connection Info에서 numOfUser값을 
-//  document 생성할 때 +1 해주기.
-//  numOfUser = 0  -->  numOfUser = 1
-//
-function initConnectionInfo() {
-  var chatId = 100;
-  var identity = Omlet.getIdentity();
-  //var numOfUser = 0;
-
-  // var initValues = {
-  //   'chatId' : chatId ,
-  //   'creator':identity,
-  //   'participants':{}
-  // };
-
-  // Connection info
-  var info = {
-    'chatId' : chatId,
-    'creator' : identity,
-    // 'users' : {},
-    'message' : '',
-    'numOfUser' : {},
-    'sessionDescription' : '',
-    'candidate' : '',
-    'sdpMLineIndex' : '',
-    'timestamp' : Date.now()
-  };
-
-  return info;
-}
-
 
 
 function Initialize(old, parameters) {
@@ -667,11 +660,11 @@ function ReceiveDoc(doc) {
 function handleMessage(doc) {
   chatDoc = doc;
 
-  if (Object.keys(chatDoc.numOfUser).length > 2)
-    return ;
-
-  // if (chatDoc.numOfUser > 2)
+  // if (Object.keys(chatDoc.numOfUser).length > 2)
   //   return ;
+
+  if (chatDoc.numOfUser > 2)
+    return ;
 
   if (chatDoc.message === 'create') {
     log('[+] chatDoc.message === create');
@@ -821,16 +814,13 @@ function addMessage(old, parameters) {
   // if (parameters.message === 'usermedia')
   //   continue;
   if (parameters.message === 'create') {// || parameters.message === 'join') {
-    old.numOfUser.push();
-    //Object.keys(chatDoc.numOfUser).length
-    //old.participants[params.name].signals.push(params.signal) ;
-
-    //old.numOfUser = old.numOfUser + 1;
+    //old.numOfUser.push();
+    old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'join') {
-    old.numOfUser.push();
+    //old.numOfUser.push();
 
-    //old.numOfUser = old.numOfUser + 1;
+    old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'candidate') {
     old.candidate = parameters.candidate;
@@ -840,7 +830,7 @@ function addMessage(old, parameters) {
     old.chatId = chatId;
     old.creator = identity;
     old.message = '';
-    old.numOfUser = {};
+    old.numOfUser = 0;
     old.sessionDescription = '';
     old.candidate = '';
     old.sdpMLineIndex = '';
@@ -860,7 +850,7 @@ function addMessage(old, parameters) {
 function msgClear(old, parameters) {
   old.chatId = '';
   old.creator = '';
-  old.numOfUser = {};
+  old.numOfUser = 0;
   old.message = 'clear';
 
   return old;
@@ -870,12 +860,12 @@ function msgClear(old, parameters) {
 
 function DocumentCleared(doc) {
   log("[+] Document cleared");
-  log("[+] User in this conversation: " + Object.keys(doc.numOfUser).length); // doc.numOfUser);
+  log("[+] User in this conversation: " + doc.numOfUser);
 }
 
 
 function addUser(doc) {
-  log("[+] docId: " + doc.chatId + ', numOfUser: ' + Object.keys(doc.numOfUser).length); //doc.numOfUser);
+  log("[+] docId: " + doc.chatId + ', numOfUser: ' + doc.numOfUser);
 }
 
 
@@ -1013,32 +1003,35 @@ function joinData() {
 
 
 
-//////////////////////////////////////////////////////////////////
-//
-//             edit 
-//
-/////////////////////////////////////////////////////////////////
 
-// // Data channel management
-// function sendData() {
-//   var data = sendTextarea.value; 
+// update parameters for caller
+// var callerParameters = {
+//   "name" : "caller",
+//   "value" : {
+//     "signals": []
+//   }
+// };
 
-//   if(isInitiator) dataChannel.send(data); 
-//   else            receiveChannel.send(data); 
+// var calleeParameters = {
+//   "name" : "callee",
+//   "value" : {
+//     "signals" : [{
+//       "signal_type" : "callee_arrived",
+//       "timestamp" : Date.now()
+//       }]
+//   }
+// };
 
-//   log("[+] Sent data: " + data);
+// function addParticipant(old, params) {
+//   old.participants[params.name] = params.value ;
+
+//   return old;
 // }
 
 
-//////////////////////////////////////////////////////////////////
-//
-//             edit
-//
-/////////////////////////////////////////////////////////////////
-
 
 function joinAV() {
-  if (Object.keys(chatDoc.numOfUser).length == 0) { // first person
+  if (chatDoc.numOfUser === 0) { // first person
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
@@ -1049,7 +1042,7 @@ function joinAV() {
       log("[-] joinAV-update-1: " + error);
     });
   }
-  else if (Object.keys(chatDoc.numOfUser).length == 1 && !isStarted) {  // second person
+  else if (chatDoc.numOfUser === 1 && !isStarted) {  // second person
     log('[+] Another peer made join room.');
 
     documentApi.update(myDocId, addMessage, param_join, function() { 
