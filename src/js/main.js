@@ -1031,6 +1031,10 @@ function joinData() {
 
 
 function joinAV() {
+  log('[+] FeedMembers: ' + Omlet.getFeedMembers());
+  log('[+] Identity: ' + Omlet.getIdentity());
+  
+
   if (chatDoc.creator == Omlet.getIdentity()) {//chatDoc.numOfUser === 0) { // first person
     log('[+] Create a room.');
 
