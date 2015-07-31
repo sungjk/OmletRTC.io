@@ -492,9 +492,9 @@ function start(data, video) {
     createPeerConnection(data, video);
     isStarted = true;
 
-    //if (isInitiator) {
+    if (isInitiator) {
       createOffer();
-    //}
+    }
   }
 }
 
@@ -701,7 +701,7 @@ function handleMessage(doc) {
     log('[+] isStarted: ' + isStarted);
     log('[+] isInitiator: ' + isInitiator);
 
-    if (!isStarted) { // && !isInitiator) { 
+    if (!isStarted) && !isInitiator) { 
       //checkAndStart(); // dataChannel인지 AV인지
       // 일단 AV로 돌려
       start(false, true);
