@@ -257,7 +257,7 @@ function setLocalSessionDescription(sessionDescription) {
 
 // ICE candidates management
 function handleIceCandidate(event) {
-  log('[+] handleIceCandidate event: ' + event.candidate);
+  log('[+] handleIceCandidate event: ' + JSON.stringify(event.candidate));
 
   var param_iceCandidate = {
     message : 'candidate',
@@ -710,22 +710,27 @@ function handleMessage(doc) {
     // The setRemoteDescription() method instructs the RTCPeerConnection to apply the supplied RTCSessionDescription 
     // as the remote offer or answer. This API changes the local media state. When the method is invoked, 
     // the user agent must follow the processing model of setLocalDescription(), with the following additional conditions:
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription));
-    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-    //   log('[+] handleMessage-setRemoteDescription-offer');
-    // }, function (error) {
-    //   log('[-] handleMessage-setRemoteDescription-offer: ' + error);
-    // }); 
+
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+      log('[+] handleMessage-setRemoteDescription-offer');
+    }, function (error) {
+      log('[-] handleMessage-setRemoteDescription-offer: ' + error);
+    }); 
+
+    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription));
+
     createAnswer();
   } 
   else if (chatDoc.sessionDescription.type === 'answer' && isStarted) { 
     log('[+] chatDoc.sessionDescription.type === answer')
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription));
-    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-    //   log('[+] handleMessage-setRemoteDescription-answer');
-    // }, function (error) {
-    //   log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-    // });
+    
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+      log('[+] handleMessage-setRemoteDescription-answer');
+    }, function (error) {
+      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
+    });
+
+    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription));
   } 
   else if (chatDoc.message === 'candidate' && isStarted) {
     log('[+] chatDoc.message === candidate')
