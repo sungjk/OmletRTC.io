@@ -1038,6 +1038,8 @@ function joinAV() {
   log('[+] chat doc identify: ' + JSON.stringify(chatDoc.creator));
   
 
+  log("[+] creator's name: " + chatDoc.creator.name);
+  log("[+] my name: " + Omlet.getIdentity().name);
 
   //if (chatDoc.numOfUser === 0 ) { // first person
   if (false) {
