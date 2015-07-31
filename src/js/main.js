@@ -693,8 +693,7 @@ function handleMessage(doc) {
     });
     log('[+] Getting user media with constraints.');
   }
-
-  if (chatDoc.message === 'usermedia') {
+  else if (chatDoc.message === 'usermedia') {
     log('[+] chatDoc.message === usermedia'); 
 
     start(false, true);
