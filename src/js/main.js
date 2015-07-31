@@ -1033,8 +1033,14 @@ function joinData() {
 
 
 function joinAV() {
+  log('[+] my feedMembers: ' + JSON.stringify(Omlet.getFeedMembers()));
+  log('[+] my identify: ' + JSON.stringify(Omlet.getIdentity()));
+  log('[+] chat doc identify: ' + JSON.stringify(chatDoc.creator));
+  
+
+
   //if (chatDoc.numOfUser === 0 ) { // first person
-  if (chatDoc.flag) {
+  if (false) {
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
