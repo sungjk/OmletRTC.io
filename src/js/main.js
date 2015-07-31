@@ -600,7 +600,7 @@ function getDocumentReference() {
 function initConnectionInfo() {
   var chatId = 100;
   var identity = Omlet.getIdentity();
-  var numOfUser = 0;
+  var numOfUser = 1;
 
   // Connection info
   var info = {
@@ -660,7 +660,7 @@ function ReceiveDoc(doc) {
 function handleMessage(doc) {
   chatDoc = doc;
 
-  if (chatDoc.numOfUser > 2)
+  if (chatDoc.numOfUser > 3)
     return ;
 
 
@@ -1055,7 +1055,7 @@ function getDocument() {
 //  joinAV 핸들링 할 때 first person을 chatDoc.numOfUser == 1로 바꿔줘야할듯
 //
 function joinAV() {
-  if (Object.keys(chatDoc.numOfUser) == 0) { // first person
+  if (chatDoc.numOfUser == 1) { // first person
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
@@ -1066,7 +1066,7 @@ function joinAV() {
       log("[-] joinAV-update-1: " + error);
     });
   }
-  else if (Object.keys(chatDoc.numOfUser) == 1 && !isStarted) {  // second person
+  else if (chatDoc.numOfUser == 2 && !isStarted) {  // second person
     log('[+] Another peer made join room.');
 
     documentApi.update(myDocId, addMessage, param_join, function() { 
