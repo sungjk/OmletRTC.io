@@ -492,9 +492,9 @@ function start(data, video) {
     createPeerConnection(data, video);
     isStarted = true;
 
-    if (isInitiator) {
+    //if (isInitiator) {
       createOffer();
-    }
+    //}
   }
 }
 
@@ -700,7 +700,7 @@ function handleMessage(doc) {
     log('[+] isStarted: ' + isStarted);
     log('[+] isInitiator: ' + isInitiator);
 
-    if (!isStarted && !isInitiator) { 
+    if (!isStarted) { // && !isInitiator) { 
       //checkAndStart(); // dataChannel인지 AV인지
       // 일단 AV로 돌려
       start(false, true);
@@ -1031,7 +1031,7 @@ function joinData() {
 
 
 function joinAV() {
-  if (chatDoc.numOfUser === 0) { // first person
+  if (chatDoc.creator === Omlet.getIdentity()) {//chatDoc.numOfUser === 0) { // first person
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
