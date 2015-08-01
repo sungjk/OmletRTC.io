@@ -99,8 +99,8 @@ var joinDataButton = get("joinDataButton");
 
 
 // Flags...
-var isInitiator = false;
-var isStarted = false;
+// var isInitiator = false;
+// var isStarted = false;
 
 // streams
 var localStream;
@@ -263,7 +263,18 @@ function handleIceCandidate(event) {
   } 
   else {
     log('[-] End of candidates.');
-    isStarted = false;
+    //isStarted = false;
+
+    var param_startedOff = {
+      message : 'started',
+      started : false
+    };
+
+    // param_startedOff
+    documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
+      log("[-] handleIceCandidate-update-param_startedOff: " + error);
+    });
+
   }
 }
 
@@ -451,16 +462,27 @@ Omlet.document = {
 function start(data, video) {
   log('[+] <<<<< start >>>>>>');
   log('[+] data: ' + data + ', video: ' + video);
-  log('[+] isStarted: ' + isStarted);
+  log('[+] started: ' + chatDoc.started);
   log('[+] localStream: ' + typeof localStream);
   log('[+] channelReady: ' + chatDoc.channelReady);
-  log('[+] isInitiator: ' + isInitiator);
+  log('[+] initiator: ' + chatDoc.initiator);
 
-  if (!isStarted && typeof localStream != 'undefined' && chatDoc.channelReady) {
+  if (!chatDoc.started && typeof localStream != 'undefined' && chatDoc.channelReady) {
     createPeerConnection(data, video);
-    isStarted = true;
+    //isStarted = true;
 
-    if (isInitiator) {
+    var param_startedOn = {
+      message : 'started',
+      started : true
+    };
+
+    // param_startedOn
+    documentApi.update(myDocId, addMessage, param_startedOn, updateSuccessCallback, function (error) {
+      log("[-] start-update-param_startedOn: " + error);
+    });
+
+
+    if (chatDoc.initiator) {
       createOffer();
     }
   }
@@ -468,7 +490,19 @@ function start(data, video) {
 
 
 function stop() {
-  isStarted = false;
+  //isStarted = false;
+
+  var param_startedOff = {
+    message : 'started',
+    started : false
+  };
+
+  // param_startedOff
+  documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
+    log("[-] stop-update-param_startedOff: " + error);
+  });
+
+
   if (dataChannel)    dataChannel.close();
   if (peerConnection) peerConnection.close();
 
@@ -485,7 +519,18 @@ function sessionTerminated() {
   stop();
 
   // 이부분도 수정 예정. isInitiator는 dataChannel용임
-  isInitiator = false;
+  //isInitiator = false;
+
+  var param_initiatorOff = {
+    message : 'initiator',
+    initiator : false
+  };
+
+  // param_initiatorOff
+  documentApi.update(myDocId, addMessage, param_initiatorOff, updateSuccessCallback, function (error) {
+    log("[-] sessionTerminated-update-param_initiatorOff: " + error);
+  });
+
 }
 
 
@@ -563,6 +608,8 @@ function initConnectionInfo() {
     'message' : '',
     'numOfUser' : numOfUser,
     'channelReady' : false,
+    'started' : false,
+    'initiator' : false,
     'sessionDescription' : '',
     'candidate' : '',
     'sdpMLineIndex' : '',
@@ -667,10 +714,10 @@ function handleMessage(doc) {
   else if (chatDoc.sessionDescription.type === 'offer') {
     log('[+] chatDoc.sessionDescription.type === offer')
 
-    log('[+] isStarted: ' + isStarted);
-    log('[+] isInitiator: ' + isInitiator);
+    log('[+] started: ' + chatDoc.started);
+    log('[+] initiator: ' + chatDoc.initiator);
 
-    if (!isStarted && !isInitiator) {
+    if (!chatDoc.started && !chatDoc.initiator) {
       //checkAndStart(); // dataChannel인지 AV인지
       // 일단 AV로 돌려
       start(false, true);
@@ -690,7 +737,7 @@ function handleMessage(doc) {
 
     createAnswer();
   } 
-  else if (chatDoc.sessionDescription.type === 'answer' && isStarted) { 
+  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.started) { 
     log('[+] chatDoc.sessionDescription.type === answer')
     
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
@@ -701,7 +748,7 @@ function handleMessage(doc) {
 
     // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription));
   } 
-  else if (chatDoc.message === 'candidate' && isStarted) {
+  else if (chatDoc.message === 'candidate' && chatDoc.started) {
     log('[+] chatDoc.message === candidate')
 
     var candidate = new RTCIceCandidate({
@@ -719,7 +766,7 @@ function handleMessage(doc) {
     
     peerConnection.addIceCandidate(candidate);
   } 
-  else if (chatDoc.message === 'clear' && isStarted) { 
+  else if (chatDoc.message === 'clear' && chatDoc.started) { 
     log('[+] chatDoc.message === clear')
 
     sessionTerminated();
@@ -800,6 +847,12 @@ function addMessage(old, parameters) {
   }
   else if (parameters.message === 'channelReady') {
     old.channelReady = parameters.channelReady;
+  }
+  else if (parameters.message === 'started') {
+    old.started = parameters.started;
+  }
+  else if (parameters.message === 'initiator') {
+    old.initiator = parameters.initiator;
   }
   else if (parameters.message === 'candidate') {
     old.candidate = parameters.candidate;
@@ -982,18 +1035,36 @@ function joinAV() {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
 
     // isChannelReady = false;
-    isStarted = false;
-    isInitiator = true;
+    // isStarted = false;
+    // isInitiator = true;
 
     var param_channelReadyOff = {
       message : 'channelReady',
       channelReady : false
     };
+    var param_startedOff = {
+      message : 'started',
+      started : false
+    };
+    var param_initiatorOn = {
+      message : 'initiator',
+      initiator : true
+    };
+
 
     // param_channelReadyOff
     documentApi.update(myDocId, addMessage, param_channelReadyOff, updateSuccessCallback, function (error) {
       log("[-] joinAV-update-channelReadyOff: " + error);
     });
+    // param_startedOff
+    documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
+      log("[-] joinAV-update-param_startedOff: " + error);
+    });
+    // param_initiatorOn
+    documentApi.update(myDocId, addMessage, param_initiatorOn, updateSuccessCallback, function (error) {
+      log("[-] joinAV-update-param_initiatorOn: " + error);
+    });
+
 
     // Call getUserMedia()
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
