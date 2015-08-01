@@ -465,7 +465,7 @@ function start(data, video) {
   log('[+] started: ' + chatDoc.started);
   log('[+] localStream: ' + typeof localStream);
   log('[+] channelReady: ' + chatDoc.channelReady);
-  log('[+] initiator: ' + chatDoc.initiator);
+  // log('[+] initiator: ' + chatDoc.initiator);
 
   if (!chatDoc.started && typeof localStream != 'undefined' && chatDoc.channelReady) {
     createPeerConnection(data, video);
@@ -482,7 +482,10 @@ function start(data, video) {
     });
 
 
-    if (chatDoc.initiator) {
+    // if (chatDoc.initiator && chatDoc.creator.name === Omlet.getIdentity().name) {
+    //   createOffer();
+    // }
+    if (chatDoc.creator.name === Omlet.getIdentity().name) {
       createOffer();
     }
   }
@@ -521,15 +524,15 @@ function sessionTerminated() {
   // 이부분도 수정 예정. isInitiator는 dataChannel용임
   //isInitiator = false;
 
-  var param_initiatorOff = {
-    message : 'initiator',
-    initiator : false
-  };
+  // var param_initiatorOff = {
+  //   message : 'initiator',
+  //   initiator : false
+  // };
 
-  // param_initiatorOff
-  documentApi.update(myDocId, addMessage, param_initiatorOff, updateSuccessCallback, function (error) {
-    log("[-] sessionTerminated-update-param_initiatorOff: " + error);
-  });
+  // // param_initiatorOff
+  // documentApi.update(myDocId, addMessage, param_initiatorOff, updateSuccessCallback, function (error) {
+  //   log("[-] sessionTerminated-update-param_initiatorOff: " + error);
+  // });
 
 }
 
@@ -609,7 +612,7 @@ function initConnectionInfo() {
     'numOfUser' : numOfUser,
     'channelReady' : false,
     'started' : false,
-    'initiator' : false,
+    // 'initiator' : false,
     'sessionDescription' : '',
     'candidate' : '',
     'sdpMLineIndex' : '',
@@ -717,11 +720,9 @@ function handleMessage(doc) {
     log('[+] chatDoc.sessionDescription.type === offer')
 
     log('[+] started: ' + chatDoc.started);
-    log('[+] initiator: ' + chatDoc.initiator);
+    // log('[+] initiator: ' + chatDoc.initiator);
 
-    if (!chatDoc.started && !chatDoc.initiator) {
-      //checkAndStart(); // dataChannel인지 AV인지
-      // 일단 AV로 돌려
+    if (!chatDoc.started && chatDoc.creator.name !== Omlet.getIdentity().name) {
       start(false, true);
     }
 
@@ -853,9 +854,9 @@ function addMessage(old, parameters) {
   else if (parameters.message === 'started') {
     old.started = parameters.started;
   }
-  else if (parameters.message === 'initiator') {
-    old.initiator = parameters.initiator;
-  }
+  // else if (parameters.message === 'initiator') {
+  //   old.initiator = parameters.initiator;
+  // }
   else if (parameters.message === 'candidate') {
     old.candidate = parameters.candidate;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
@@ -1048,10 +1049,10 @@ function joinAV() {
       message : 'started',
       started : false
     };
-    var param_initiatorOn = {
-      message : 'initiator',
-      initiator : true
-    };
+    // var param_initiatorOn = {
+    //   message : 'initiator',
+    //   initiator : true
+    // };
 
 
     // param_channelReadyOff
@@ -1063,9 +1064,9 @@ function joinAV() {
       log("[-] joinAV-update-param_startedOff: " + error);
     });
     // param_initiatorOn
-    documentApi.update(myDocId, addMessage, param_initiatorOn, updateSuccessCallback, function (error) {
-      log("[-] joinAV-update-param_initiatorOn: " + error);
-    });
+    // documentApi.update(myDocId, addMessage, param_initiatorOn, updateSuccessCallback, function (error) {
+    //   log("[-] joinAV-update-param_initiatorOn: " + error);
+    // });
 
 
     // Call getUserMedia()
