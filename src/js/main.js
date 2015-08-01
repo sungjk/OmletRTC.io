@@ -695,7 +695,7 @@ function handleMessage(doc) {
     log('[+] chatDoc.message === candidate')
 
     var candidate = new RTCIceCandidate({
-      sdpMLineIndex : chatDoc.sdpMLineIndex, 
+      //sdpMLineIndex : chatDoc.sdpMLineIndex, 
       candidate : chatDoc.candidate
     }, onAddIceCandidateSuccess, function (error) {
       log('[-] handleMessage-RTCIceCandidate: ' + error);
