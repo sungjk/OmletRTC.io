@@ -399,8 +399,6 @@ function createPeerConnection(data, video) {
     return;
   }
 
-  // 원래 내꺼 소스
-
   // video: true
   if(video) {
     peerConnection.onaddstream = handleRemoteStreamAdded;
@@ -427,30 +425,6 @@ function createPeerConnection(data, video) {
       return;
     }
   }
-
-
-
-  // peerConnection.onaddstream = handleRemoteStreamAdded;
-  // peerConnection.onremovestream = handleRemoteStreamRemoved;
-
-  // if (isInitiator) { 
-  //   try {
-  //     // Create a reliable data channel
-  //     dataChannel = peerConnection.createDataChannel("datachannel", {reliable: true});
-  //   } 
-  //   catch (e) {
-  //     log('[-] Failed to create data channel.\n' + e.message);
-  //     return;
-  //   }
-
-  //   dataChannel.onopen = handleDataChannelStateChange;
-  //   dataChannel.onmessage = onMessage;
-  //   dataChannel.onclose = handleDataChannelStateChange;
-  // } 
-  // else { // Joiner
-  //   peerConnection.ondatachannel = gotReceiveChannel;
-  // }
-
 }
 
 
@@ -482,6 +456,7 @@ function start(data, video) {
   log('[+] isStarted: ' + isStarted);
   log('[+] localStream: ' + typeof localStream);
   log('[+] isChannelReady: ' + isChannelReady);
+  log('[+] isInitiator: ' + isInitiator);
 
   if (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
     createPeerConnection(data, video);
@@ -1001,9 +976,6 @@ function joinData() {
 
 
 function joinAV() {
-  log("[+] creator's name: " + chatDoc.creator.name);
-  log("[+] my name: " + Omlet.getIdentity().name);
-
   // Caller
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
