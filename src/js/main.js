@@ -344,6 +344,7 @@ function handleReceiveChannelStateChange() {
  *****************************************/
 
 
+
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
   log('[+] >>>>> handleUserMedia <<<<<');
@@ -391,6 +392,8 @@ function handleRemoteStreamRemoved(event) {
 
 // PeerConnection management
 function createPeerConnection(data, video) {
+  log("[+] <<<<< createPeerConnection >>>>>");
+
   try {
     peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
     peerConnection.addStream(localStream);
@@ -492,9 +495,9 @@ function start(data, video) {
     createPeerConnection(data, video);
     isStarted = true;
 
-    if (isInitiator) {
+    //if (isInitiator) {
       createOffer();
-    }
+    //}
   }
 }
 
@@ -667,30 +670,31 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.message === 'create' && chatDoc.creator.name === Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === create');
+  // if (chatDoc.message === 'create' && chatDoc.creator.name === Omlet.getIdentity().name) {
+  //   log('[+] chatDoc.message === create');
 
-    isInitiator = true;
+  //   isInitiator = true;
 
-    // Call getUserMedia()
-    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] handleMessage-getUserMedia-create: " + error);
-    });
-    log('Getting user media with constraints.');
+  //   // Call getUserMedia()
+  //   navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+  //     log("[-] handleMessage-getUserMedia-create: " + error);
+  //   });
+  //   log('Getting user media with constraints.');
 
-    start(false, true);
-  }
-  else if (chatDoc.message === 'join' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === join');
-    isChannelReady = true;
+  //   start(false, true);
+  // }
+  // else if (chatDoc.message === 'join' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+  //   log('[+] chatDoc.message === join');
+  //   isChannelReady = true;
 
-    // Call getUserMedia()
-    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] handleMessage-getUserMedia-join: " + error);
-    });
-    log('[+] Getting user media with constraints.');
-  }
-  else if (chatDoc.message === 'usermedia') {
+  //   // Call getUserMedia()
+  //   navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+  //     log("[-] handleMessage-getUserMedia-join: " + error);
+  //   });
+  //   log('[+] Getting user media with constraints.');
+  // }
+  // else if (chatDoc.message === 'usermedia') {
+  if (chatDoc.message === 'usermedia') {
     log('[+] chatDoc.message === usermedia'); 
 
     start(false, true);
@@ -701,7 +705,7 @@ function handleMessage(doc) {
     log('[+] isStarted: ' + isStarted);
     log('[+] isInitiator: ' + isInitiator);
 
-    if (!isInitiator && !isStarted) {
+    if (!isStarted) { //isInitiator && !isStarted) {
       //checkAndStart(); // dataChannel인지 AV인지
       // 일단 AV로 돌려
       start(false, true);
@@ -919,11 +923,6 @@ function create() {
     log("[+] Omlet is installed.");
     log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
 
-
-    // change disabled property 
-    // joinDataButton.disabled = false;
-    // joinAVButton.disabled = false;
-
     documentApi.create(function(d) {
       // create successCallback
 
@@ -1038,14 +1037,39 @@ function joinData() {
 
 
 function joinAV() {
+  // Caller
+  if (chatDoc.creator.name === Omlet.getIdentity().name) {
+    isChannelReady = false;
+    isStarted = false;
+    //isInitiator = true;
+
+    // Call getUserMedia()
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] handleMessage-getUserMedia-create: " + error);
+    });
+    log('Getting user media with constraints.');
+
+    start(false, true);
+  }
+  else {  // Callee
+    isChannelReady = true;
+
+    // Call getUserMedia()
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] handleMessage-getUserMedia-create: " + error);
+    });
+    log('Getting user media with constraints.');
+  }
+
+
+
   //log('[+] my feedMembers: ' + JSON.stringify(Omlet.getFeedMembers()));
   //log('[+] my identify: ' + JSON.stringify(Omlet.getIdentity()));
   //log('[+] chat doc identify: ' + JSON.stringify(chatDoc.creator));
   log("[+] creator's name: " + chatDoc.creator.name);
   log("[+] my name: " + Omlet.getIdentity().name);
 
-  //if (chatDoc.numOfUser === 0 ) { // first person
-  if (chatDoc.creator.name === Omlet.getIdentity().name) {
+  if (chatDoc.numOfUser === 0 ) { // first person
     log('[+] Create a room.');
 
     documentApi.update(myDocId, addMessage, param_create, function() { 
