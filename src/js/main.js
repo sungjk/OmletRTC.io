@@ -254,7 +254,7 @@ function handleIceCandidate(event) {
 
     var param_iceCandidate = {
       message : 'candidate',
-      id : event.candidate.sdpMid,
+      sdpMid : event.candidate.sdpMid,
       sdpMLineIndex : event.candidate.sdpMLineIndex,
       candidate : event.candidate.candidate
     };
@@ -695,8 +695,9 @@ function handleMessage(doc) {
     log('[+] chatDoc.message === candidate')
 
     var candidate = new RTCIceCandidate({
-      //sdpMLineIndex : chatDoc.sdpMLineIndex, 
-      candidate : chatDoc.candidate
+      candidate : chatDoc.candidate,
+      sdpMid : chatDoc.sdpMid,
+      sdpMLineIndex : chatDoc.sdpMLineIndex
     }, onAddIceCandidateSuccess, function (error) {
       log('[-] handleMessage-RTCIceCandidate: ' + error);
     });
