@@ -352,12 +352,12 @@ function handleUserMedia(stream) {
     documentApi.get(myDocId, addUser, function (error) {
       log('[-] handleUserMedia-update-get: ' + error);
     }); 
+
+    if (chatDoc.creator.name === Omlet.getIdentity().name)
+      start(false, true);
   }, function (error) {
     log('[-] handleUserMedia-update: ' + error);
   });
-
-  if (chatDoc.creator.name === Omlet.getIdentity().name)
-    start(false, true);
 }
 
 
