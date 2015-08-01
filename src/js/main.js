@@ -670,7 +670,6 @@ function ReceiveDoc(doc) {
 }
 
 
-
 function handleMessage(doc) {
   chatDoc = doc;
 
@@ -682,14 +681,14 @@ function handleMessage(doc) {
 
     start(false, true);
   }
-  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+  else if (chatDoc.sessionDescription.type === 'offer') {
     log('[+] chatDoc.sessionDescription.type === offer')
     log('[+] isStarted: ' + isStarted);
     // log('[+] started: ' + chatDoc.started);
     // log('[+] started: ' + chatDoc.started);
     // log('[+] initiator: ' + chatDoc.initiator);
 
-    if (!isStarted && chatDoc.creator.name !== Omlet.getIdentity().name) {
+    if (!isStarted && chatDoc.creator.name !== Omlet.getIdentity().name ) {
       start(false, true);
     }
 
