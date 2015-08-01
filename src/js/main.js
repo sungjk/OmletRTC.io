@@ -101,7 +101,6 @@ var joinDataButton = get("joinDataButton");
 // Flags...
 var isInitiator = false;
 var isStarted = false;
-var isChannelReady = false;
 
 // streams
 var localStream;
@@ -144,10 +143,9 @@ var param_join = {
 var param_clear = {
   message : 'clear'
 };
-var param_usermedia = {
-  message : 'usermedia'
+var param_userMedia = {
+  message : 'userMedia'
 };
-
 
 
 
@@ -347,7 +345,7 @@ function handleUserMedia(stream) {
   log('[+] Adding local stream.');
 
   // update document message; 'usermedia'
-  documentApi.update(myDocId, addMessage, param_usermedia, function() { 
+  documentApi.update(myDocId, addMessage, param_userMedia, function() { 
     documentApi.get(myDocId, addUser, function (error) {
       log('[-] handleUserMedia-update-get: ' + error);
     }); 
@@ -455,10 +453,10 @@ function start(data, video) {
   log('[+] data: ' + data + ', video: ' + video);
   log('[+] isStarted: ' + isStarted);
   log('[+] localStream: ' + typeof localStream);
-  log('[+] isChannelReady: ' + isChannelReady);
+  log('[+] channelReady: ' + chatDoc.channelReady);
   log('[+] isInitiator: ' + isInitiator);
 
-  if (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
+  if (!isStarted && typeof localStream != 'undefined' && chatDoc.channelReady) {
     createPeerConnection(data, video);
     isStarted = true;
 
@@ -560,11 +558,11 @@ function initConnectionInfo() {
 
   // Connection info
   var info = {
-    'flag' : true,
     'chatId' : chatId,
     'creator' : identity,
     'message' : '',
     'numOfUser' : numOfUser,
+    'channelReady' : false,
     'sessionDescription' : '',
     'candidate' : '',
     'sdpMLineIndex' : '',
@@ -661,8 +659,8 @@ function handleMessage(doc) {
   //   log('[+] Getting user media with constraints.');
   // }
   // else if (chatDoc.message === 'usermedia') {
-  if (chatDoc.message === 'usermedia') {
-    log('[+] chatDoc.message === usermedia'); 
+  if (chatDoc.message === 'userMedia') {
+    log('[+] chatDoc.message === userMedia'); 
 
     start(false, true);
   }
@@ -797,8 +795,11 @@ function addMessage(old, parameters) {
   //   old.numOfUser = old.numOfUser + 1;
   // }
 
-  if (parameters.message === 'usermedia') {
+  if (parameters.message === 'userMedia') {
     old.numOfUser = old.numOfUser + 1;
+  }
+  else if (parameters.message === 'channelReady') {
+    old.channelReady = parameters.channelReady;
   }
   else if (parameters.message === 'candidate') {
     old.candidate = parameters.candidate;
@@ -980,25 +981,45 @@ function joinAV() {
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
 
-    isChannelReady = false;
+    // isChannelReady = false;
     isStarted = false;
     isInitiator = true;
 
+    var param_channelReadyOff = {
+      message : 'channelReady',
+      channelReady : false
+    };
+
+    // param_channelReadyOff
+    documentApi.update(myDocId, addMessage, param_channelReadyOff, updateSuccessCallback, function (error) {
+      log("[-] joinAV-update-channelReadyOff: " + error);
+    });
+
     // Call getUserMedia()
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] handleMessage-getUserMedia-create: " + error);
+      log("[-] joinAV-getUserMedia-caller: " + error);
     });
     log('[+] Getting user media with constraints.');
 
-    start(false, true);
+    start(false, true);    
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
-    isChannelReady = true;
+    // isChannelReady = true;
+
+    var param_channelReadyOn = {
+      message : 'channelReady',
+      channelReady : true
+    };
+
+    // param_channelReadyOn
+    documentApi.update(myDocId, addMessage, param_channelReadyOn, updateSuccessCallback, function (error) {
+      log("[-] joinAV-update-channelReadyOn: " + error);
+    });
 
     // Call getUserMedia()
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] handleMessage-getUserMedia-create: " + error);
+      log("[-] joinAV-getUserMedia-callee: " + error);
     });
     log('[+] Getting user media with constraints.');
   }
