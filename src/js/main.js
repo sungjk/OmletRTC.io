@@ -674,37 +674,8 @@ function ReceiveDoc(doc) {
 function handleMessage(doc) {
   chatDoc = doc;
 
-  // if (Object.keys(chatDoc.numOfUser).length > 2)
-  //   return ;
-
   if (chatDoc.numOfUser > 2)
     return ;
-
-  // if (chatDoc.message === 'create' && chatDoc.creator.name === Omlet.getIdentity().name) {
-  //   log('[+] chatDoc.message === create');
-
-  //   isInitiator = true;
-
-  //   // Call getUserMedia()
-  //   navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-  //     log("[-] handleMessage-getUserMedia-create: " + error);
-  //   });
-  //   log('Getting user media with constraints.');
-
-  //   start(false, true);
-  // }
-  // else if (chatDoc.message === 'join' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-  //   log('[+] chatDoc.message === join');
-  //   isChannelReady = true;
-
-  //   // Call getUserMedia()
-  //   navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-  //     log("[-] handleMessage-getUserMedia-join: " + error);
-  //   });
-  //   log('[+] Getting user media with constraints.');
-  // }
-  // else if (chatDoc.message === 'usermedia') {
-
 
   if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia'); 
@@ -728,8 +699,6 @@ function handleMessage(doc) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     }); 
 
-    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription));
-
     createAnswer();
   } 
   else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
@@ -740,17 +709,9 @@ function handleMessage(doc) {
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     });
-
-    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription));
   } 
   else if (chatDoc.message === 'candidate' && isStarted) {
     log('[+] chatDoc.message === candidate')
-
-    // var candidate = new RTCIceCandidate({
-    //   sdpMLineIndex : chatDoc.sdpMLineIndex, 
-    //   candidate : chatDoc.candidate
-    // });
-
 
     var candidate = new RTCIceCandidate({
       sdpMLineIndex : chatDoc.sdpMLineIndex, 
