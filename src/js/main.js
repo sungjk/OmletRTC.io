@@ -1,16 +1,8 @@
 /*
 
-1. initConnectionInfo() 에서 info value 수정
-//  initialize 할 떄 numOfUser를 1로 바꿔주게 되면
-//  joinAV 핸들링 할 때 first person을 chatDoc.numOfUser == 1로 바꿔줘야할듯
-
-2. joinAV() 에서 first person, second person 핸들링 값 수정
-//  connection Info에서 numOfUser값을 
-//  document 생성할 때 +1 해주기.
-//  numOfUser = 0  -->  numOfUser = 1
-
-
-- 둘 다 조인한 후 한쪽에서 joinAV누르면 둘 다 getUserMedia 실행되는지 원본 소스와 비교하기
+  //log('[+] my feedMembers: ' + JSON.stringify(Omlet.getFeedMembers()));
+  //log('[+] my identify: ' + JSON.stringify(Omlet.getIdentity()));
+  //log('[+] chat doc identify: ' + JSON.stringify(chatDoc.creator));
 
 */
 
@@ -495,9 +487,9 @@ function start(data, video) {
     createPeerConnection(data, video);
     isStarted = true;
 
-    //if (isInitiator) {
+    if (isInitiator) {
       createOffer();
-    //}
+    }
   }
 }
 
@@ -705,7 +697,7 @@ function handleMessage(doc) {
     log('[+] isStarted: ' + isStarted);
     log('[+] isInitiator: ' + isInitiator);
 
-    if (!isStarted) { //isInitiator && !isStarted) {
+    if (!isStarted && !isInitiator) {
       //checkAndStart(); // dataChannel인지 AV인지
       // 일단 AV로 돌려
       start(false, true);
@@ -823,14 +815,14 @@ function addMessage(old, parameters) {
 
   // if (parameters.message === 'usermedia')
   //   continue;
-  if (parameters.message === 'create') {// || parameters.message === 'join') {
-    //old.numOfUser.push();
-    old.flag = false;
-    old.numOfUser = old.numOfUser + 1;
-  }
-  else if (parameters.message === 'join') {
-    //old.numOfUser.push();
+  // if (parameters.message === 'create') {// || parameters.message === 'join') {
+  //   old.numOfUser = old.numOfUser + 1;
+  // }
+  // else if (parameters.message === 'join') {
+  //   old.numOfUser = old.numOfUser + 1;
+  // }
 
+  if (parameters.message === 'usermedia') {
     old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'candidate') {
@@ -1008,46 +1000,21 @@ function joinData() {
 }
 
 
-
-
-// update parameters for caller
-// var callerParameters = {
-//   "name" : "caller",
-//   "value" : {
-//     "signals": []
-//   }
-// };
-
-// var calleeParameters = {
-//   "name" : "callee",
-//   "value" : {
-//     "signals" : [{
-//       "signal_type" : "callee_arrived",
-//       "timestamp" : Date.now()
-//       }]
-//   }
-// };
-
-// function addParticipant(old, params) {
-//   old.participants[params.name] = params.value ;
-
-//   return old;
-// }
-
-
-
 function joinAV() {
+  log("[+] creator's name: " + chatDoc.creator.name);
+  log("[+] my name: " + Omlet.getIdentity().name);
+
   // Caller
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
     isChannelReady = false;
     isStarted = false;
-    //isInitiator = true;
+    isInitiator = true;
 
     // Call getUserMedia()
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
       log("[-] handleMessage-getUserMedia-create: " + error);
     });
-    log('Getting user media with constraints.');
+    log('[+] Getting user media with constraints.');
 
     start(false, true);
   }
@@ -1058,43 +1025,38 @@ function joinAV() {
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
       log("[-] handleMessage-getUserMedia-create: " + error);
     });
-    log('Getting user media with constraints.');
+    log('[+] Getting user media with constraints.');
   }
 
 
 
-  //log('[+] my feedMembers: ' + JSON.stringify(Omlet.getFeedMembers()));
-  //log('[+] my identify: ' + JSON.stringify(Omlet.getIdentity()));
-  //log('[+] chat doc identify: ' + JSON.stringify(chatDoc.creator));
-  log("[+] creator's name: " + chatDoc.creator.name);
-  log("[+] my name: " + Omlet.getIdentity().name);
 
-  if (chatDoc.numOfUser === 0 ) { // first person
-    log('[+] Create a room.');
+  // if (chatDoc.numOfUser === 0 ) { // first person
+  //   log('[+] Create a room.');
 
-    documentApi.update(myDocId, addMessage, param_create, function() { 
-      documentApi.get(myDocId, {}, function (error) {
-        log("[-] joinAV-update-get-1: " + error);
-      }); 
-    }, function (error) {
-      log("[-] joinAV-update-1: " + error);
-    });
-  }
-  else if (chatDoc.numOfUser === 1 && !isStarted) {  // second person
-    log('[+] Another peer made join room.');
+  //   documentApi.update(myDocId, addMessage, param_create, function() { 
+  //     documentApi.get(myDocId, {}, function (error) {
+  //       log("[-] joinAV-update-get-1: " + error);
+  //     }); 
+  //   }, function (error) {
+  //     log("[-] joinAV-update-1: " + error);
+  //   });
+  // }
+  // else if (chatDoc.numOfUser === 1 && !isStarted) {  // second person
+  //   log('[+] Another peer made join room.');
 
-    documentApi.update(myDocId, addMessage, param_join, function() { 
-      documentApi.get(myDocId, {}, function (error) {
-        log("[-] joinAV-update-get-2: " + error);
-      }); 
-    }, function (error) {
-      log("[-] joinAV-update-2: " + error);
-    });  
-  }
-  else {
-    log('[-] Channel is full.');
-    return;
-  }
+  //   documentApi.update(myDocId, addMessage, param_join, function() { 
+  //     documentApi.get(myDocId, {}, function (error) {
+  //       log("[-] joinAV-update-get-2: " + error);
+  //     }); 
+  //   }, function (error) {
+  //     log("[-] joinAV-update-2: " + error);
+  //   });  
+  // }
+  // else {
+  //   log('[-] Channel is full.');
+  //   return;
+  // }
 }
 
 
