@@ -249,34 +249,25 @@ function setLocalSessionDescription(sessionDescription) {
 
 // ICE candidates management
 function handleIceCandidate(event) {
-  log('[+] handleIceCandidate event: ' + JSON.stringify(event.candidate));
-
-  var param_iceCandidate = {
-    message : 'candidate',
-    sdpMLineIndex : event.candidate.sdpMLineIndex,
-    candidate : event.candidate.candidate
-  };
+  // log('[+] handleIceCandidate event: ' + JSON.stringify(event.candidate));
+  log('[+] handleIceCandidate event.');
 
   if (event.candidate) {
+    var param_iceCandidate = {
+      message : 'candidate',
+      id : event.candidate.sdpMid,
+      sdpMLineIndex : event.candidate.sdpMLineIndex,
+      candidate : event.candidate.candidate
+
+    };
+
     // update: function(reference, func, parameters, success, error)
-    documentApi.update(myDocId, addSignal, param_iceCandidate , updateSuccessCallback, function (error) {
+    documentApi.update(myDocId, addMessage, param_iceCandidate , updateSuccessCallback, function (error) {
       log('[-] handleIceCandidate-update: ' + error);
     });
   } 
   else {
     log('[-] End of candidates.');
-    isStarted = false;
-
-    // var param_startedOff = {
-    //   message : 'started',
-    //   started : false
-    // };
-
-    // // param_startedOff
-    // documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
-    //   log("[-] handleIceCandidate-update-param_startedOff: " + error);
-    // });
-
   }
 }
 
@@ -828,23 +819,9 @@ function errorCallback(error) {
  *****************************************/
 
 
-    // var param_sdp = {
-    //   message : 'sessionDescription',
-    //   sessionDescription : sessionDescription
-    // };
-
 // 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
   if (parameters.message !== 'undefined')  old.message = parameters.message;
-
-  // if (parameters.message === 'usermedia')
-  //   continue;
-  // if (parameters.message === 'create') {// || parameters.message === 'join') {
-  //   old.numOfUser = old.numOfUser + 1;
-  // }
-  // else if (parameters.message === 'join') {
-  //   old.numOfUser = old.numOfUser + 1;
-  // }
 
   if (parameters.message === 'userMedia') {
     old.numOfUser = old.numOfUser + 1;
