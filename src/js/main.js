@@ -741,7 +741,7 @@ function handleMessage(doc) {
 
     createAnswer();
   } 
-  else if (chatDoc.sessionDescription.type === 'answer' && isStarted { 
+  else if (chatDoc.sessionDescription.type === 'answer' && isStarted) { 
     log('[+] chatDoc.sessionDescription.type === answer')
     
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
@@ -771,7 +771,7 @@ function handleMessage(doc) {
     peerConnection.addIceCandidate(candidate);
   } 
   else if (chatDoc.message === 'clear' && isStarted) { 
-    log('[+] chatDoc.message === clear')
+    log('[+] chatDoc.message === clear');
 
     sessionTerminated();
   }
