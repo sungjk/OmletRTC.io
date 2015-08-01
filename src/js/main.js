@@ -344,17 +344,20 @@ function handleUserMedia(stream) {
   attachMediaStream(localVideo, stream);
 
   // update document message; 'userMedia'
-  documentApi.update(myDocId, addMessage, param_userMedia, {}, function (error) {
+  // documentApi.update(myDocId, addMessage, param_userMedia, {}, function (error) {
+  //   log('[-] handleUserMedia-update: ' + error);
+  // });
+
+  documentApi.update(myDocId, addMessage, param_userMedia, function() { 
+    documentApi.get(myDocId, addUser, function (error) {
+      log('[-] handleUserMedia-update-get: ' + error);
+    }); 
+  }, function (error) {
     log('[-] handleUserMedia-update: ' + error);
   });
 
-  // documentApi.update(myDocId, addMessage, param_userMedia, function() { 
-  //   documentApi.get(myDocId, addUser, function (error) {
-  //     log('[-] handleUserMedia-update-get: ' + error);
-  //   }); 
-  // }, function (error) {
-  //   log('[-] handleUserMedia-update: ' + error);
-  // });
+  if (chatDoc.creator.name === Omlet.getIdentity().name)
+    start(false, true);
 }
 
 
@@ -467,10 +470,6 @@ function start(data, video) {
     //   log("[-] start-update-param_startedOn: " + error);
     // });
 
-
-    // if (chatDoc.initiator && chatDoc.creator.name === Omlet.getIdentity().name) {
-    //   createOffer();
-    // }
     if (chatDoc.creator.name === Omlet.getIdentity().name) {
       createOffer();
     }
@@ -983,8 +982,6 @@ function joinAV() {
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
       log("[-] joinAV-getUserMedia-caller: " + error);
     });
-
-    start(false, true);    
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
