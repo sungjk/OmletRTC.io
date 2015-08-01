@@ -706,12 +706,14 @@ function handleMessage(doc) {
   //   log('[+] Getting user media with constraints.');
   // }
   // else if (chatDoc.message === 'usermedia') {
+
+
   if (chatDoc.message === 'userMedia') {
     log('[+] chatDoc.message === userMedia'); 
 
     start(false, true);
   }
-  else if (chatDoc.sessionDescription.type === 'offer') {
+  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer')
 
     log('[+] started: ' + chatDoc.started);
@@ -737,7 +739,7 @@ function handleMessage(doc) {
 
     createAnswer();
   } 
-  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.started) { 
+  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.started && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.sessionDescription.type === answer')
     
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
