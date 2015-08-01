@@ -241,7 +241,7 @@ function setLocalSessionDescription(sessionDescription) {
     message : 'sessionDescription',
     sessionDescription : sessionDescription
   };
-  documentApi.update(myDocId, addMessage, param_sdp, updateSuccessCallback, function (error) {
+  documentApi.update(myDocId, addMessage, param_sdp, {}, function (error) {
     log("[-] setLocalSessionDescription-update: " + error);
   });
 }
@@ -254,13 +254,13 @@ function handleIceCandidate(event) {
 
     var param_iceCandidate = {
       message : 'candidate',
+      candidate : event.candidate.candidate,
       sdpMid : event.candidate.sdpMid,
-      sdpMLineIndex : event.candidate.sdpMLineIndex,
-      candidate : event.candidate.candidate
+      sdpMLineIndex : event.candidate.sdpMLineIndex
     };
 
     // update: function(reference, func, parameters, success, error)
-    documentApi.update(myDocId, addMessage, param_iceCandidate , updateSuccessCallback, function (error) {
+    documentApi.update(myDocId, addMessage, param_iceCandidate , {}, function (error) {
       log('[-] handleIceCandidate-update: ' + error);
     });
   } 
@@ -344,7 +344,7 @@ function handleUserMedia(stream) {
   attachMediaStream(localVideo, stream);
 
   // update document message; 'userMedia'
-  documentApi.update(myDocId, addMessage, param_userMedia, updateSuccessCallback, function (error) {
+  documentApi.update(myDocId, addMessage, param_userMedia, {}, function (error) {
     log('[-] handleUserMedia-update: ' + error);
   });
 
@@ -386,7 +386,7 @@ function createPeerConnection(data, video) {
 
     log('[+] onicecandidate');
     peerConnection.onicecandidate = handleIceCandidate;
-    //peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 
     //log('[+] Created RTCPeerConnnection with:\n' + 'config: ' + JSON.stringify(peerConnectionConfig) + '\nconstraints: ' + JSON.stringify(peerConnectionConstraints));
   }
@@ -592,6 +592,7 @@ function initConnectionInfo() {
     // 'initiator' : false,
     'sessionDescription' : '',
     'candidate' : '',
+    'sdpMid' : '',
     'sdpMLineIndex' : '',
     'timestamp' : Date.now()
   };
@@ -780,6 +781,7 @@ function addMessage(old, parameters) {
   // }
   else if (parameters.message === 'candidate') {
     old.candidate = parameters.candidate;
+    old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
   }
   else if (parameters.message === 'clear') {
@@ -963,7 +965,7 @@ function joinAV() {
 
 
     // param_channelReadyOff
-    documentApi.update(myDocId, addMessage, param_channelReadyOff, updateSuccessCallback, function (error) {
+    documentApi.update(myDocId, addMessage, param_channelReadyOff, {}, function (error) {
       log("[-] joinAV-update-channelReadyOff: " + error);
     });
     // param_startedOff
@@ -994,7 +996,7 @@ function joinAV() {
     };
 
     // param_channelReadyOn
-    documentApi.update(myDocId, addMessage, param_channelReadyOn, updateSuccessCallback, function (error) {
+    documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
       log("[-] joinAV-update-channelReadyOn: " + error);
     });
 
