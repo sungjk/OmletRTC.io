@@ -100,7 +100,7 @@ var joinDataButton = get("joinDataButton");
 
 // Flags...
 // var isInitiator = false;
-// var isStarted = false;
+var isStarted = false;
 
 // streams
 var localStream;
@@ -218,6 +218,8 @@ function createOffer() {
     peerConnection.createOffer(setLocalSessionDescription, function (error) {
       log('[-] createOffer: ' + error);
     }, sdpConstraints);
+
+
 }
 
 
@@ -263,17 +265,17 @@ function handleIceCandidate(event) {
   } 
   else {
     log('[-] End of candidates.');
-    //isStarted = false;
+    isStarted = false;
 
-    var param_startedOff = {
-      message : 'started',
-      started : false
-    };
+    // var param_startedOff = {
+    //   message : 'started',
+    //   started : false
+    // };
 
-    // param_startedOff
-    documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
-      log("[-] handleIceCandidate-update-param_startedOff: " + error);
-    });
+    // // param_startedOff
+    // documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
+    //   log("[-] handleIceCandidate-update-param_startedOff: " + error);
+    // });
 
   }
 }
@@ -462,24 +464,26 @@ Omlet.document = {
 function start(data, video) {
   log('[+] <<<<< start >>>>>>');
   log('[+] data: ' + data + ', video: ' + video);
-  log('[+] started: ' + chatDoc.started);
+
+  // log('[+] started: ' + chatDoc.started);
+  log('[+] isStarted: ' + isStarted);
   log('[+] localStream: ' + typeof localStream);
   log('[+] channelReady: ' + chatDoc.channelReady);
   // log('[+] initiator: ' + chatDoc.initiator);
 
-  if (!chatDoc.started && typeof localStream != 'undefined' && chatDoc.channelReady) {
+  if (!isStarted && typeof localStream != 'undefined' && chatDoc.channelReady) {
     createPeerConnection(data, video);
-    //isStarted = true;
+    isStarted = true;
 
-    var param_startedOn = {
-      message : 'started',
-      started : true
-    };
+    // var param_startedOn = {
+    //   message : 'started',
+    //   started : true
+    // };
 
-    // param_startedOn
-    documentApi.update(myDocId, addMessage, param_startedOn, updateSuccessCallback, function (error) {
-      log("[-] start-update-param_startedOn: " + error);
-    });
+    // // param_startedOn
+    // documentApi.update(myDocId, addMessage, param_startedOn, updateSuccessCallback, function (error) {
+    //   log("[-] start-update-param_startedOn: " + error);
+    // });
 
 
     // if (chatDoc.initiator && chatDoc.creator.name === Omlet.getIdentity().name) {
@@ -493,17 +497,17 @@ function start(data, video) {
 
 
 function stop() {
-  //isStarted = false;
+  isStarted = false;
 
-  var param_startedOff = {
-    message : 'started',
-    started : false
-  };
+  // var param_startedOff = {
+  //   message : 'started',
+  //   started : false
+  // };
 
-  // param_startedOff
-  documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
-    log("[-] stop-update-param_startedOff: " + error);
-  });
+  // // param_startedOff
+  // documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
+  //   log("[-] stop-update-param_startedOff: " + error);
+  // });
 
 
   if (dataChannel)    dataChannel.close();
@@ -611,7 +615,7 @@ function initConnectionInfo() {
     'message' : '',
     'numOfUser' : numOfUser,
     'channelReady' : false,
-    'started' : false,
+    // 'started' : false,
     // 'initiator' : false,
     'sessionDescription' : '',
     'candidate' : '',
@@ -718,17 +722,14 @@ function handleMessage(doc) {
   }
   else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer')
-
-    log('[+] started: ' + chatDoc.started);
+    log('[+] isStarted: ' + isStarted);
+    // log('[+] started: ' + chatDoc.started);
+    // log('[+] started: ' + chatDoc.started);
     // log('[+] initiator: ' + chatDoc.initiator);
 
-    if (!chatDoc.started && chatDoc.creator.name !== Omlet.getIdentity().name) {
+    if (!isStarted && chatDoc.creator.name !== Omlet.getIdentity().name) {
       start(false, true);
     }
-
-    // The setRemoteDescription() method instructs the RTCPeerConnection to apply the supplied RTCSessionDescription 
-    // as the remote offer or answer. This API changes the local media state. When the method is invoked, 
-    // the user agent must follow the processing model of setLocalDescription(), with the following additional conditions:
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[+] handleMessage-setRemoteDescription-offer');
@@ -740,7 +741,7 @@ function handleMessage(doc) {
 
     createAnswer();
   } 
-  else if (chatDoc.sessionDescription.type === 'answer' && chatdoc.started) { 
+  else if (chatDoc.sessionDescription.type === 'answer' && isStarted { 
     log('[+] chatDoc.sessionDescription.type === answer')
     
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
@@ -751,25 +752,25 @@ function handleMessage(doc) {
 
     // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription));
   } 
-  else if (chatDoc.message === 'candidate' && chatDoc.started) {
+  else if (chatDoc.message === 'candidate' && isStarted) {
     log('[+] chatDoc.message === candidate')
-
-    var candidate = new RTCIceCandidate({
-      sdpMLineIndex : chatDoc.sdpMLineIndex, 
-      candidate : chatDoc.candidate
-    });
-
 
     // var candidate = new RTCIceCandidate({
     //   sdpMLineIndex : chatDoc.sdpMLineIndex, 
     //   candidate : chatDoc.candidate
-    // }, onAddIceCandidateSuccess, function (error) {
-    //   log('[-] handleMessage-RTCIceCandidate: ' + error);
     // });
+
+
+    var candidate = new RTCIceCandidate({
+      sdpMLineIndex : chatDoc.sdpMLineIndex, 
+      candidate : chatDoc.candidate
+    }, onAddIceCandidateSuccess, function (error) {
+      log('[-] handleMessage-RTCIceCandidate: ' + error);
+    });
     
     peerConnection.addIceCandidate(candidate);
   } 
-  else if (chatDoc.message === 'clear' && chatDoc.started) { 
+  else if (chatDoc.message === 'clear' && isStarted) { 
     log('[+] chatDoc.message === clear')
 
     sessionTerminated();
@@ -851,9 +852,9 @@ function addMessage(old, parameters) {
   else if (parameters.message === 'channelReady') {
     old.channelReady = parameters.channelReady;
   }
-  else if (parameters.message === 'started') {
-    old.started = parameters.started;
-  }
+  // else if (parameters.message === 'started') {
+  //   old.started = parameters.started;
+  // }
   // else if (parameters.message === 'initiator') {
   //   old.initiator = parameters.initiator;
   // }
@@ -1038,17 +1039,17 @@ function joinAV() {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
 
     // isChannelReady = false;
-    // isStarted = false;
+    isStarted = false;
     // isInitiator = true;
 
     var param_channelReadyOff = {
       message : 'channelReady',
       channelReady : false
     };
-    var param_startedOff = {
-      message : 'started',
-      started : false
-    };
+    // var param_startedOff = {
+    //   message : 'started',
+    //   started : false
+    // };
     // var param_initiatorOn = {
     //   message : 'initiator',
     //   initiator : true
@@ -1060,9 +1061,9 @@ function joinAV() {
       log("[-] joinAV-update-channelReadyOff: " + error);
     });
     // param_startedOff
-    documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
-      log("[-] joinAV-update-param_startedOff: " + error);
-    });
+    // documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
+    //   log("[-] joinAV-update-param_startedOff: " + error);
+    // });
     // param_initiatorOn
     // documentApi.update(myDocId, addMessage, param_initiatorOn, updateSuccessCallback, function (error) {
     //   log("[-] joinAV-update-param_initiatorOn: " + error);
