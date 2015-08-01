@@ -1006,6 +1006,8 @@ function joinAV() {
 
   // Caller
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
+    log("[+] " + Omlet.getIdentity().name + " creates the room.");
+
     isChannelReady = false;
     isStarted = false;
     isInitiator = true;
@@ -1019,6 +1021,7 @@ function joinAV() {
     start(false, true);
   }
   else {  // Callee
+    log("[+] " + Omlet.getIdentity().name + " joins the room.");
     isChannelReady = true;
 
     // Call getUserMedia()
