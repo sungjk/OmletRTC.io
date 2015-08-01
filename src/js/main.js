@@ -357,7 +357,7 @@ function handleUserMedia(stream) {
   
   log('[+] Adding local stream.');
 
-  // update document message; 'usermedia'
+  // update document message; 'userMedia'
   documentApi.update(myDocId, addMessage, param_userMedia, function() { 
     documentApi.get(myDocId, addUser, function (error) {
       log('[-] handleUserMedia-update-get: ' + error);
@@ -715,7 +715,7 @@ function handleMessage(doc) {
   // else if (chatDoc.message === 'usermedia') {
 
 
-  if (chatDoc.message === 'userMedia') {
+  if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia'); 
 
     start(false, true);
