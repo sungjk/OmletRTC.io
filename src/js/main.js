@@ -740,7 +740,7 @@ function handleMessage(doc) {
 
     createAnswer();
   } 
-  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.started && chatDoc.creator.name === Omlet.getIdentity().name) { 
+  else if (chatDoc.sessionDescription.type === 'answer' && chatdoc.started) { 
     log('[+] chatDoc.sessionDescription.type === answer')
     
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
