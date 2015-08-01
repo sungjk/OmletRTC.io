@@ -249,10 +249,9 @@ function setLocalSessionDescription(sessionDescription) {
 
 // ICE candidates management
 function handleIceCandidate(event) {
-  // log('[+] handleIceCandidate event: ' + JSON.stringify(event.candidate));
-  log('[+] handleIceCandidate event.');
-
   if (event.candidate) {
+    log('[+] handleIceCandidate event.');
+
     var param_iceCandidate = {
       message : 'candidate',
       id : event.candidate.sdpMid,
@@ -341,18 +340,21 @@ function handleUserMedia(stream) {
   log('[+] >>>>> handleUserMedia <<<<<');
 
   localStream = stream;
+  log('[+] attachMediaStream(localVideo, stream)');
   attachMediaStream(localVideo, stream);
-  
-  log('[+] Adding local stream.');
 
   // update document message; 'userMedia'
-  documentApi.update(myDocId, addMessage, param_userMedia, function() { 
-    documentApi.get(myDocId, addUser, function (error) {
-      log('[-] handleUserMedia-update-get: ' + error);
-    }); 
-  }, function (error) {
+  documentApi.update(myDocId, addMessage, param_userMedia, updateSuccessCallback, function (error) {
     log('[-] handleUserMedia-update: ' + error);
   });
+
+  // documentApi.update(myDocId, addMessage, param_userMedia, function() { 
+  //   documentApi.get(myDocId, addUser, function (error) {
+  //     log('[-] handleUserMedia-update-get: ' + error);
+  //   }); 
+  // }, function (error) {
+  //   log('[-] handleUserMedia-update: ' + error);
+  // });
 }
 
 
@@ -382,8 +384,9 @@ function createPeerConnection(data, video) {
     log('[+] isStarted = true');
     isStarted = true;
 
+    log('[+] onicecandidate');
     peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    //peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 
     //log('[+] Created RTCPeerConnnection with:\n' + 'config: ' + JSON.stringify(peerConnectionConfig) + '\nconstraints: ' + JSON.stringify(peerConnectionConstraints));
   }
@@ -444,13 +447,10 @@ Omlet.document = {
 
 
 function start(data, video) {
+  log('[+] start()');
   if (!isStarted && typeof localStream != 'undefined' && chatDoc.channelReady) {
-    log('[+] <<<<< start >>>>>>');
-
     // log('[+] started: ' + chatDoc.started);
-    log('[+] isStarted: ' + isStarted);
-    log('[+] localStream: ' + typeof localStream);
-    log('[+] channelReady: ' + chatDoc.channelReady);
+    log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
 
     createPeerConnection(data, video);
 
@@ -672,16 +672,15 @@ function handleMessage(doc) {
 
     if (!isStarted) {
       start(false, true);
+
+      peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+        log('[+] handleMessage-setRemoteDescription-offer');
+      }, function (error) {
+        log('[-] handleMessage-setRemoteDescription-offer: ' + error);
+      }); 
+
+      createAnswer();
     }
-
-
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] handleMessage-setRemoteDescription-offer');
-    }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-offer: ' + error);
-    }); 
-
-    createAnswer();
   } 
   else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.sessionDescription.type === answer')
@@ -977,10 +976,10 @@ function joinAV() {
 
 
     // Call getUserMedia()
+    log('[+] getUserMedia.');
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
       log("[-] joinAV-getUserMedia-caller: " + error);
     });
-    log('[+] Getting user media with constraints.');
 
     start(false, true);    
   }
@@ -999,10 +998,10 @@ function joinAV() {
     });
 
     // Call getUserMedia()
+    log('[+] getUserMedia.');
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
       log("[-] joinAV-getUserMedia-callee: " + error);
     });
-    log('[+] Getting user media with constraints.');
   }
 }
 
