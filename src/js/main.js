@@ -695,14 +695,9 @@ function joinAV() {
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
 
-    
-    // navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-    //   log("[-] joinAV-getUserMedia-caller: " + error);
-    // });
-
     log('[+] getUserMedia.');
-    navigator.getUserMedia(constraints).then(handleUserMedia).catch(function (e) {
-      log("[-] joinAV-getUserMedia-caller: " + e);
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] joinAV-getUserMedia-caller: " + error);
     });
 
     start(false, true);    
@@ -715,18 +710,14 @@ function joinAV() {
       message : 'channelReady',
       channelReady : true
     };
-    documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (e) {
-      log("[-] joinAV-update-channelReadyOn: " + e);
+    documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
+      log("[-] joinAV-update-channelReadyOn: " + error);
     });
 
     log('[+] getUserMedia.');
-    navigator.getUserMedia(constraints).then(handleUserMedia).catch(function(e) {
-      log("[-] joinAV-getUserMedia-callee: " + e);
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] joinAV-getUserMedia-callee: " + error);
     });
-
-    // navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-    //   log("[-] joinAV-getUserMedia-callee: " + error);
-    // });
   }
 }
 
