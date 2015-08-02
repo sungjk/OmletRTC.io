@@ -700,7 +700,7 @@ function joinAV() {
       log("[-] joinAV-getUserMedia-caller: " + error);
     });
 
-    // start(false, true);    
+    start(false, true);    
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
