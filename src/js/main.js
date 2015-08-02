@@ -264,7 +264,7 @@ function onAddIceCandidateError(error) {
 
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
-  log('[+] >>>>> handleUserMedia <<<<<');
+  log('[+] getUserMedia() success handler');
 
   localStream = stream;
   log('[+] attachMediaStream(localVideo, stream)');
@@ -700,7 +700,7 @@ function joinAV() {
       log("[-] joinAV-getUserMedia-caller: " + error);
     });
 
-    start(false, true);    
+    // start(false, true);    
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
