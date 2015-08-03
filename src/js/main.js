@@ -271,7 +271,7 @@ function setLocalSessionDescription(sessionDescription) {
 
   peerConnection.setLocalDescription(sessionDescription, function () {
     var param_sdp = {
-      message : 'sessionDescription',
+      message : 'sdp',
       sessionDescription : sessionDescription,
     };
     documentApi.update(myDocId, addMessage, param_sdp, {}, function (error) {
@@ -563,17 +563,6 @@ function handleMessage(doc) {
     });
     peerConnection.addIceCandidate(candidate);
   }
-  // else if (chatDoc.message === 'sessionDescription') {
-  //   log('[+] peerConnection.setRemoteDescription');
-
-  //   peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-  //     if (chatDoc.sessionDescription.type == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-  //       createAnswer();
-  //     }
-  //   }, function (error) {
-  //     log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-  //   });
-  // }
   else if (chatDoc.message === 'clear' && isStarted) { 
     log('[+] chatDoc.message === clear');
 
@@ -647,7 +636,7 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  else if (parameters.message === 'sessionDescription') {
+  else if (parameters.message === 'sdp') {
     old.sessionDescription = parameters.sessionDescription; 
   }
 
@@ -782,12 +771,11 @@ function joinAV() {
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
 
+    createPeerConnection2(false, true);
+
     documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
       log("[-] joinAV-update-channelReadyOn: " + error);
     });
-        
-    createPeerConnection2(false, true);
-
 
     // documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
     //   log("[-] joinAV-update-channelReadyOn: " + error);
