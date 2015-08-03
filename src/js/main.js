@@ -43,6 +43,10 @@
 'use strict';
 
 
+// // Look after different browser vendors' ways of calling the getUserMedia() API method:
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+
 //////////////////////////////////////////////////////////////////
 //
 //                Log console
@@ -149,60 +153,6 @@ var param_channelReadyOn = {
 //
 /////////////////////////////////////////////////////////////////
 
-function createPeerConnection2(data, video) {
-  try {
-    log("[+] createPeerConnection2()");
-    peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
-
-    log("[+] Attach local Stream.");
-    peerConnection.addStream(localStream);
-  }
-  catch (e) {
-    log('[-] Failed to create RTCPeerConnection: ' + e.message);
-    return;
-  }
-
-  isStarted = true;
-  log('[+] isStarted: ' + isStarted);
-
-  // Caller
-  if (chatDoc.creator.name === Omlet.getIdentity().name) {
-    createOffer();
-  }
-  else {  // Callee
-    log('[+] Callee onicecandidate');
-    peerConnection.onicecandidate = calleeIceCandidate;
-    //peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-  }
-
-  // video: true
-  if(video) {
-    peerConnection.onaddstream = handleRemoteStreamAdded;
-    peerConnection.onremovestream = handleRemoteStreamRemoved;
-  }
-
-  // data: true
-  if(data) {
-    log("[+] Creating data channel.");
-
-    var dataChannelOptions = {
-      ordered: true
-    };
-    try {
-      dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
-      dataChannel.onerror = errorCallback;
-      dataChannel.onmessage = onMessage;
-      dataChannel.onopen = handleDataChannelState;
-      dataChannel.onclose = handleDataChannelState;
-
-    }
-    catch (e) {
-      log('[-] Failed to create data channel.\n' + e.message);
-      return;
-    }
-  }
-}
-
 function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
@@ -214,6 +164,9 @@ function createPeerConnection(data, video) {
     isStarted = true;
     log('[+] isStarted: ' + isStarted);
 
+    log('[+] handleIceCandidate');
+    peerConnection.onicecandidate = handleIceCandidate;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
   }
   catch (e) {
     log('[-] Failed to create RTCPeerConnection: ' + e.message);
@@ -278,52 +231,11 @@ function setLocalSessionDescription(sessionDescription) {
   });
 }
 
-function calleeIceCandidate(event) {
-  log('[+] calleeIceCandidate()');
-
-  if (event.candidate) {
-    log('[+] Callee IceCandidate event.');
-
-    // Callee가 보내는 candidate
-    var param_iceCandidate = {
-      message : 'calleeCandidate',
-      candidate : event.candidate.candidate,
-      sdpMid : event.candidate.sdpMid,
-      sdpMLineIndex : event.candidate.sdpMLineIndex
-    };
-    documentApi.update(myDocId, addMessage, param_iceCandidate , {}, function (error) {
-      log('[-] calleeIceCandidate-update: ' + error);
-    });
-  } 
-  else {
-    log('[-] End of Callee candidates.');
-  }
-}
-
-function callerIceCandidate(event) {
-  log('[+] callerIceCandidate()');
-
-  if (event.candidate) {
-    log('[+] Caller IceCandidate event.');
-
-    var param_iceCandidate = {
-      message : 'callerCandidate',
-      candidate : event.candidate.candidate,
-      sdpMid : event.candidate.sdpMid,
-      sdpMLineIndex : event.candidate.sdpMLineIndex
-    };
-    documentApi.update(myDocId, addMessage, param_iceCandidate , {}, function (error) {
-      log('[-] callerIceCandidate-update: ' + error);
-    });
-  } 
-  else {
-    log('[-] End of Caller candidates.');
-  }
-}
-
 function handleIceCandidate(event) {
+  log('[+] Call handleIceCandidate event.');
+
   if (event.candidate) {
-    log('[+] handleIceCandidate event.');
+    log('[+] Found candidate.');
 
     var param_iceCandidate = {
       message : 'candidate',
@@ -589,56 +501,20 @@ function handleMessage(doc) {
       log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     });
   } 
-  
-  else if (chatDoc.message === 'calleeCandidate' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name){
-    log('[+] chatDoc.message === calleeCandidate')
+  else if (chatDoc.message === 'candidate' && isStarted) {
+    log('[+] chatDoc.message === candidate')
 
     var candidate = new RTCIceCandidate({
       candidate : chatDoc.candidate,
       sdpMLineIndex : chatDoc.sdpMLineIndex
     });
-    log('[+] peerConnection.addIceCandidate(candidate)')
     peerConnection.addIceCandidate(candidate);
-
-    log('[+] Caller onicecandidate');
-    peerConnection.onicecandidate = callerIceCandidate;
-    // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-  }
-  else if (chatDoc.message === 'callerCandidate' && isStarted && chatDoc.creator.name !== Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === callerCandidate')
-
-    var candidate = new RTCIceCandidate({
-      candidate : chatDoc.candidate,
-      sdpMLineIndex : chatDoc.sdpMLineIndex
-    });
-    log('[+] peerConnection.addIceCandidate(candidate)')
-    peerConnection.addIceCandidate(candidate);
-
-    createAnswer();
-    // chatDoc.sessionDescription 이 뭔지 알 수 없을듯...
-    // log('[+] peerConnection.setRemoteDescription(): ' + chatDoc.sessionDescription.type)
-    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-    //   log('[+] handleMessage-setRemoteDescription-offer');
-    // }, function (error) {
-    //   log('[-] handleMessage-setRemoteDescription-offer: ' + error);
-    // }); 
-
-    // createAnswer();
   }
   else if (chatDoc.message === 'clear' && isStarted) { 
     log('[+] chatDoc.message === clear');
 
     sessionTerminated();
   }
-  // else if (chatDoc.message === 'candidate' && isStarted) {
-  //   log('[+] chatDoc.message === candidate')
-
-  //   var candidate = new RTCIceCandidate({
-  //     candidate : chatDoc.candidate,
-  //     sdpMLineIndex : chatDoc.sdpMLineIndex
-  //   });
-  //   peerConnection.addIceCandidate(candidate);
-  // }
 }
 
 
@@ -693,16 +569,11 @@ function addMessage(old, parameters) {
   else if (parameters.message === 'channelReady') {
     old.channelReady = parameters.channelReady;
   }
-  else if (parameters.message === 'calleeCandidate' || parameters.message === 'callerCandidate') {
+  else if (parameters.message === 'candidate') {
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
   }
-  // else if (parameters.message === 'candidate') {
-  //   old.candidate = parameters.candidate;
-  //   old.sdpMid = parameters.sdpMid;
-  //   old.sdpMLineIndex = parameters.sdpMLineIndex;
-  // }
   else if (parameters.message === 'clear') {
     old.chatId = chatId;
     old.creator = identity;
