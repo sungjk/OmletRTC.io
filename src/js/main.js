@@ -782,11 +782,12 @@ function joinAV() {
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
 
-    createPeerConnection2(false, true);
-
     documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
       log("[-] joinAV-update-channelReadyOn: " + error);
     });
+        
+    createPeerConnection2(false, true);
+
 
     // documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
     //   log("[-] joinAV-update-channelReadyOn: " + error);
