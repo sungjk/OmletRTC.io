@@ -534,7 +534,7 @@ function handleMessage(doc) {
 
     createOffer();
   }
-  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+  else if (chatDoc.sessionDescription.type == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer')
 
     log('[+] peerConnection.setRemoteDescription');
@@ -544,7 +544,7 @@ function handleMessage(doc) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     }); 
   } 
-  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
+  else if (chatDoc.sessionDescription.type == 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.sessionDescription.type === answer')
     
     log('[+] peerConnection.setRemoteDescription');
