@@ -2,6 +2,9 @@
   //log('[+] my feedMembers: ' + JSON.stringify(Omlet.getFeedMembers()));
   //log('[+] my identify: ' + JSON.stringify(Omlet.getIdentity()));
   //log('[+] chat doc identify: ' + JSON.stringify(chatDoc.creator));
+
+  //log('[+] Created RTCPeerConnnection with:\n' + 'config: ' + JSON.stringify(peerConnectionConfig) 
+  + '\nconstraints: ' + JSON.stringify(peerConnectionConstraints));
 */
 
 /*********************************************************************************
@@ -146,6 +149,30 @@ var param_channelReadyOn = {
 //
 /////////////////////////////////////////////////////////////////
 
+// function createPeerConnection2() {
+//   try {
+//     log("[+] createPeerConnection()");
+//     peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
+
+//     log("[+] Attach local Stream.");
+//     peerConnection.addStream(localStream);
+
+//     isStarted = true;
+//     log('[+] isStarted: ' + isStarted);
+
+//     if (chatDoc.creator.name === Omlet.getIdentity().name) {
+//       createOffer();
+//     }
+//   }
+//   catch (e) {
+//     log('[-] Failed to create RTCPeerConnection: ' + e.message);
+//     return;
+//   }
+// }
+
+
+
+
 function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
@@ -156,18 +183,16 @@ function createPeerConnection(data, video) {
 
     isStarted = true;
     log('[+] isStarted: ' + isStarted);
-
-    log('[+] onicecandidate');
-    peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-
-    //log('[+] Created RTCPeerConnnection with:\n' + 'config: ' + JSON.stringify(peerConnectionConfig) + '\nconstraints: ' + JSON.stringify(peerConnectionConstraints));
   }
   catch (e) {
     log('[-] Failed to create RTCPeerConnection: ' + e.message);
     return;
   }
 
+  log('[+] onicecandidate');
+  peerConnection.onicecandidate = handleIceCandidate;
+  peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    
   // video: true
   if(video) {
     peerConnection.onaddstream = handleRemoteStreamAdded;
@@ -503,6 +528,9 @@ function handleMessage(doc) {
       sdpMLineIndex : chatDoc.sdpMLineIndex
     });
     peerConnection.addIceCandidate(candidate);
+  }
+  else if {
+
   }
   else if (chatDoc.message === 'clear' && isStarted) { 
     log('[+] chatDoc.message === clear');
