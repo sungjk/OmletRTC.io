@@ -192,7 +192,7 @@ function createPeerConnection(data, video) {
   log('[+] onicecandidate');
   peerConnection.onicecandidate = handleIceCandidate;
   peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-    
+
   // video: true
   if(video) {
     peerConnection.onaddstream = handleRemoteStreamAdded;
@@ -529,9 +529,9 @@ function handleMessage(doc) {
     });
     peerConnection.addIceCandidate(candidate);
   }
-  else if {
+  // else if (){
 
-  }
+  // }
   else if (chatDoc.message === 'clear' && isStarted) { 
     log('[+] chatDoc.message === clear');
 
