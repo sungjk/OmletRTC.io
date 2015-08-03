@@ -149,29 +149,59 @@ var param_channelReadyOn = {
 //
 /////////////////////////////////////////////////////////////////
 
-// function createPeerConnection2() {
-//   try {
-//     log("[+] createPeerConnection()");
-//     peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
+function createPeerConnection2() {
+  try {
+    log("[+] createPeerConnection()");
+    peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
 
-//     log("[+] Attach local Stream.");
-//     peerConnection.addStream(localStream);
+    log("[+] Attach local Stream.");
+    peerConnection.addStream(localStream);
+  }
+  catch (e) {
+    log('[-] Failed to create RTCPeerConnection: ' + e.message);
+    return;
+  }
 
-//     isStarted = true;
-//     log('[+] isStarted: ' + isStarted);
+  isStarted = true;
+  log('[+] isStarted: ' + isStarted);
 
-//     if (chatDoc.creator.name === Omlet.getIdentity().name) {
-//       createOffer();
-//     }
-//   }
-//   catch (e) {
-//     log('[-] Failed to create RTCPeerConnection: ' + e.message);
-//     return;
-//   }
-// }
+  // Caller
+  if (chatDoc.creator.name === Omlet.getIdentity().name) {
+    createOffer();
+  }
+  else {  // Callee
+    log('[+] Callee onicecandidate');
+    peerConnection.onicecandidate = handleCalleeIceCandidate;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+  }
 
+  // video: true
+  if(video) {
+    peerConnection.onaddstream = handleRemoteStreamAdded;
+    peerConnection.onremovestream = handleRemoteStreamRemoved;
+  }
 
+  // data: true
+  if(data) {
+    log("[+] Creating data channel.");
 
+    var dataChannelOptions = {
+      ordered: true
+    };
+    try {
+      dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
+      dataChannel.onerror = errorCallback;
+      dataChannel.onmessage = onMessage;
+      dataChannel.onopen = handleDataChannelState;
+      dataChannel.onclose = handleDataChannelState;
+
+    }
+    catch (e) {
+      log('[-] Failed to create data channel.\n' + e.message);
+      return;
+    }
+  }
+}
 
 function createPeerConnection(data, video) {
   try {
@@ -183,15 +213,15 @@ function createPeerConnection(data, video) {
 
     isStarted = true;
     log('[+] isStarted: ' + isStarted);
+
+    log('[+] onicecandidate');
+    peerConnection.onicecandidate = handleIceCandidate;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
   }
   catch (e) {
     log('[-] Failed to create RTCPeerConnection: ' + e.message);
     return;
   }
-
-  log('[+] onicecandidate');
-  peerConnection.onicecandidate = handleIceCandidate;
-  peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 
   // video: true
   if(video) {
@@ -249,6 +279,44 @@ function setLocalSessionDescription(sessionDescription) {
   documentApi.update(myDocId, addMessage, param_sdp, {}, function (error) {
     log("[-] setLocalSessionDescription-update: " + error);
   });
+}
+
+function handleCalleeIceCandidate(event) {
+  if (event.candidate) {
+    log('[+] Callee IceCandidate event.');
+
+    var param_iceCandidate = {
+      message : 'calleeCandidate',
+      candidate : event.candidate.candidate,
+      sdpMid : event.candidate.sdpMid,
+      sdpMLineIndex : event.candidate.sdpMLineIndex
+    };
+    documentApi.update(myDocId, addMessage, param_iceCandidate , {}, function (error) {
+      log('[-] handleCalleeIceCandidate-update: ' + error);
+    });
+  } 
+  else {
+    log('[-] End of Callee candidates.');
+  }
+}
+
+function handleCallerIceCandidate(event) {
+  if (event.candidate) {
+    log('[+] Caller IceCandidate event.');
+
+    var param_iceCandidate = {
+      message : 'callerCandidate',
+      candidate : event.candidate.candidate,
+      sdpMid : event.candidate.sdpMid,
+      sdpMLineIndex : event.candidate.sdpMLineIndex
+    };
+    documentApi.update(myDocId, addMessage, param_iceCandidate , {}, function (error) {
+      log('[-] handleCallerIceCandidate-update: ' + error);
+    });
+  } 
+  else {
+    log('[-] End of Caller candidates.');
+  }
 }
 
 function handleIceCandidate(event) {
@@ -354,11 +422,12 @@ function start(data, video) {
   if (!isStarted && typeof localStream != 'undefined' && chatDoc.channelReady) {
     log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
 
-    createPeerConnection(data, video);
-
-    if (chatDoc.creator.name === Omlet.getIdentity().name) {
-      createOffer();
-    }
+    createPeerConnection2(data, video);
+    
+    // createPeerConnection(data, video);
+    // if (chatDoc.creator.name === Omlet.getIdentity().name) {
+    //   createOffer();
+    // }
   }
 }
 
@@ -520,18 +589,49 @@ function handleMessage(doc) {
       log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     });
   } 
-  else if (chatDoc.message === 'candidate' && isStarted) {
-    log('[+] chatDoc.message === candidate')
+  // else if (chatDoc.message === 'candidate' && isStarted) {
+  //   log('[+] chatDoc.message === candidate')
+
+  //   var candidate = new RTCIceCandidate({
+  //     candidate : chatDoc.candidate,
+  //     sdpMLineIndex : chatDoc.sdpMLineIndex
+  //   });
+  //   peerConnection.addIceCandidate(candidate);
+  // }
+  else if (chatDoc.message === 'calleeCandidate' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name){
+    log('[+] chatDoc.message === calleeCandidate')
 
     var candidate = new RTCIceCandidate({
       candidate : chatDoc.candidate,
       sdpMLineIndex : chatDoc.sdpMLineIndex
     });
+    log('[+] peerConnection.addIceCandidate(candidate)')
     peerConnection.addIceCandidate(candidate);
-  }
-  // else if (){
 
-  // }
+    log('[+] Caller onicecandidate');
+    peerConnection.onicecandidate = handleCallerIceCandidate;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+  }
+  else if (chatDoc.message === 'callerCandidate' && isStarted && chatDoc.creator.name !== Omlet.getIdentity().name) {
+    log('[+] chatDoc.message === callerCandidate')
+
+    var candidate = new RTCIceCandidate({
+      candidate : chatDoc.candidate,
+      sdpMLineIndex : chatDoc.sdpMLineIndex
+    });
+    log('[+] peerConnection.addIceCandidate(candidate)')
+    peerConnection.addIceCandidate(candidate);
+
+    // chatDoc.sessionDescription 이 뭔지 알 수 없을듯...
+    // log('[+] peerConnection.setRemoteDescription(): ' + chatDoc.sessionDescription.type)
+    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+    //   log('[+] handleMessage-setRemoteDescription-offer');
+    // }, function (error) {
+    //   log('[-] handleMessage-setRemoteDescription-offer: ' + error);
+    // }); 
+
+    // createAnswer();
+  }
   else if (chatDoc.message === 'clear' && isStarted) { 
     log('[+] chatDoc.message === clear');
 
