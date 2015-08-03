@@ -282,9 +282,12 @@ function setLocalSessionDescription(sessionDescription) {
 }
 
 function handleCalleeIceCandidate(event) {
+  log('[+] handleCalleeIceCandidate()');
+
   if (event.candidate) {
     log('[+] Callee IceCandidate event.');
 
+    // Callee가 보내는 candidate
     var param_iceCandidate = {
       message : 'calleeCandidate',
       candidate : event.candidate.candidate,
@@ -301,6 +304,8 @@ function handleCalleeIceCandidate(event) {
 }
 
 function handleCallerIceCandidate(event) {
+  log('[+] handleCallerIceCandidate()');
+  
   if (event.candidate) {
     log('[+] Caller IceCandidate event.');
 
