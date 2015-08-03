@@ -226,20 +226,10 @@ function setLocalSessionDescription(sessionDescription) {
   log("[+] setLocalSessionDescription.");
   peerConnection.setLocalDescription(sessionDescription);
 
-  if (sessionDescription.type === 'offer') {
-    var param_sdp = {
-      message : 'sessionDescription',
-      sessionDescription : sessionDescription,
-      offerState : true
-    };
-  }
-  else if (sessionDescription.type === 'answer') {
-    var param_sdp = {
-      message : 'sessionDescription',
-      sessionDescription : sessionDescription,
-      answerState : true
-    };
-  }
+  var param_sdp = {
+    message : 'sessionDescription',
+    sessionDescription : sessionDescription,
+  };
   documentApi.update(myDocId, addMessage, param_sdp, {}, function (error) {
     log("[-] setLocalSessionDescription-update: " + error);
   });
@@ -414,8 +404,6 @@ function initConnectionInfo() {
     'message' : '',
     'numOfUser' : numOfUser,
     'channelReady' : false,
-    'offerState' : false,
-    'answerState' : false,
     'sessionDescription' : '',
     'candidate' : '',
     'sdpMid' : '',
@@ -496,18 +484,8 @@ function handleMessage(doc) {
 
     if (!isStarted) {
       start(false, true);
-    }
 
-    if (chatDoc.offerState) {
-      var param_offerState = {
-        message : 'sessionDescription',
-        sessionDescription : chatDoc.sessionDescription,
-        offerState : false
-      };
-      documentApi.update(myDocId, addMessage, param_offerState, {}, function (error) {
-        log("[-] handleMessage-update-offerState: " + error);
-      }); 
-
+      log('[+] peerConnection.setRemoteDescription');
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
         log('[+] handleMessage-setRemoteDescription-offer');
       }, function (error) {
@@ -520,22 +498,12 @@ function handleMessage(doc) {
   else if (chatDoc.sessionDescription.type === 'answer' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.sessionDescription.type === answer')
     
-    if (chatDoc.answerState) {
-      var param_answerState = {
-        message : 'sessionDescription',
-        sessionDescription : chatDoc.sessionDescription,
-        answerState : false
-      };
-      documentApi.update(myDocId, addMessage, param_answerState, {}, function (error) {
-        log("[-] handleMessage-update-answerState: " + error);
-      }); 
-
-      peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-        log('[+] handleMessage-setRemoteDescription-answer');
-      }, function (error) {
-        log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-      });
-    }
+    log('[+] peerConnection.setRemoteDescription');
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+      log('[+] handleMessage-setRemoteDescription-answer');
+    }, function (error) {
+      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
+    });
   } 
   else if (chatDoc.message === 'candidate' && isStarted) {
     log('[+] chatDoc.message === candidate')
@@ -621,13 +589,6 @@ function addMessage(old, parameters) {
   }
   else if (parameters.message === 'sessionDescription') {
     old.sessionDescription = parameters.sessionDescription; 
-
-    if (parameters.sessionDescription.type === 'offer') {
-      old.offerState = parameters.offerState;
-    }
-    else if (parameters.sessionDescription.type === 'answer') {
-      old.answerState = parameters.answerState;
-    }
   }
 
   old.timestamp = Date.now();
