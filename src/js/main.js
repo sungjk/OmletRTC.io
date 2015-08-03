@@ -534,6 +534,31 @@ function handleMessage(doc) {
 
     createOffer();
   }
+  else if (chatDoc.message === 'candidate' && isStarted) {
+    log('[+] chatDoc.message === candidate')
+
+    var candidate = new RTCIceCandidate({
+      candidate : chatDoc.candidate,
+      sdpMLineIndex : chatDoc.sdpMLineIndex
+    });
+    peerConnection.addIceCandidate(candidate);
+  }
+  else if (chatDoc.message === 'sessionDescription') {
+    log('[+] peerConnection.setRemoteDescription');
+
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+      if (chatDoc.sessionDescription.type == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+        createAnswer();
+      }
+    }, function (error) {
+      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
+    });
+  }
+  else if (chatDoc.message === 'clear' && isStarted) { 
+    log('[+] chatDoc.message === clear');
+
+    sessionTerminated();
+  }
   // else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
   //   log('[+] chatDoc.sessionDescription.type === offer')
   //   log('[+] isStarted: ' + isStarted);
@@ -561,30 +586,6 @@ function handleMessage(doc) {
   //     log('[-] handleMessage-setRemoteDescription-answer: ' + error);
   //   });
   // }
-  else if (chatDoc.message === 'candidate' && isStarted) {
-    log('[+] chatDoc.message === candidate')
-
-    var candidate = new RTCIceCandidate({
-      candidate : chatDoc.candidate,
-      sdpMLineIndex : chatDoc.sdpMLineIndex
-    });
-    peerConnection.addIceCandidate(candidate);
-  }
-  else if (chatDoc.message === 'sessionDescription') {
-    log('[+] peerConnection.setRemoteDescription');
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      if (chatDoc.sessionDescription.type == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-        createAnswer();
-      }
-    }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-    });
-  }
-  else if (chatDoc.message === 'clear' && isStarted) { 
-    log('[+] chatDoc.message === clear');
-
-    sessionTerminated();
-  }
 }
 
 
