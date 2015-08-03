@@ -142,10 +142,6 @@ var param_clear = {
 var param_userMedia = {
   message : 'userMedia'
 };
-var param_sdp = {
-  message : 'sessionDescription',
-  sessionDescription : sessionDescription
-};
 var param_channelReadyOn = {
   message : 'channelReady',
   channelReady : true
@@ -226,6 +222,10 @@ function setLocalSessionDescription(sessionDescription) {
   log("[+] setLocalSessionDescription.");
   peerConnection.setLocalDescription(sessionDescription);
 
+  var param_sdp = {
+    message : 'sessionDescription',
+    sessionDescription : sessionDescription
+  };
   documentApi.update(myDocId, addMessage, param_sdp, {}, function (error) {
     log("[-] setLocalSessionDescription-update: " + error);
   });
