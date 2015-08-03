@@ -482,13 +482,13 @@ function handleMessage(doc) {
 
     if (!isStarted) {
       start(false, true);
-    }
 
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] handleMessage-setRemoteDescription-offer');
-    }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-offer: ' + error);
-    }); 
+      peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+        log('[+] handleMessage-setRemoteDescription-offer');
+      }, function (error) {
+        log('[-] handleMessage-setRemoteDescription-offer: ' + error);
+      }); 
+    }
   } 
   else if (chatDoc.sessionDescription.type === 'answer' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.sessionDescription.type === answer')
@@ -701,6 +701,9 @@ function getDocument() {
 }
 
 function joinAV() {
+  if (chatDoc.numOfUser > 2)
+    return;
+
   // Caller
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
