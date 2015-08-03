@@ -107,7 +107,7 @@ var constraints = {
 };
 
 // PeerConnection ICE protocol configuration (either Firefox or Chrome)
-var pc_config = webrtcDetectedBrowser === 'firefox' ? 
+var pc_config = webrtcDetectedBrowser === 'Chrome' ? 
     { 'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
     { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
 
@@ -171,8 +171,8 @@ function createPeerConnection2(data, video) {
   }
   else {  // Callee
     log('[+] Callee onicecandidate');
-    peerConnection.onicecandidate = handleCalleeIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    peerConnection.onicecandidate = calleeIceCandidate;
+    //peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
   }
 
   // video: true
@@ -214,9 +214,6 @@ function createPeerConnection(data, video) {
     isStarted = true;
     log('[+] isStarted: ' + isStarted);
 
-    log('[+] onicecandidate');
-    peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
   }
   catch (e) {
     log('[-] Failed to create RTCPeerConnection: ' + e.message);
@@ -281,10 +278,10 @@ function setLocalSessionDescription(sessionDescription) {
   });
 }
 
-function handleCalleeIceCandidate(event) {
-  //log('[+] handleCalleeIceCandidate()');
+function calleeIceCandidate(event) {
+  log('[+] calleeIceCandidate()');
 
-  //if (event.candidate) {
+  if (event.candidate) {
     log('[+] Callee IceCandidate event.');
 
     // Callee가 보내는 candidate
@@ -295,16 +292,16 @@ function handleCalleeIceCandidate(event) {
       sdpMLineIndex : event.candidate.sdpMLineIndex
     };
     documentApi.update(myDocId, addMessage, param_iceCandidate , {}, function (error) {
-      log('[-] handleCalleeIceCandidate-update: ' + error);
+      log('[-] calleeIceCandidate-update: ' + error);
     });
-  // } 
-  // else {
-  //   log('[-] End of Callee candidates.');
-  // }
+  } 
+  else {
+    log('[-] End of Callee candidates.');
+  }
 }
 
-function handleCallerIceCandidate(event) {
-  log('[+] handleCallerIceCandidate()');
+function callerIceCandidate(event) {
+  log('[+] callerIceCandidate()');
 
   if (event.candidate) {
     log('[+] Caller IceCandidate event.');
@@ -316,7 +313,7 @@ function handleCallerIceCandidate(event) {
       sdpMLineIndex : event.candidate.sdpMLineIndex
     };
     documentApi.update(myDocId, addMessage, param_iceCandidate , {}, function (error) {
-      log('[-] handleCallerIceCandidate-update: ' + error);
+      log('[-] callerIceCandidate-update: ' + error);
     });
   } 
   else {
@@ -582,8 +579,6 @@ function handleMessage(doc) {
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     }); 
-
-    createAnswer();
   } 
   else if (chatDoc.sessionDescription.type === 'answer' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.sessionDescription.type === answer')
@@ -594,15 +589,7 @@ function handleMessage(doc) {
       log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     });
   } 
-  // else if (chatDoc.message === 'candidate' && isStarted) {
-  //   log('[+] chatDoc.message === candidate')
-
-  //   var candidate = new RTCIceCandidate({
-  //     candidate : chatDoc.candidate,
-  //     sdpMLineIndex : chatDoc.sdpMLineIndex
-  //   });
-  //   peerConnection.addIceCandidate(candidate);
-  // }
+  
   else if (chatDoc.message === 'calleeCandidate' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name){
     log('[+] chatDoc.message === calleeCandidate')
 
@@ -614,8 +601,8 @@ function handleMessage(doc) {
     peerConnection.addIceCandidate(candidate);
 
     log('[+] Caller onicecandidate');
-    peerConnection.onicecandidate = handleCallerIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    peerConnection.onicecandidate = callerIceCandidate;
+    // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
   }
   else if (chatDoc.message === 'callerCandidate' && isStarted && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.message === callerCandidate')
@@ -627,6 +614,7 @@ function handleMessage(doc) {
     log('[+] peerConnection.addIceCandidate(candidate)')
     peerConnection.addIceCandidate(candidate);
 
+    createAnswer();
     // chatDoc.sessionDescription 이 뭔지 알 수 없을듯...
     // log('[+] peerConnection.setRemoteDescription(): ' + chatDoc.sessionDescription.type)
     // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
@@ -642,6 +630,15 @@ function handleMessage(doc) {
 
     sessionTerminated();
   }
+  // else if (chatDoc.message === 'candidate' && isStarted) {
+  //   log('[+] chatDoc.message === candidate')
+
+  //   var candidate = new RTCIceCandidate({
+  //     candidate : chatDoc.candidate,
+  //     sdpMLineIndex : chatDoc.sdpMLineIndex
+  //   });
+  //   peerConnection.addIceCandidate(candidate);
+  // }
 }
 
 
