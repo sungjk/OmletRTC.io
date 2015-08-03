@@ -135,8 +135,10 @@ var param_clear = {
 var param_userMedia = {
   message : 'userMedia'
 };
-
-
+var param_channelReadyOn = {
+  message : 'channelReady',
+  channelReady : true
+};
 
 //////////////////////////////////////////////////////////////////
 //
@@ -151,6 +153,9 @@ function createPeerConnection(data, video) {
 
     log("[+] Attach local Stream.");
     peerConnection.addStream(localStream);
+
+    isStarted = true;
+    log('[+] isStarted: ' + isStarted);
 
     log('[+] onicecandidate');
     peerConnection.onicecandidate = handleIceCandidate;
@@ -325,7 +330,6 @@ function start(data, video) {
     log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
 
     createPeerConnection(data, video);
-    isStarted = true;
 
     if (chatDoc.creator.name === Omlet.getIdentity().name) {
       createOffer();
@@ -449,13 +453,19 @@ function watchDocument(docref, OnUpdate) {
 }
 
 
+/*
+  'userMedia' : Caller에게만 핸들링되도록
+  'offer' : Callee에게만 핸들링되도록
+  'answer' : Caller에게만 핸들링되도록
+  'candidate' : 
+*/
 function handleMessage(doc) {
   chatDoc = doc;
 
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.message === 'userMedia') {
+  if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia'); 
 
     start(false, true);
@@ -490,12 +500,8 @@ function handleMessage(doc) {
 
     var candidate = new RTCIceCandidate({
       candidate : chatDoc.candidate,
-      sdpMid : chatDoc.sdpMid,
       sdpMLineIndex : chatDoc.sdpMLineIndex
-    }, onAddIceCandidateSuccess, function (error) {
-      log('[-] handleMessage-RTCIceCandidate: ' + error);
     });
-    
     peerConnection.addIceCandidate(candidate);
   }
   else if (chatDoc.message === 'clear' && isStarted) { 
@@ -702,12 +708,7 @@ function joinAV() {
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
-    isStarted = false;
 
-    var param_channelReadyOn = {
-      message : 'channelReady',
-      channelReady : true
-    };
     documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
       log("[-] joinAV-update-channelReadyOn: " + error);
     });
