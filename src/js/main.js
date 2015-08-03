@@ -142,6 +142,10 @@ var param_clear = {
 var param_userMedia = {
   message : 'userMedia'
 };
+var param_sdp = {
+  message : 'sessionDescription',
+  sessionDescription : sessionDescription
+};
 var param_channelReadyOn = {
   message : 'channelReady',
   channelReady : true
@@ -222,10 +226,6 @@ function setLocalSessionDescription(sessionDescription) {
   log("[+] setLocalSessionDescription.");
   peerConnection.setLocalDescription(sessionDescription);
 
-  var param_sdp = {
-    message : 'sessionDescription',
-    sessionDescription : sessionDescription
-  };
   documentApi.update(myDocId, addMessage, param_sdp, {}, function (error) {
     log("[-] setLocalSessionDescription-update: " + error);
   });
@@ -471,7 +471,7 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.message === 'userMedia') { // && chatDoc.creator.name === Omlet.getIdentity().name) {
+  if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia'); 
 
     start(false, true);
