@@ -534,6 +534,26 @@ function handleMessage(doc) {
 
     createOffer();
   }
+  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+    log('[+] chatDoc.sessionDescription.type === offer')
+
+    log('[+] peerConnection.setRemoteDescription');
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+      createAnswer();
+    }, function (error) {
+      log('[-] handleMessage-setRemoteDescription-offer: ' + error);
+    }); 
+  } 
+  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
+    log('[+] chatDoc.sessionDescription.type === answer')
+    
+    log('[+] peerConnection.setRemoteDescription');
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+      log('[+] handleMessage-setRemoteDescription-answer');
+    }, function (error) {
+      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
+    });
+  }
   else if (chatDoc.message === 'candidate' && isStarted) {
     log('[+] chatDoc.message === candidate')
 
@@ -543,49 +563,22 @@ function handleMessage(doc) {
     });
     peerConnection.addIceCandidate(candidate);
   }
-  else if (chatDoc.message === 'sessionDescription') {
-    log('[+] peerConnection.setRemoteDescription');
+  // else if (chatDoc.message === 'sessionDescription') {
+  //   log('[+] peerConnection.setRemoteDescription');
 
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      if (chatDoc.sessionDescription.type == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-        createAnswer();
-      }
-    }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-    });
-  }
+  //   peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+  //     if (chatDoc.sessionDescription.type == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+  //       createAnswer();
+  //     }
+  //   }, function (error) {
+  //     log('[-] handleMessage-setRemoteDescription-answer: ' + error);
+  //   });
+  // }
   else if (chatDoc.message === 'clear' && isStarted) { 
     log('[+] chatDoc.message === clear');
 
     sessionTerminated();
   }
-  // else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-  //   log('[+] chatDoc.sessionDescription.type === offer')
-  //   log('[+] isStarted: ' + isStarted);
-
-  //   if (!isStarted) {
-  //     start(false, true);
-
-  //     log('[+] peerConnection.setRemoteDescription');
-  //     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-  //       log('[+] handleMessage-setRemoteDescription-offer');
-  //     }, function (error) {
-  //       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
-  //     }); 
-
-  //     createAnswer();
-  //   }
-  // } 
-  // else if (chatDoc.sessionDescription.type === 'answer' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name) { 
-  //   log('[+] chatDoc.sessionDescription.type === answer')
-    
-  //   log('[+] peerConnection.setRemoteDescription');
-  //   peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-  //     log('[+] handleMessage-setRemoteDescription-answer');
-  //   }, function (error) {
-  //     log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-  //   });
-  // }
 }
 
 
