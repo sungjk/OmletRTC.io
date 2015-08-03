@@ -199,6 +199,10 @@ function createPeerConnection(data, video) {
       return;
     }
   }
+
+  if (chatDoc.creator.name === Omlet.getIdentity().name) {
+    createOffer();
+  }
 }
 
 function createOffer() {
@@ -337,9 +341,7 @@ function start(data, video) {
     log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
 
     createPeerConnection(data, video);
-    if (chatDoc.creator.name === Omlet.getIdentity().name) {
-      createOffer();
-    }
+    
   }
 }
 
@@ -489,6 +491,8 @@ function handleMessage(doc) {
         log('[-] handleMessage-setRemoteDescription-offer: ' + error);
       }); 
     }
+
+    createAnswer();
   } 
   else if (chatDoc.sessionDescription.type === 'answer' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.sessionDescription.type === answer')
