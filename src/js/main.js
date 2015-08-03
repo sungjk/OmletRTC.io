@@ -233,7 +233,7 @@ function setLocalSessionDescription(sessionDescription) {
       offerState : true
     };
   }
-  else (sessionDescription.type === 'answer') {
+  else if (sessionDescription.type === 'answer') {
     var param_sdp = {
       message : 'sessionDescription',
       sessionDescription : sessionDescription,
