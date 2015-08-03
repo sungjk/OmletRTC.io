@@ -282,9 +282,9 @@ function setLocalSessionDescription(sessionDescription) {
 }
 
 function handleCalleeIceCandidate(event) {
-  log('[+] handleCalleeIceCandidate()');
+  //log('[+] handleCalleeIceCandidate()');
 
-  if (event.candidate) {
+  //if (event.candidate) {
     log('[+] Callee IceCandidate event.');
 
     // Callee가 보내는 candidate
@@ -297,15 +297,15 @@ function handleCalleeIceCandidate(event) {
     documentApi.update(myDocId, addMessage, param_iceCandidate , {}, function (error) {
       log('[-] handleCalleeIceCandidate-update: ' + error);
     });
-  } 
-  else {
-    log('[-] End of Callee candidates.');
-  }
+  // } 
+  // else {
+  //   log('[-] End of Callee candidates.');
+  // }
 }
 
 function handleCallerIceCandidate(event) {
   log('[+] handleCallerIceCandidate()');
-  
+
   if (event.candidate) {
     log('[+] Caller IceCandidate event.');
 
