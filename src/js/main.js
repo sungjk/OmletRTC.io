@@ -149,9 +149,9 @@ var param_channelReadyOn = {
 //
 /////////////////////////////////////////////////////////////////
 
-function createPeerConnection2() {
+function createPeerConnection2(data, video) {
   try {
-    log("[+] createPeerConnection()");
+    log("[+] createPeerConnection2()");
     peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
 
     log("[+] Attach local Stream.");
@@ -423,7 +423,7 @@ function start(data, video) {
     log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
 
     createPeerConnection2(data, video);
-    
+
     // createPeerConnection(data, video);
     // if (chatDoc.creator.name === Omlet.getIdentity().name) {
     //   createOffer();
@@ -691,11 +691,16 @@ function addMessage(old, parameters) {
   else if (parameters.message === 'channelReady') {
     old.channelReady = parameters.channelReady;
   }
-  else if (parameters.message === 'candidate') {
+  else if (parameters.message === 'calleeCandidate' || parameters.message === 'callerCandidate') {
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
   }
+  // else if (parameters.message === 'candidate') {
+  //   old.candidate = parameters.candidate;
+  //   old.sdpMid = parameters.sdpMid;
+  //   old.sdpMLineIndex = parameters.sdpMLineIndex;
+  // }
   else if (parameters.message === 'clear') {
     old.chatId = chatId;
     old.creator = identity;
