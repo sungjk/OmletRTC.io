@@ -336,12 +336,10 @@ function start(data, video) {
   if (!isStarted && typeof localStream != 'undefined' && chatDoc.channelReady) {
     log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
 
-    createPeerConnection2(data, video);
-
-    // createPeerConnection(data, video);
-    // if (chatDoc.creator.name === Omlet.getIdentity().name) {
-    //   createOffer();
-    // }
+    createPeerConnection(data, video);
+    if (chatDoc.creator.name === Omlet.getIdentity().name) {
+      createOffer();
+    }
   }
 }
 
