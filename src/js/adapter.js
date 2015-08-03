@@ -163,10 +163,6 @@ function log(message){
 
 
 
-// // Look after different browser vendors' ways of calling the getUserMedia() API method:
-navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-
 // /*
 //  *  Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
 //  *
