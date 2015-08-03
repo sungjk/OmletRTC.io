@@ -153,6 +153,50 @@ var param_channelReadyOn = {
 //
 /////////////////////////////////////////////////////////////////
 
+function createPeerConnection2(data, video) {
+  log("[+] createPeerConnection2()");
+  peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
+
+  log('[+] handleIceCandidate');
+  peerConnection.onicecandidate = handleIceCandidate;
+  peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+
+  if(data) {
+    log("[+] Creating data channel.");
+
+    var dataChannelOptions = {
+      ordered: true
+    };
+
+    dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
+
+    dataChannel.onerror = logError ;
+    dataChannel.onmessage = onMessage;
+    dataChannel.onopen = dataChannelOpened;
+    dataChannel.onclose = function () {
+      log("[-] The Data Channel is closed.");
+    };
+  }
+
+  if(video) {
+    peerConnection.onaddstream = function (event) { 
+      log('[+] Remote stream added.'); 
+      attachMediaStream(remoteVideo, event.stream); 
+      log('[+] Remote stream attached.'); 
+      remoteStream = event.stream;
+    }
+    peerConnection.onremovestream = function (event) {
+      log('[+] Remote stream removed. Event: ', event);
+    };
+
+    log('[+] getUserMedia.');
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] createPeerConnection2-getUserMedia: " + error);
+    });
+  }
+}
+
+
 function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
@@ -281,6 +325,7 @@ function onAddIceCandidateError(error) {
  *
  *****************************************/
 
+
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
   log('[+] getUserMedia() success handler');
@@ -288,6 +333,9 @@ function handleUserMedia(stream) {
   localStream = stream;
   log('[+] attachMediaStream(localVideo, stream)');
   attachMediaStream(localVideo, stream);
+
+  log("[+] peerConnection.addStream(stream)") ;
+  peerConnection.addStream(stream);
 
   // update document message; 'userMedia'
   documentApi.update(myDocId, addMessage, param_userMedia, function() { 
@@ -476,38 +524,43 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === userMedia'); 
+  // if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
+  //   log('[+] chatDoc.message === userMedia'); 
 
-    start(false, true);
+  //   start(false, true);
+  // }
+  if (chatDoc.message === 'channelReady' && chatDoc.creator.name === Omlet.getIdentity().name) {
+    log('[+] chatDoc.message === channelReady'); 
+
+    createOffer();
   }
-  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-    log('[+] chatDoc.sessionDescription.type === offer')
-    log('[+] isStarted: ' + isStarted);
+  // else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+  //   log('[+] chatDoc.sessionDescription.type === offer')
+  //   log('[+] isStarted: ' + isStarted);
 
-    if (!isStarted) {
-      start(false, true);
+  //   if (!isStarted) {
+  //     start(false, true);
 
-      log('[+] peerConnection.setRemoteDescription');
-      peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-        log('[+] handleMessage-setRemoteDescription-offer');
-      }, function (error) {
-        log('[-] handleMessage-setRemoteDescription-offer: ' + error);
-      }); 
+  //     log('[+] peerConnection.setRemoteDescription');
+  //     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+  //       log('[+] handleMessage-setRemoteDescription-offer');
+  //     }, function (error) {
+  //       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
+  //     }); 
 
-      createAnswer();
-    }
-  } 
-  else if (chatDoc.sessionDescription.type === 'answer' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name) { 
-    log('[+] chatDoc.sessionDescription.type === answer')
+  //     createAnswer();
+  //   }
+  // } 
+  // else if (chatDoc.sessionDescription.type === 'answer' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name) { 
+  //   log('[+] chatDoc.sessionDescription.type === answer')
     
-    log('[+] peerConnection.setRemoteDescription');
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] handleMessage-setRemoteDescription-answer');
-    }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-    });
-  } 
+  //   log('[+] peerConnection.setRemoteDescription');
+  //   peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+  //     log('[+] handleMessage-setRemoteDescription-answer');
+  //   }, function (error) {
+  //     log('[-] handleMessage-setRemoteDescription-answer: ' + error);
+  //   });
+  // }
   else if (chatDoc.message === 'candidate' && isStarted) {
     log('[+] chatDoc.message === candidate')
 
@@ -723,24 +776,32 @@ function joinAV() {
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
 
-    log('[+] getUserMedia.');
-    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] joinAV-getUserMedia-caller: " + error);
-    });
+    createPeerConnection2(false, true);
 
-    start(false, true);
+    // log('[+] getUserMedia.');
+    // navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+    //   log("[-] joinAV-getUserMedia-caller: " + error);
+    // });
+
+    // start(false, true);
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
+
+    createPeerConnection2(false, true);
 
     documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
       log("[-] joinAV-update-channelReadyOn: " + error);
     });
 
-    log('[+] getUserMedia.');
-    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] joinAV-getUserMedia-callee: " + error);
-    });
+    // documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
+    //   log("[-] joinAV-update-channelReadyOn: " + error);
+    // });
+
+    // log('[+] getUserMedia.');
+    // navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+    //   log("[-] joinAV-getUserMedia-callee: " + error);
+    // });
   }
 }
 
@@ -802,396 +863,4 @@ Omlet.ready(function() {
   }
 });
 
-
-
-
-
-
-
-
-
-
-// function ReceiveUpdatedDoc(doc) {
-
-
-//   chatDoc = doc;
-
-//   log( "Updated Doc Fetched" );
-//   log( "chat id: " + chatDoc.chatId ) ;
-//   log( "people in this conversation: " + Object.keys(chatDoc.participants).length );
-
-//   if( Object.keys(chatDoc.participants).length != 2 ) {
-//     return ;
-//   }
-
-
-//     //log("Updated signals: " + JSON.stringify(processedSignals) ) ;
-
-//     // Having two people
-//     var caller = chatDoc.participants["caller"] ;
-//     var callee = chatDoc.participants["callee"] ;
-
-//     //log( "CALLER:" + JSON.stringify(caller));
-//     // Callee Signal Handler - process signals generated by caller
-//     for (var i = 0; i < caller.signals.length; i++) {
-
-//       var signal = caller.signals[i];
-//       if (signal.timestamp in processedSignals)
-//         continue ;
-//       processedSignals[signal.timestamp]  = 1 ;
-
-//       if (signal.signal_type === "new_ice_candidate") {
-//         log("PC2 is adding ICE.");
-//         peerConnection2.addIceCandidate(
-//           new RTCIceCandidate(signal.candidate),
-//           onAddIceCandidateSuccess, onAddIceCandidateError
-//           );
-//       } else if (signal.signal_type === "new_description") {
-//         log("PC2 is setting remote description");
-//         peerConnection2.setRemoteDescription(
-//           new RTCSessionDescription(signal.sdp),
-//           function () {
-//             log("PC2 is checking for offer.");
-//             if (peerConnection2.remoteDescription.type == "offer") {
-//               log("PC2 is creating answer.");
-//               peerConnection2.createAnswer(onNewDescriptionCreated_2, logError);
-//             }
-//           }, logError);
-//       }
-
-
-//     }
-
-//     //log("CALLEE:" + JSON.stringify(callee));
-//     // Caller Signal Handler - process signals generated by callee
-//     for (var i = 0; i < callee.signals.length; i++) {
-//       var signal = callee.signals[i];
-//       if (signal.timestamp in processedSignals)
-//         continue ;
-//       processedSignals[signal.timestamp]  = 1 ;
-
-//       if (signal.signal_type === "callee_arrived") {
-
-//         //  if( there ==0 ) {
-//           log("Callee Arrived") ;
-//           peerConnection.createOffer(
-//             onNewDescriptionCreated,
-//             logError
-//             );
-//         //  there =1 ;
-//       //  }
-//     }
-//     else if (signal.signal_type === "new_ice_candidate") {
-//       peerConnection.addIceCandidate(
-//         new RTCIceCandidate(signal.candidate),
-//         onAddIceCandidateSuccess, onAddIceCandidateError
-//         );
-//     } else if (signal.signal_type === "new_description") {
-//       log(signal.sdp);
-//       peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp), function () {}, logError);
-//     }
-//   }
-
-// }
-
-
-
-// function onNewDescriptionCreated(description) {
-//   peerConnection.setLocalDescription(description, function () {
-//     log("Caller Local Description Set");
-
-//     // Send it to the other peer
-//     if ( omletAsSignallingChannel ){
-//       //TODO Update the Document
-//       log("updating doc with id#:" + myDocId);
-
-//         //documentApi.update(myDocId, addParticipant, {"name": "dummy" , "value" : {"signals":[]} }
-//         //     , function() { documentApi.get(myDocId, participantAdded); }
-//         //     , function(e) { alert("error: " + JSON.stringify(e)); }
-//         //);
-
-//     var des_obj = {"name": "caller" , "signal" : {"signal_type": "new_description","timestamp":Date.now(),  "sdp": description} }  ;
-//         //var des_str = JSON.stringify( des_obj );
-
-
-
-//         //log(des_str) ;
-//         //str = JSON.stringify(description);
-//         //str = '{"sdp": "v=0\r\n\o=- 368374678643784 2 IN IP4 12.3.3.3 \r\ns-=-\r\nt=0 0\r\na=msid-semantic:"}';
-//         //str = 'Hello kitty' ;
-//     documentApi.update(myDocId, addSignal, des_obj , function() { log("Signal added"); }
-//      , function(e) { alert("error: " + JSON.stringify(e)); }
-//      );
-
-//         //documentApi.update(myDocId, addSignal
-//         //    , {
-//               //"name": "caller" ,
-//               //"signal": {
-//             //    "type": "new_description",
-//             //    "sdp": description
-//             //  }
-//       //      }
-//       //       , function() { log("sldpa signal added"); }
-//       //       , function(e) { alert("error: " + JSON.stringify(e)); }
-//       //  );
-
-//     }
-//     else {
-//         // Other method
-//     }
-//   }, logError);
-// }
-
-
-// function onNewDescriptionCreated_2(description) {
-//   peerConnection2.setLocalDescription(description, function () {
-//     log("Callee Local Description Set");
-
-//     // Send it to the other peer
-//     if (omletAsSignallingChannel) {
-//       //TODO Update the Document
-//       var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_description","timestamp":Date.now(),  "sdp": description} }  ;
-//       documentApi.update(myDocId, addSignal, des_obj , function() { log("Signal added"); }
-//          , function(e) { alert("error: " + JSON.stringify(e)); });
-//     }
-//     else {
-//       signallingSocket.emit("message",
-//         JSON.stringify({
-//           channel: get('channelId').value,
-//           signal_type: "new_description",
-//           sdp: description
-//         }));
-//     }
-//   }, logError);
-// }
-
-
-
-// function onIceCandidate(event){
-//   log("New Ice Candidate Found");
-//   if (event.candidate) {
-//     if ( omletAsSignallingChannel ){
-//       //TODO Update the Document
-//       var des_obj = {"name": "caller" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
-//       documentApi.update(myDocId, addSignal, des_obj , function() { log("NewICE Signal added"); }
-//        , function(e) { alert("error: " + JSON.stringify(e)); }
-//        );
-//     } else {
-//     }
-//   }
-// }
-
-// function onIceCandidate2(event){
-//   log("New Ice Candidate Found");
-//   if (event.candidate) {
-//     if ( omletAsSignallingChannel ){
-//       //TODO Update the Document
-//       var des_obj = {"name": "callee" , "signal" : {"signal_type": "new_ice_candidate","timestamp":Date.now(), "candidate": event.candidate} }  ;
-//       documentApi.update(myDocId, addSignal, des_obj , function() { log("NewICE Signal added"); }
-//        , function(e) { alert("error: " + JSON.stringify(e)); }
-//        );
-//     } else {
-//     }
-//   }
-// }
-
-
-
-// function streaming(stream) {
-//   var localMedia = get("localVideo")
-//   if (window.URL) {
-//     localMedia.src = window.URL.createObjectURL(stream);
-//   } else {
-//     localMedia.src = stream;
-//   }
-//   localMedia.autoplay = true;
-//   localMedia.play();
-
-//   peerConnection.addStream(stream);
-//   log("Stream attached to PC1") ;
-// }
-
-
-
-// function getMedia(){
-//   navigator.getUserMedia(
-//     {audio:false, video:true}
-//     , streaming, logError);
-// }
-
-
-
-// // Callback to be called in case of success...
-// function successCallback(stream) {
-//   localMedia = get("localVideo")
-
-//   // Make the stream available to the console for introspection
-//   window.stream = stream;
-//   // Attach the returned stream to the <video> element in the HTML page
-//   localMedia.src = window.URL.createObjectURL(stream);
-//   // Set <video> element property
-//   localMedia.autoplay = true;
-//   // Start playing video
-//   localMedia.play();
-
-//   peerConnection.addStream(stream);
-//   log("[+] Stream attached to PC1.") ;
-// }
-
-
-
-// //////////// Establishing Connection ////////////
-// function initConnection(caller, data, video){
-//   // Caller
-//   if (caller) {
-//     log("[+] Creating the first PeerConnection Object.");
-
-//     var options = {
-//       "optional": [
-//       {DtlsSrtpKeyAgreement: true}
-//             //,{RtpDataChannels: getData}
-//             ],
-//             mandatory: { googIPv6: true }
-//           };
-//           peerConnection = new RTCPeerConnection(null, options);
-
-//     // Sends ice candidates to the other peer
-//     peerConnection.onicecandidate = onIceCandidate;
-//     peerConnection.oniceconnectionstatechange = function (ice_state) {
-//       log("[+] PC1: " + peerConnection.iceGatheringState + " " + peerConnection.iceConnectionState);
-//     }
-
-//     if(data) {
-//       log("[+] Creating data channel.");
-
-//       var dataChannelOptions = {
-//         ordered: true
-//       };
-
-//       dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
-
-//       dataChannel.onerror = logError ;
-//       dataChannel.onmessage = onMessage;
-//       dataChannel.onopen = dataChannelOpened;
-//       dataChannel.onclose = function () {
-//         log("[-] The Data Channel is closed.");
-//       };
-//     }
-
-//     if(video) {
-//       peerConnection.onaddstream = function (event) {
-//         log('[+] PC1: Remote stream is arrived.');
-
-//         //var media = get("");
-//         //media.id = "remoteView0";
-//         //media.src = webkitURL.createObjectURL(event.stream);
-//         //media.autoplay = true;
-
-//         // var media = get("localVideo");
-//         // media.src = webkitURL.createObjectURL(event.stream);
-//         // media.autoplay = true;
-//         // media.play();
-//       };
-
-//       peerConnection.onremovestream = function (event) {
-//         log('PC1: Remote stream removed.');
-//       };
-
-//       getMedia();
-//     }
-//   }
-//   else {  // Callee
-//     log("[+] Creating the second PeerConnection Object.");
-
-//     var options = {
-//       "optional": [
-//         {DtlsSrtpKeyAgreement: true}
-//         //,{RtpDataChannels: getData}
-//       ],
-//       mandatory: { googIPv6: true }
-//     };
-
-//     peerConnection2 = new RTCPeerConnection(null, options);
-
-//     // Sends ice candidates to the other peer
-//     peerConnection2.onicecandidate = onIceCandidate2;
-//     peerConnection2.oniceconnectionstatechange = function (ice_state) {
-//       log("[+] PC2: " + peerConnection2.iceGatheringState + " " + peerConnection2.iceConnectionState);
-//     }
-
-//     if (data){
-//       peerConnection2.ondatachannel = function (e) {
-//         // Data channle opened
-//         log("Datachennel PC2-side opened");
-//         dataChannel2 = e.channel;
-//         dataChannel2.onerror = logError ;
-//         dataChannel2.onmessage = onMessage2;
-//         dataChannel2.onclose = function () {
-//           log("The Data Channel is closed");
-//         };
-//       }
-//     }
-
-//     if(video) {
-//       peerConnection2.onaddstream = function (event) {
-//         log("[+] PC2: Remote stream arrived.");
-//         //log(JSON.stringify(event));
-
-//         var remoteMedia = get("remoteVideo");
-//         if (window.URL) {
-//           remoteMedia.src = window.URL.createObjectURL(event.stream);
-//         } else {
-//           remoteMedia.src = event.stream;
-//         }
-//         remoteMedia.autoplay = true;
-//         remoteMedia.play() ;
-
-//         peerConnection2.addStream(event.stream);        
-
-//         log('[+] PC2: Remote stream is playing.');
-//       };
-
-//       peerConnection2.onremovestream = function (event) {
-//         log('[+] PC2: Remote stream removed.');
-//       };
-
-//       //getMedia() ;
-//     }
-//   }
-// }
-
-
-
-// document.getElementById("joinAVButton").addEventListener('click',function(){
-//   var caller = false;
-
-//   log("[*] Check for other party.");
-
-//   if(Object.keys(chatDoc.participants).length  == 0){
-//     initConnection(true, false, true);
-
-//     try{
-//       log("[+] Adding the caller.");
-//       documentApi.update(myDocId, addParticipant, {"name": "caller" , "value" : {"signals":[]} }
-//        , function() { documentApi.get(myDocId, participantAdded); }
-//        , function(e) { alert("[-] Adding caller-update; " + JSON.stringify(e)); }
-//        );
-//       //documentApi.update(chatDocId, addParticipant, {"caller":true}, ReceiveUpdate);
-//     }
-//     catch(err){
-//       log("[-] Adding caller; " + err.message);
-//     }
-//   }
-//   else {
-//     initConnection(false, false, true) ;
-
-//     log("[+] Adding the callee.");
-
-//     documentApi.update(myDocId, addParticipant, {"name": "callee" , "value" : {"signals":[{"signal_type": "callee_arrived" , "timestamp": Date.now()}]} }
-//      , function() { documentApi.get(myDocId, participantAdded); }
-//      , function(e) { alert("[-] Adding callee-update; " + JSON.stringify(e)); }
-//      );
-//     //documentApi.update(chatDocId, addParticipant, {"caller":false}, ReceiveUpdate);
-//   }
-// });
 
