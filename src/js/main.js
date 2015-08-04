@@ -238,7 +238,7 @@ function setLocalSessionDescription(sessionDescription) {
   };
   documentApi.update(myDocId, addMessage, param_sdp, function () {
       documentApi.get(myDocId, function () {}); 
-    }, , function (error) {
+    }, function (error) {
     log("[-] setLocalSessionDescription-update: " + error);
   });
 }
