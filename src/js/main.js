@@ -153,50 +153,6 @@ var param_channelReadyOn = {
 //
 /////////////////////////////////////////////////////////////////
 
-function createPeerConnection2(data, video) {
-  log("[+] createPeerConnection2()");
-  peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
-
-  log('[+] handleIceCandidate');
-  peerConnection.onicecandidate = handleIceCandidate;
-  peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-
-  if(data) {
-    log("[+] Creating data channel.");
-
-    var dataChannelOptions = {
-      ordered: true
-    };
-
-    dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
-
-    dataChannel.onerror = logError ;
-    dataChannel.onmessage = onMessage;
-    dataChannel.onopen = dataChannelOpened;
-    dataChannel.onclose = function () {
-      log("[-] The Data Channel is closed.");
-    };
-  }
-
-  if(video) {
-    peerConnection.onaddstream = function (event) { 
-      log('[+] Remote stream added.'); 
-      attachMediaStream(remoteVideo, event.stream); 
-      log('[+] Remote stream attached.'); 
-      remoteStream = event.stream;
-    }
-    peerConnection.onremovestream = function (event) {
-      log('[+] Remote stream removed. Event: ', event);
-    };
-
-    log('[+] getUserMedia.');
-    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] createPeerConnection2-getUserMedia: " + error);
-    });
-  }
-}
-
-
 function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
@@ -242,10 +198,6 @@ function createPeerConnection(data, video) {
       log('[-] Failed to create data channel.\n' + e.message);
       return;
     }
-  }
-
-  if (chatDoc.creator.name === Omlet.getIdentity().name) {
-    createOffer();
   }
 }
 
@@ -334,9 +286,6 @@ function handleUserMedia(stream) {
   log('[+] attachMediaStream(localVideo, stream)');
   attachMediaStream(localVideo, stream);
 
-  log("[+] peerConnection.addStream(stream)") ;
-  peerConnection.addStream(stream);
-
   // update document message; 'userMedia'
   documentApi.update(myDocId, addMessage, param_userMedia, function() { 
     documentApi.get(myDocId, addUser, function (error) {
@@ -392,7 +341,10 @@ function start(data, video) {
     log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
 
     createPeerConnection(data, video);
-    
+   
+    if (chatDoc.creator.name === Omlet.getIdentity().name) {
+      createOffer();
+    } 
   }
 }
 
@@ -524,16 +476,16 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  // if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
-  //   log('[+] chatDoc.message === userMedia'); 
+  if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
+    log('[+] chatDoc.message === userMedia'); 
 
-  //   start(false, true);
-  // }
-  if (chatDoc.message === 'channelReady' && chatDoc.creator.name === Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === channelReady'); 
-
-    createOffer();
+    start(false, true);
   }
+  // if (chatDoc.message === 'channelReady' && chatDoc.creator.name === Omlet.getIdentity().name) {
+  //   log('[+] chatDoc.message === channelReady'); 
+
+  //   createOffer();
+  // }
   else if (chatDoc.sessionDescription.type == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer')
 
@@ -660,12 +612,9 @@ function DocumentCleared(doc) {
   log("[+] User in this conversation: " + doc.numOfUser);
 }
 
-
 function addUser(doc) {
   log("[+] docId: " + doc.chatId + ', numOfUser: ' + doc.numOfUser);
 }
-
-
 
 function stop() {
   isStarted = false;
@@ -760,32 +709,24 @@ function joinAV() {
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
 
-    createPeerConnection2(false, true);
+    log('[+] getUserMedia.');
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] joinAV-getUserMedia-caller: " + error);
+    });
 
-    // log('[+] getUserMedia.');
-    // navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-    //   log("[-] joinAV-getUserMedia-caller: " + error);
-    // });
-
-    // start(false, true);
+    start(false, true);
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
-
-    createPeerConnection2(false, true);
 
     documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
       log("[-] joinAV-update-channelReadyOn: " + error);
     });
 
-    // documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
-    //   log("[-] joinAV-update-channelReadyOn: " + error);
-    // });
-
-    // log('[+] getUserMedia.');
-    // navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-    //   log("[-] joinAV-getUserMedia-callee: " + error);
-    // });
+    log('[+] getUserMedia.');
+    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+      log("[-] joinAV-getUserMedia-callee: " + error);
+    });
   }
 }
 
