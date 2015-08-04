@@ -466,30 +466,6 @@ function watchDocument(docref, OnUpdate) {
   'candidate' : 
 */
 
-socket.on('message', function (message) {
-    console.log('Received message:', message);
-
-    if (message === 'got user media') {
-        checkAndStart();  
-    } else if (message.type === 'offer') {
-        if (!isInitiator && !isStarted) {
-            checkAndStart();
-        }
-        pc.setRemoteDescription(new RTCSessionDescription(message));
-        doAnswer();
-    } else if (message.type === 'answer' && isStarted) {
-        pc.setRemoteDescription(new RTCSessionDescription(message));
-    } else if (message.type === 'candidate' && isStarted) {
-        var candidate = new RTCIceCandidate({
-            sdpMLineIndex: message.label,
-            candidate: message.candidate
-        });
-        pc.addIceCandidate(candidate);
-    } else if (message === 'bye' && isStarted) {
-        handleRemoteHangup();
-    }
-});
-
 function handleMessage(doc) {
   chatDoc = doc;
 
