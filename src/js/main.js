@@ -73,7 +73,12 @@ var peerConnection;
 var dataChannel;
 
 // sessionDescription constraints
-var sdpConstraints = {};
+// var sdpConstraints = {};
+var sdpConstraints = {
+  'mandatory': {
+  'OfferToReceiveAudio' : false,
+  'OfferToReceiveVideo' : true 
+}};
 
 
  /*****************************************
@@ -156,8 +161,7 @@ var param_channelReadyOn = {
 function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
-    //peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
-    peerConnection = new RTCPeerConnection(null, pc_constraints);
+    peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
     log("[+] Attach local Stream.");
     peerConnection.addStream(localStream);
     log('[+] handleIceCandidate');
@@ -194,6 +198,14 @@ function createPeerConnection(data, video) {
       log('[-] Failed to create data channel.\n' + e.message);
       return;
     }
+  }
+
+  if (chatDoc.creator.name === Omlet.getIdentity().name) {
+    log('[+] createOffer.');
+
+    peerConnection.createOffer(setLocalSessionDescription, function (error) {
+      log('[-] createOffer: ' + error);
+    }, sdpConstraints);
   }
 }
 
@@ -337,10 +349,6 @@ function start(data, video) {
     createPeerConnection(data, video);
     log('[+] isStarted: ' + isStarted);
     isStarted = true;
-
-    if (chatDoc.creator.name === Omlet.getIdentity().name) {
-      createOffer();
-    }
   }
 }
 
@@ -489,7 +497,10 @@ function handleMessage(doc) {
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[+] handleMessage-setRemoteDescription-offer');
 
-      createAnswer();
+      log('[+] createAnswer.');
+      peerConnection.createAnswer(setLocalSessionDescription, function (error) {
+        log('[-] createAnswer: ' + error);
+      }, sdpConstraints);
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     }); 
@@ -787,3 +798,172 @@ Omlet.ready(function() {
 });
 
 
+
+
+
+
+
+
+
+
+//
+
+// locate a peer connection according to its id
+function locate_peer_connection(id) {
+   var index = peer_id.indexOf(id);
+   // not seen before
+   if (index == -1) {
+    add_peer_connection();
+     peer_id.push(id);
+    index = peer_id.length - 1;
+  }
+   return index;
+ }
+
+// add a peer connection
+function add_peer_connection() {
+  console.log('add peer connection');
+  // add another peer connection for use
+  peer_connection.push(new rtc_peer_connection({ "iceServers": [{ "url": "stun:"+stun_server }]}));
+
+  // generic handler that sends any ice candidate to the other peer
+  peer_connection[peer_connection.length - 1].onicecandidate = function (ice_event) {
+    if (ice_event.candidate) {
+      signaling_server.send(
+        JSON.stringify({
+          type: "new_ice_candidate",
+          candidate: ice_event.candidate,
+          id: self_id,
+          token:call_token
+        })
+      );
+      console.log('send new ice candidate, from ' + self_id);
+    }
+  };
+
+  // display remote video streams when they arrive using local <video> MediaElement
+  peer_connection[peer_connection.length - 1].onaddstream = function (event) {
+    video_src.push(event.stream); // store this src
+    video_src_id.push(peer_connection.length - 1);
+    if (video_src.length == 1) { // first peer
+      connect_stream_to_src(event.stream, document.getElementById("remote_video"));
+      // video rotating function
+      setInterval(function() {
+        // rorating video src
+        var video_now = video_rotate;
+
+        if (video_rotate == video_src.length - 1) {
+          video_rotate = 0;
+        } else {
+          video_rotate++;
+        }
+        var status = peer_connection[video_src_id[video_rotate]].iceConnectionState;
+        if (status == "disconnected" || status == "closed") { // connection lost, do not show video
+          console.log('connection ' + video_rotate + ' liveness check failed');
+        } 
+        else if (video_now != video_rotate) {
+          connect_stream_to_src(video_src[video_rotate], document.getElementById("remote_video"));
+        }
+      }, 8000);
+      // hide placeholder and show remote video
+      console.log('first remote video');
+      document.getElementById("loading_state").style.display = "none";
+      document.getElementById("open_call_state").style.display = "block";
+    }
+    console.log('remote video');
+  };
+  peer_connection[peer_connection.length - 1].addStream(local_stream);
+}
+
+// handle new peer
+function new_peer(signal) {
+  // locate peer connection
+  var id = locate_peer_connection(signal.id);
+  console.log('new peer ' + id);
+  // create offer
+  peer_connection[id].createOffer(function(sdp) {
+    peer_connection[id].setLocalDescription(sdp, 
+    function() { // call back
+      console.log('set local, send offer, connection '+ id);
+      signaling_server.send(
+        JSON.stringify({
+          token: call_token,
+          id: self_id,
+          type:"new_offer",
+          sdp: sdp
+        })
+      );
+    }, log_error);
+  }, log_error);
+}
+
+// handle offer
+function new_offer_handler(signal) {
+  var id = locate_peer_connection(signal.id);
+  console.log('new offer ' + id);
+  // set remote description
+  peer_connection[id].setRemoteDescription(
+    new rtc_session_description(signal.sdp), 
+    function() { // call back
+      peer_connection[id].createAnswer(function(sdp) {
+        peer_connection[id].setLocalDescription(sdp, function () {
+          console.log('set local, send answer, connection '+ id);
+          signaling_server.send(
+            JSON.stringify({
+              token: call_token,
+              id: self_id,
+              type:"new_answer",
+              sdp: sdp
+            })
+          );
+        }, 
+        log_error);
+    }, log_error);
+  }, log_error);
+}
+
+// handle answer
+function new_answer_handler(signal) {
+  var id = locate_peer_connection(signal.id);
+  console.log('new answer ' + id);
+  peer_connection[id].setRemoteDescription(new rtc_session_description(signal.sdp),
+    function() {
+      console.log('receive offer answer, set remote, connection '+ id);
+    }
+    , log_error);
+}
+
+// handle ice candidate
+function ice_candidate_handler(signal) {
+  var id = locate_peer_connection(signal.id);
+  console.log('get new_ice_candidate from ' + id);
+  if (typeof(RTCIceCandidate) != "undefined") {
+    peer_connection[id].addIceCandidate(
+        new RTCIceCandidate(signal.candidate)
+    );
+  } else { // firefox
+    peer_connection[id].addIceCandidate(
+      new mozRTCIceCandidate(signal.candidate)
+    );
+  }
+}
+
+function event_handler(event) {
+  var signal = JSON.parse(event.data);
+  if (signal.type === "peer_arrival") {
+    new_peer(signal);
+  } else if (signal.type === "new_ice_candidate") {
+    ice_candidate_handler(signal);
+  } else if (signal.type === "new_offer") { // get peer description offer
+    new_offer_handler(signal);
+  } else if (signal.type === "new_answer") { // get peer description answer
+    new_answer_handler(signal);
+  } else if (signal.type === "new_chat_message") { // chat message and file sharing info
+    add_chat_message(signal);
+  } 
+}
+
+// generic error handler
+function log_error(error) {
+  console.log(error);
+}
