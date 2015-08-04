@@ -210,7 +210,7 @@ app.get('/js/adapter.js', function(req,res){
 });
 
 app.get('/webrtcjs/webrtc.js', function(req,res){
-	res.sendFile(__dirname + '/webrtcjs/webrtcjs.js');
+	res.sendFile(__dirname + '/webrtcjs/webrtc.js');
 });
 
 app.get('/js/events.js', function(req,res){
