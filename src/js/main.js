@@ -157,13 +157,8 @@ function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
     peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
-
     log("[+] Attach local Stream.");
     peerConnection.addStream(localStream);
-
-    isStarted = true;
-    log('[+] isStarted: ' + isStarted);
-
     log('[+] handleIceCandidate');
     peerConnection.onicecandidate = handleIceCandidate;
     peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
@@ -221,19 +216,16 @@ function createAnswer() {
 function setLocalSessionDescription(sessionDescription) {
   log("[+] setLocalSessionDescription.");
 
-  peerConnection.setLocalDescription(sessionDescription, function () {
-    var param_sdp = {
-      message : 'sdp',
-      sessionDescription : sessionDescription,
-    };
-    documentApi.update(myDocId, addMessage, param_sdp, {}, function (error) {
-      log("[-] setLocalSessionDescription-update: " + error);
-    });
-  }, function (error) {
-    log("[-] setLocalSessionDescription: " + error);
+  peerConnection.setLocalDescription(sessionDescription);
+
+  var param_sdp = {
+    message : 'sdp',
+    sessionDescription : sessionDescription,
+  };
+  documentApi.update(myDocId, addMessage, param_sdp, {}, function (error) {
+    log("[-] setLocalSessionDescription-update: " + error);
   });
 }
-
 
 function handleIceCandidate(event) {
   log('[+] Call handleIceCandidate event.');
@@ -243,15 +235,17 @@ function handleIceCandidate(event) {
 
     var param_iceCandidate = {
       message : 'candidate',
-      candidate : event.candidate.candidate,
+      sdpMLineIndex : event.candidate.sdpMLineIndex,
       sdpMid : event.candidate.sdpMid,
-      sdpMLineIndex : event.candidate.sdpMLineIndex
+      candidate : event.candidate.candidate
+
     };
     documentApi.update(myDocId, addMessage, param_iceCandidate , {}, function (error) {
       log('[-] handleIceCandidate-update: ' + error);
     });
   } 
   else {
+    log('[-] End of candidates.');
   }
 }
 
@@ -276,7 +270,6 @@ function onAddIceCandidateError(error) {
  *  @since  2015.07.18
  *
  *****************************************/
-
 
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
@@ -341,7 +334,9 @@ function start(data, video) {
     log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
 
     createPeerConnection(data, video);
-   
+    log('[+] isStarted: ' + isStarted);
+    isStarted = true;
+
     if (chatDoc.creator.name === Omlet.getIdentity().name) {
       createOffer();
     } 
@@ -470,13 +465,38 @@ function watchDocument(docref, OnUpdate) {
   'answer' : Caller에게만 핸들링되도록
   'candidate' : 
 */
+
+socket.on('message', function (message) {
+    console.log('Received message:', message);
+
+    if (message === 'got user media') {
+        checkAndStart();  
+    } else if (message.type === 'offer') {
+        if (!isInitiator && !isStarted) {
+            checkAndStart();
+        }
+        pc.setRemoteDescription(new RTCSessionDescription(message));
+        doAnswer();
+    } else if (message.type === 'answer' && isStarted) {
+        pc.setRemoteDescription(new RTCSessionDescription(message));
+    } else if (message.type === 'candidate' && isStarted) {
+        var candidate = new RTCIceCandidate({
+            sdpMLineIndex: message.label,
+            candidate: message.candidate
+        });
+        pc.addIceCandidate(candidate);
+    } else if (message === 'bye' && isStarted) {
+        handleRemoteHangup();
+    }
+});
+
 function handleMessage(doc) {
   chatDoc = doc;
 
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
+  if (chatDoc.message === 'userMedia') {
     log('[+] chatDoc.message === userMedia'); 
 
     start(false, true);
@@ -490,12 +510,14 @@ function handleMessage(doc) {
 
     log('[+] peerConnection.setRemoteDescription');
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      createAnswer();
+      log('[+] handleMessage-setRemoteDescription-offer');
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     }); 
+  
+    createAnswer();
   } 
-  else if (chatDoc.sessionDescription.type == 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
+  else if (chatDoc.sessionDescription.type == 'answer' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.sessionDescription.type === answer')
     
     log('[+] peerConnection.setRemoteDescription');
@@ -699,7 +721,7 @@ function getDocument() {
   }
 }
 
-// sajjad
+
 function joinAV() {
   if (chatDoc.numOfUser > 2)
     return;
