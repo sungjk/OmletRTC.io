@@ -302,7 +302,8 @@ function handleRemoteStreamRemoved(event) {
 function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
-    peerConnection = new webkitRTCPeerConnection(servers);
+    // peerConnection = new webkitRTCPeerConnection(servers);
+    peerConnection = new RTCPeerConnection(servers);
     // peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
 
     log("[+] Attach local Stream.");
