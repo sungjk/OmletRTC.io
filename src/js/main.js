@@ -236,7 +236,7 @@ function setLocalSessionDescription(sessionDescription) {
     message : 'sessionDescription',
     sessionDescription : sessionDescription
   };
-  documentApi.update(myDocId, addMessage, param_sdp, {}, function (error) {
+  documentApi.update(myDocId, addMessage, param_sdp, function () {}, function (error) {
     log("[-] setLocalSessionDescription-update: " + error);
   });
 }
@@ -255,7 +255,7 @@ function handleIceCandidate(event) {
     };
 
     // update: function(reference, func, parameters, success, error)
-    documentApi.update(myDocId, addMessage, param_iceCandidate , {}, function (error) {
+    documentApi.update(myDocId, addMessage, param_iceCandidate , function () {}, function (error) {
       log('[-] handleIceCandidate-update: ' + error);
     });
   } 
@@ -988,7 +988,7 @@ function joinAV() {
     };
 
     // param_channelReadyOn
-    documentApi.update(myDocId, addMessage, param_channelReadyOn, {}, function (error) {
+    documentApi.update(myDocId, addMessage, param_channelReadyOn, function () {}, function (error) {
       log("[-] joinAV-update-channelReadyOn: " + error);
     });
 
