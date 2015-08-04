@@ -722,8 +722,6 @@ function joinAV() {
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
       log("[-] joinAV-getUserMedia-caller: " + error);
     });
-
-    start(false, true);
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
