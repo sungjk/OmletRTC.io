@@ -209,6 +209,10 @@ app.get('/js/adapter.js', function(req,res){
 	res.sendFile(__dirname + '/js/adapter.js');
 });
 
+app.get('/webrtcjs/webrtcjs.js', function(req,res){
+	res.sendFile(__dirname + '/webrtcjs/webrtcjs.js');
+});
+
 app.get('/js/events.js', function(req,res){
 	res.sendFile(__dirname + '/js/events.js');
 });
