@@ -64,13 +64,13 @@ var dataChannel;
 var receiveChannel;
 
 // sessionDescription constraints
-// var sdpConstraints = {};
-var sdpConstraints = {
-    mandatory: {
-        //OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true
-    }
-};
+var sdpConstraints = {};
+// var sdpConstraints = {
+//     mandatory: {
+//         OfferToReceiveAudio: true,
+//         OfferToReceiveVideo: true
+//     }
+// };
 
 // attach video number
 var attachVideoNumber = 0;
