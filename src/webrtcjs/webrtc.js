@@ -249,6 +249,10 @@ function handleIceCandidate(event) {
   }
 }
 
+function handleIceCandidateChange(ice_state) {
+  log('[+] iceGatheringState: ' + peerConnection.iceGatheringState + ', iceConnectionState: ' + peerConnection.iceConnectionState);
+}
+
 
 function onMessage(msg){
   log('[+] Received message: ' + msg.data); 
