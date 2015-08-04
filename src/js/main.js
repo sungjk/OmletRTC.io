@@ -309,6 +309,7 @@ function createPeerConnection(data, video) {
     isStarted = true;
 
     log('[+] onicecandidate');
+
     peerConnection.onicecandidate = handleIceCandidate;
     peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
   }
@@ -563,7 +564,7 @@ function handleMessage(doc) {
 
     var candidate = new RTCIceCandidate({
       candidate : chatDoc.candidate,
-      sdpMid : chatDoc.sdpMid,
+      // sdpMid : chatDoc.sdpMid,
       sdpMLineIndex : chatDoc.sdpMLineIndex
     }, onAddIceCandidateSuccess, function (error) {
       log('[-] handleMessage-RTCIceCandidate: ' + error);
