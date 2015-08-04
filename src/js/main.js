@@ -236,7 +236,9 @@ function setLocalSessionDescription(sessionDescription) {
     message : 'sessionDescription',
     sessionDescription : sessionDescription
   };
-  documentApi.update(myDocId, addMessage, param_sdp, function () {}, function (error) {
+  documentApi.update(myDocId, addMessage, param_sdp, function () {
+      documentApi.get(myDocId, function () {}); 
+    }, , function (error) {
     log("[-] setLocalSessionDescription-update: " + error);
   });
 }
@@ -255,7 +257,9 @@ function handleIceCandidate(event) {
     };
 
     // update: function(reference, func, parameters, success, error)
-    documentApi.update(myDocId, addMessage, param_iceCandidate , function () {}, function (error) {
+    documentApi.update(myDocId, addMessage, param_iceCandidate , function () {
+      documentApi.get(myDocId, function () {}); 
+    },  function (error) {
       log('[-] handleIceCandidate-update: ' + error);
     });
   } 
@@ -957,7 +961,9 @@ function joinAV() {
 
 
     // param_channelReadyOff
-    documentApi.update(myDocId, addMessage, param_channelReadyOff, {}, function (error) {
+    documentApi.update(myDocId, addMessage, param_channelReadyOff, function () {
+      documentApi.get(myDocId, function () {}); 
+    }, function (error) {
       log("[-] joinAV-update-channelReadyOff: " + error);
     });
     // param_startedOff
@@ -988,7 +994,9 @@ function joinAV() {
     };
 
     // param_channelReadyOn
-    documentApi.update(myDocId, addMessage, param_channelReadyOn, function () {}, function (error) {
+    documentApi.update(myDocId, addMessage, param_channelReadyOn, function () {
+      documentApi.get(myDocId, function () {}); 
+    }, function (error) {
       log("[-] joinAV-update-channelReadyOn: " + error);
     });
 
