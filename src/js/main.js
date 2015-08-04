@@ -81,22 +81,13 @@ var attachVideoNumber = 0;
 var createButton = get("createButton");
 var clearButton = get("clearButton");
 var getDocButton = get("getDocButton");
-//var joinDataButton = get("joinDataButton");
+var joinDataButton = get("joinDataButton");
 var joinAVButton = get("joinAVButton");
-
-// var localVideo = get("localVideo");
-// var remoteVideo = get("remoteVideo");
 
 var localVideo = getQuery("#localVideo");
 var remoteVideo = getQuery("#remoteVideo");
 
-var joinDataButton = get("joinDataButton");
-// var sendTextarea = get("dataChannelSend");
-// var receiveTextarea = get("dataChannelReceive");
 
-
-// Flags...
-// var isInitiator = false;
 var isStarted = false;
 
 // streams
@@ -155,8 +146,7 @@ var param_userMedia = {
 createButton.onclick = create;
 clearButton.onclick = clearDocument;
 getDocButton.onclick = getDocument;
-//joinDataButton.onclick = joinData;
-//joinDataButton.onclick = sendData;
+joinDataButton.onclick = joinData;
 joinAVButton.onclick = joinAV;
 
 
@@ -166,19 +156,6 @@ joinAVButton.onclick = joinAV;
 //                Log console
 //
 /////////////////////////////////////////////////////////////////
-
-if (typeof console  != "undefined")
-    if (typeof console.log != 'undefined')
-        console.olog = console.log;
-    else
-        console.olog = function() {};
-
-console.log = function(message) {
-  console.olog(message);
-  $('#debugDiv').append('<p>' + message + '</p>');
-};
-
-console.error = console.debug = console.info = console.log
 
 
 function log(message){
@@ -256,7 +233,6 @@ function handleIceCandidate(event) {
       sdpMLineIndex : event.candidate.sdpMLineIndex
     };
 
-    // update: function(reference, func, parameters, success, error)
     documentApi.update(myDocId, addMessage, param_iceCandidate , function () {
       documentApi.get(myDocId, function () {}); 
     },  function (error) {
@@ -279,51 +255,6 @@ function onMessage(msg){
 }
 
 
-function gotReceiveChannel(event) {
-  log("[+] data received: " + msg.data) ;
-
-  receiveChannel = event.channel;
-  receiveChannel.onmessage = handleMessage; 
-  receiveChannel.onopen = handleReceiveChannelStateChange; 
-  receiveChannel.onclose = handleReceiveChannelStateChange;
-}
-
-
-function handleDataChannelStateChange() {
-  var readyState = dataChannel.readyState;
-  log('[+] DataChannel state is: ' + readyState);
-
-  // If channel ready, enable user's input
-  if (readyState == "open") {
-    dataChannelSend.disabled = false;
-    dataChannelSend.focus();
-    dataChannelSend.placeholder = "";
-    joinDataButton.disabled = false;
-  } 
-  else {
-    dataChannelSend.disabled = true;
-    joinDataButton.disabled = true;
-  }
-}
-
-
-
-function handleReceiveChannelStateChange() {
-  var readyState = receiveChannel.readyState; 
-  trace('Receive channel state is: ' + readyState); // If channel ready, enable user's input
-  
-  if (readyState == "open") {
-    dataChannelSend.disabled = false; 
-    dataChannelSend.focus(); 
-    dataChannelSend.placeholder = ""; 
-    joinDataButton.disabled = false;
-  } 
-  else {
-    dataChannelSend.disabled = true;
-    joinDataButton.disabled = true; 
-  }
-}
-
 
  /*****************************************
  *
@@ -340,11 +271,6 @@ function handleUserMedia(stream) {
   localStream = stream;
   log('[+] attachMediaStream(localVideo, stream)');
   attachMediaStream(localVideo, stream);
-
-  // update document message; 'userMedia'
-  // documentApi.update(myDocId, addMessage, param_userMedia, {}, function (error) {
-  //   log('[-] handleUserMedia-update: ' + error);
-  // });
 
   documentApi.update(myDocId, addMessage, param_userMedia, function() { 
     documentApi.get(myDocId, addUser, function (error) {
@@ -385,8 +311,6 @@ function createPeerConnection(data, video) {
     log('[+] onicecandidate');
     peerConnection.onicecandidate = handleIceCandidate;
     peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-
-    //log('[+] Created RTCPeerConnnection with:\n' + 'config: ' + JSON.stringify(peerConnectionConfig) + '\nconstraints: ' + JSON.stringify(peerConnectionConstraints));
   }
   catch (e) {
     log('[-] Failed to create RTCPeerConnection: ' + e.message);
@@ -423,9 +347,6 @@ function createPeerConnection(data, video) {
 
 
 
-
-
-
 //////////////////////////////////////////////////////////////////
 //
 //                Omlet Framework code
@@ -442,33 +363,13 @@ Omlet.document = {
 }
 */
 
-
-
 function start(data, video) {
   log('[+] start()');
+
   if (!isStarted && typeof localStream != 'undefined' && chatDoc.channelReady) {
-    // log('[+] started: ' + chatDoc.started);
     log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
 
     createPeerConnection(data, video);
-
-    // log('[+] isStarted = true');
-    // isStarted = true;
-
-    // var param_startedOn = {
-    //   message : 'started',
-    //   started : true
-    // };
-
-    // // param_startedOn
-    // documentApi.update(myDocId, addMessage, param_startedOn, updateSuccessCallback, function (error) {
-    //   log("[-] start-update-param_startedOn: " + error);
-    // });
-
-
-    // if (chatDoc.initiator && chatDoc.creator.name === Omlet.getIdentity().name) {
-    //   createOffer();
-    // }
     if (chatDoc.creator.name === Omlet.getIdentity().name) {
       createOffer();
     }
@@ -478,17 +379,6 @@ function start(data, video) {
 
 function stop() {
   isStarted = false;
-
-  // var param_startedOff = {
-  //   message : 'started',
-  //   started : false
-  // };
-
-  // // param_startedOff
-  // documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
-  //   log("[-] stop-update-param_startedOff: " + error);
-  // });
-
 
   if (dataChannel)    dataChannel.close();
   if (peerConnection) peerConnection.close();
@@ -501,19 +391,6 @@ function stop() {
 function sessionTerminated() {
   log('[+] Session terminated.');
   stop();
-
-  // 이부분도 수정 예정. isInitiator는 dataChannel용임
-  // isInitiator = false;
-
-  // var param_initiatorOff = {
-  //   message : 'initiator',
-  //   initiator : false
-  // };
-
-  // // param_initiatorOff
-  // documentApi.update(myDocId, addMessage, param_initiatorOff, updateSuccessCallback, function (error) {
-  //   log("[-] sessionTerminated-update-param_initiatorOff: " + error);
-  // });
 
 }
 
@@ -555,9 +432,6 @@ function _loadDocument() {
     myDocId = getDocumentReference();
     log("[+] Get documentReference id: " + myDocId );
 
-    // watch: function(reference, onUpdate, success, error)
-    // The updateCallback argument to watch is called every time the document changes, for example
-    // because it is being updated by another user. It receives the new document as its only argument.
     documentApi.watch(myDocId, updateCallback, watchSuccessCallback, function (error) {
       log('[-] _loadDocument-watch: ' + error);
     });
@@ -586,8 +460,6 @@ function initConnectionInfo() {
     'message' : '',
     'numOfUser' : numOfUser,
     'channelReady' : false,
-    // 'started' : false,
-    // 'initiator' : false,
     'sessionDescription' : '',
     'candidate' : '',
     'sdpMid' : '',
@@ -665,21 +537,17 @@ function handleMessage(doc) {
   else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer')
     log('[+] isStarted: ' + isStarted);
-    // log('[+] started: ' + chatDoc.started);
-    // log('[+] started: ' + chatDoc.started);
-    // log('[+] initiator: ' + chatDoc.initiator);
 
     if (!isStarted) {
       start(false, true);
-
-      peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-        log('[+] handleMessage-setRemoteDescription-offer');
-      }, function (error) {
-        log('[-] handleMessage-setRemoteDescription-offer: ' + error);
-      }); 
-
-      createAnswer();
     }
+
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+      log('[+] handleMessage-setRemoteDescription-offer');
+      createAnswer();
+    }, function (error) {
+      log('[-] handleMessage-setRemoteDescription-offer: ' + error);
+    });
   } 
   else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.sessionDescription.type === answer')
@@ -769,12 +637,6 @@ function addMessage(old, parameters) {
   else if (parameters.message === 'channelReady') {
     old.channelReady = parameters.channelReady;
   }
-  // else if (parameters.message === 'started') {
-  //   old.started = parameters.started;
-  // }
-  // else if (parameters.message === 'initiator') {
-  //   old.initiator = parameters.initiator;
-  // }
   else if (parameters.message === 'candidate') {
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
@@ -942,23 +804,11 @@ function joinAV() {
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
 
-    // isChannelReady = false;
     isStarted = false;
-    // isInitiator = true;
-
     var param_channelReadyOff = {
       message : 'channelReady',
       channelReady : false
     };
-    // var param_startedOff = {
-    //   message : 'started',
-    //   started : false
-    // };
-    // var param_initiatorOn = {
-    //   message : 'initiator',
-    //   initiator : true
-    // };
-
 
     // param_channelReadyOff
     documentApi.update(myDocId, addMessage, param_channelReadyOff, function () {
@@ -966,15 +816,6 @@ function joinAV() {
     }, function (error) {
       log("[-] joinAV-update-channelReadyOff: " + error);
     });
-    // param_startedOff
-    // documentApi.update(myDocId, addMessage, param_startedOff, updateSuccessCallback, function (error) {
-    //   log("[-] joinAV-update-param_startedOff: " + error);
-    // });
-    // param_initiatorOn
-    // documentApi.update(myDocId, addMessage, param_initiatorOn, updateSuccessCallback, function (error) {
-    //   log("[-] joinAV-update-param_initiatorOn: " + error);
-    // });
-
 
     // Call getUserMedia()
     log('[+] getUserMedia.');
@@ -986,7 +827,7 @@ function joinAV() {
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
-    // isChannelReady = true;
+    isStarted = false;
 
     var param_channelReadyOn = {
       message : 'channelReady',
