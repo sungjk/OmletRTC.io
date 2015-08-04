@@ -65,12 +65,6 @@ var receiveChannel;
 
 // sessionDescription constraints
 var sdpConstraints = {};
-// var sdpConstraints = {
-//     mandatory: {
-//         OfferToReceiveAudio: true,
-//         OfferToReceiveVideo: true
-//     }
-// };
 
 // attach video number
 var attachVideoNumber = 0;
@@ -384,25 +378,7 @@ function start(data, video) {
 
     createPeerConnection(data, video);
     if (chatDoc.creator.name === Omlet.getIdentity().name) {
-      log('[+] createOffer.');
-      peerConnection.createOffer(function (offer) {
-          peerConnection.setLocalDescription(offer);
-       
-          var param_sdp = {
-            message : 'offer',
-            sessionDescription : offer
-          };
-          documentApi.update(myDocId, addMessage, param_sdp, function () {
-              documentApi.get(myDocId, function () {}); 
-            }, function (error) {
-            log("[-] setLocalSessionDescription-update: " + error);
-          });
-
-      }, function (error) {
-        log('[-] createOffer: ' + error);
-      }, sdpConstraints);
-
-      // createOffer();
+      createOffer();
     }
   }
 }
@@ -565,8 +541,8 @@ function handleMessage(doc) {
 
     start(false, true);
   }
-  else if (chatDoc.message === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === offer')
+  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+    log('[+] chatDoc.sessionDescription.type === offer')
     log('[+] isStarted: ' + isStarted);
 
     if (!isStarted) {
@@ -575,31 +551,13 @@ function handleMessage(doc) {
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[+] handleMessage-setRemoteDescription-offer');
-      // createAnswer();
-
-      log('[+] createAnswer.');
-      peerConnection.createAnswer(function (answer) {
-        peerConnection.setLocalDescription(answer);
-
-        var param_sdp = {
-          message : 'answer',
-          sessionDescription : answer
-        };
-        documentApi.update(myDocId, addMessage, param_sdp, function () {
-            documentApi.get(myDocId, function () {}); 
-          }, function (error) {
-          log("[-] setLocalSessionDescription-update: " + error);
-        });
-      }, function (error) {
-        log('[-] createAnswer: ' + error);
-      }, sdpConstraints);
-
+      createAnswer();
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     });
   } 
-  else if (chatDoc.message === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
-    log('[+] chatDoc.message === answer')
+  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
+    log('[+] chatDoc.sessionDescription.type === answer')
     
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[+] handleMessage-setRemoteDescription-answer');
