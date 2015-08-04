@@ -67,7 +67,7 @@ var receiveChannel;
 // var sdpConstraints = {};
 var sdpConstraints = {
     mandatory: {
-        OfferToReceiveAudio: true,
+        //OfferToReceiveAudio: true,
         OfferToReceiveVideo: true
     }
 };
