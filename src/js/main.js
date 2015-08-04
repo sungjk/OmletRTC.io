@@ -471,12 +471,12 @@ function handleMessage(doc) {
 
   if (chatDoc.numOfUser > 2)
     return ;
-if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
+
+  if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia'); 
 
     start(false, true);
   }
-  
   else if (chatDoc.sessionDescription.type == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer')
 
@@ -487,11 +487,11 @@ if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentit
     log('[+] peerConnection.setRemoteDescription');
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[+] handleMessage-setRemoteDescription-offer');
+
+      createAnswer();
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     }); 
-  
-    createAnswer();
   } 
   else if (chatDoc.sessionDescription.type == 'answer' && isStarted && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.sessionDescription.type === answer')
