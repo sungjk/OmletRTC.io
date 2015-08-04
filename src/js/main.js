@@ -751,6 +751,7 @@ function getDocument() {
   }
 }
 
+// sajjad
 function joinAV() {
   if (chatDoc.numOfUser > 2)
     return;
