@@ -57,7 +57,7 @@ var myDocId;
 var chatDoc;
 
 // RTCPeerConnection object
-// var peerConnection;
+ var peerConnection;
 
 // dataChannel object
 var dataChannel;
@@ -302,8 +302,7 @@ function handleRemoteStreamRemoved(event) {
 function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
-    // peerConnection = new webkitRTCPeerConnection(servers);
-    peerConnection = new RTCPeerConnection(servers);
+    peerConnection = new webkitRTCPeerConnection(servers);
     // peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
 
     log("[+] Attach local Stream.");
