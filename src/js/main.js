@@ -539,11 +539,29 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === userMedia'); 
 
-    start(false, true);
+  if (chatDoc.message === 'candidate' && isStarted) {
+    log('[+] chatDoc.message === candidate')
+
+    var candidate = new RTCIceCandidate({
+      candidate : chatDoc.candidate,
+      // sdpMid : chatDoc.sdpMid,
+      sdpMLineIndex : chatDoc.sdpMLineIndex
+    }, onAddIceCandidateSuccess, function (error) {
+      log('[-] handleMessage-RTCIceCandidate: ' + error);
+    });
+    
+    peerConnection.addIceCandidate(candidate);
   }
+  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
+    log('[+] chatDoc.sessionDescription.type === answer')
+
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+      log('[+] handleMessage-setRemoteDescription-answer');
+    }, function (error) {
+      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
+    });
+  } 
   else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer');
     log('[+] isStarted: ' + isStarted);
@@ -558,28 +576,11 @@ function handleMessage(doc) {
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     });
-  } 
-  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
-    log('[+] chatDoc.sessionDescription.type === answer')
+  }
+  else if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
+    log('[+] chatDoc.message === userMedia'); 
 
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] handleMessage-setRemoteDescription-answer');
-    }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-    });
-  } 
-  else if (chatDoc.message === 'candidate' && isStarted) {
-    log('[+] chatDoc.message === candidate')
-
-    var candidate = new RTCIceCandidate({
-      candidate : chatDoc.candidate,
-      // sdpMid : chatDoc.sdpMid,
-      sdpMLineIndex : chatDoc.sdpMLineIndex
-    }, onAddIceCandidateSuccess, function (error) {
-      log('[-] handleMessage-RTCIceCandidate: ' + error);
-    });
-    
-    peerConnection.addIceCandidate(candidate);
+    start(false, true);
   }
   else if (chatDoc.message === 'clear' && isStarted) { 
     log('[+] chatDoc.message === clear');
