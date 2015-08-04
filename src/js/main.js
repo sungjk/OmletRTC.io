@@ -395,6 +395,11 @@ function stop() {
 
 function sessionTerminated() {
   log('[+] Session terminated.');
+
+  peerConnection.dispose();
+  localStream.dispose();
+  remoteStream.dispose();
+
   stop();
 
 }
@@ -540,7 +545,7 @@ function handleMessage(doc) {
     start(false, true);
   }
   else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-    log('[+] chatDoc.sessionDescription.type === offer')
+    log('[+] chatDoc.sessionDescription.type === offer');
     log('[+] isStarted: ' + isStarted);
 
     if (!isStarted) {
@@ -556,14 +561,12 @@ function handleMessage(doc) {
   } 
   else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.sessionDescription.type === answer')
-    
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription));
 
-    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-    //   log('[+] handleMessage-setRemoteDescription-answer');
-    // }, function (error) {
-    //   log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-    // });
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+      log('[+] handleMessage-setRemoteDescription-answer');
+    }, function (error) {
+      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
+    });
   } 
   else if (chatDoc.message === 'candidate' && isStarted) {
     log('[+] chatDoc.message === candidate')
@@ -650,9 +653,8 @@ function addMessage(old, parameters) {
     old.sdpMLineIndex = parameters.sdpMLineIndex;
   }
   else if (parameters.message === 'clear') {
-    old.chatId = chatId;
-    old.creator = identity;
-    old.message = '';
+    old.chatId = '';
+    old.creator = '';
     old.numOfUser = 0;
     old.sessionDescription = '';
     old.candidate = '';
@@ -666,19 +668,6 @@ function addMessage(old, parameters) {
 
   return old;
 }
-
-
-
-// Message for clear document.
-function msgClear(old, parameters) {
-  old.chatId = '';
-  old.creator = '';
-  old.numOfUser = 0;
-  old.message = 'clear';
-
-  return old;
-}
-
 
 
 function DocumentCleared(doc) {
