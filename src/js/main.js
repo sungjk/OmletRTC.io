@@ -73,12 +73,12 @@ var peerConnection;
 var dataChannel;
 
 // sessionDescription constraints
-// var sdpConstraints = {};
-var sdpConstraints = {
-  'mandatory': {
-  'OfferToReceiveAudio' : false,
-  'OfferToReceiveVideo' : true 
-}};
+var sdpConstraints = {};
+// var sdpConstraints = {
+//   'mandatory': {
+//   'OfferToReceiveAudio' : false,
+//   'OfferToReceiveVideo' : true 
+// }};
 
 
  /*****************************************
