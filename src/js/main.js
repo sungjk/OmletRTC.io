@@ -1,49 +1,4 @@
-/*
-  //log('[+] my feedMembers: ' + JSON.stringify(Omlet.getFeedMembers()));
-  //log('[+] my identify: ' + JSON.stringify(Omlet.getIdentity()));
-  //log('[+] chat doc identify: ' + JSON.stringify(chatDoc.creator));
-*/
-
-
-
-/*********************************************************************************
- *
- *  Procedure of function call (Omlet is not installed.)
- *
- *  1. [Omlet is Ready.]              Omlet.ready : Omlet Start
- *     [Doc is not found.]
- *     [Initializing DocumentAPI to use traditional style.]
- *  2. [Loading document]             _loadDocument() : get documentReference id
- *     [Document ***NOT*** found]
- *
- *********************************************************************************/
-
-/*********************************************************************************
- *
- *  Procedure of function call (Omlet is installed.)
- *
- *  1. [Omlet is Ready.]              Omlet.ready : Omlet Start
- *  2. [Initializing DocumentAPI.]    initDocumentAPI() : get documentAPI
- *  3. [Loading document]             _loadDocument() : get documentReference id
- *     [Get documentReference id: ]
- *
- *  4. [Creating localPeerConnection Object.] initConnection() : Caller
- *  5. [Call local's getUserMedia.]           getLocalMedia)() : Caller
- *  6. [Adding the Caller]                    $("joinAVButton").addEventListener('click',function() : before called  documentApi.update() 
- *  7. [Participant added. docId: ]           participantAdded : documentAPI.get's success callback
- *  8. [Updated Doc Fetched]                  getSuccessCallback
- *     [chat id: ]
- *     [people in this conversation: ]
- *  9. [Add local peer stream.]               localStreaming() : after local addStream
- *
- *********************************************************************************/
-
-
 'use strict';
-
-// // Look after different browser vendors' ways of calling the getUserMedia() API method:
-navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
 
 //////////////////////////////////////////////////////////////////
 //
@@ -56,19 +11,11 @@ var documentApi;
 var myDocId;
 var chatDoc;
 
-// RTCPeerConnection object
 var peerConnection;
-
-// dataChannel object
 var dataChannel;
-var receiveChannel;
 
 // sessionDescription constraints
 var sdpConstraints = {};
-
-// attach video number
-var attachVideoNumber = 0;
-
 
 
  /*****************************************
@@ -249,11 +196,6 @@ function handleIceCandidateChange(ice_state) {
 }
 
 
-function onMessage(msg){
-  log('[+] Received message: ' + msg.data); 
-  receiveTextarea.value += msg.data + '\n';
-}
-
 
 
  /*****************************************
@@ -358,15 +300,20 @@ function createPeerConnection(data, video) {
 //
 /////////////////////////////////////////////////////////////////
 
-/*
-Omlet.document = {
-  create: function(success, error),
-  get: function(reference, success, error),
-  update: function(reference, func, parameters, success, error),
-  watch: function(reference, onUpdate, success, error),
-  unwatch: function(reference, success, error)
-}
-*/
+/*****************************************************************
+ *
+ * Omlet.document = {
+ *   create: function(success, error),
+ *   get: function(reference, success, error),
+ *     // The successful result of get is the document itself.
+ *   update: function(reference, func, parameters, success, error),
+ *   watch: function(reference, onUpdate, success, error),
+ *     // The updateCallback argument to watch is called every time the document changes, for example
+ *     // because it is being updated by another user. It receives the new document as its only argument.
+ *   unwatch: function(reference, success, error)
+ * }
+ *
+ *****************************************************************/
 
 function start(data, video) {
   log('[+] start()');
@@ -637,8 +584,6 @@ function errorCallback(error) {
  *
  *****************************************/
 
-
-// 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
   if (parameters.message !== 'undefined')  old.message = parameters.message;
 
@@ -714,13 +659,9 @@ function create() {
     documentApi.create(function(d) {
       // create successCallback
 
-      // Document property is a document reference that can be serialized and can be passed to the other calls.
       myDocId = d.Document;
       location.hash = "#/docId/" + myDocId;
 
-      // update: function(reference, func, parameters, success, error)
-      // The func argument to update is called to generate the document or to update it with the new parameters. 
-      // It is passed the old document as the first argument, and the app specified parameters as the second.
       documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
         // update successCallback
         documentApi.get(myDocId, DocumentCreated, errorCallback);
