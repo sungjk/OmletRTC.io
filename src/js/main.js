@@ -481,13 +481,12 @@ function handleMessage(doc) {
 
     start(false, true);
   }
-  // if (chatDoc.message === 'channelReady' && chatDoc.creator.name === Omlet.getIdentity().name) {
-  //   log('[+] chatDoc.message === channelReady'); 
-
-  //   createOffer();
-  // }
   else if (chatDoc.sessionDescription.type == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer')
+
+    if (!isStarted) {
+      start(false, true);
+    }
 
     log('[+] peerConnection.setRemoteDescription');
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
