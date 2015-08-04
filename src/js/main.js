@@ -156,7 +156,8 @@ var param_channelReadyOn = {
 function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
-    peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
+    //peerConnection = new RTCPeerConnection(pc_config, pc_constraints);
+    peerConnection = new RTCPeerConnection(null, pc_constraints);
     log("[+] Attach local Stream.");
     peerConnection.addStream(localStream);
     log('[+] handleIceCandidate');
@@ -339,7 +340,7 @@ function start(data, video) {
 
     if (chatDoc.creator.name === Omlet.getIdentity().name) {
       createOffer();
-    } 
+    }
   }
 }
 
