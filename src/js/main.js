@@ -471,12 +471,12 @@ function handleMessage(doc) {
 
   if (chatDoc.numOfUser > 2)
     return ;
-
-  if (chatDoc.message === 'userMedia') {
+if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia'); 
 
     start(false, true);
   }
+  
   else if (chatDoc.sessionDescription.type == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer')
 
