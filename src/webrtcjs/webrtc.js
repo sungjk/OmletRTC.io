@@ -5,40 +5,6 @@
 */
 
 
-
-/*********************************************************************************
- *
- *  Procedure of function call (Omlet is not installed.)
- *
- *  1. [Omlet is Ready.]              Omlet.ready : Omlet Start
- *     [Doc is not found.]
- *     [Initializing DocumentAPI to use traditional style.]
- *  2. [Loading document]             _loadDocument() : get documentReference id
- *     [Document ***NOT*** found]
- *
- *********************************************************************************/
-
-/*********************************************************************************
- *
- *  Procedure of function call (Omlet is installed.)
- *
- *  1. [Omlet is Ready.]              Omlet.ready : Omlet Start
- *  2. [Initializing DocumentAPI.]    initDocumentAPI() : get documentAPI
- *  3. [Loading document]             _loadDocument() : get documentReference id
- *     [Get documentReference id: ]
- *
- *  4. [Creating localPeerConnection Object.] initConnection() : Caller
- *  5. [Call local's getUserMedia.]           getLocalMedia)() : Caller
- *  6. [Adding the Caller]                    $("joinAVButton").addEventListener('click',function() : before called  documentApi.update() 
- *  7. [Participant added. docId: ]           participantAdded : documentAPI.get's success callback
- *  8. [Updated Doc Fetched]                  getSuccessCallback
- *     [chat id: ]
- *     [people in this conversation: ]
- *  9. [Add local peer stream.]               localStreaming() : after local addStream
- *
- *********************************************************************************/
-
-
 'use strict';
 
 // // Look after different browser vendors' ways of calling the getUserMedia() API method:
@@ -56,18 +22,14 @@ var documentApi;
 var myDocId;
 var chatDoc;
 
-// RTCPeerConnection object
- var peerConnection;
-
-// dataChannel object
-var dataChannel;
-var receiveChannel;
 
 // sessionDescription constraints
 var sdpConstraints = {};
 
-// attach video number
-var attachVideoNumber = 0;
+// var remote;          // ID of the remote peer -- set once they send an offer
+var peerConnection;  // This is our WebRTC connection
+var dataChannel;     // dataChannel object
+var running = false; // Keep track of our connection state
 
 
 
@@ -88,7 +50,6 @@ var localVideo = getQuery("#localVideo");
 var remoteVideo = getQuery("#remoteVideo");
 
 
-var isStarted = false;
 
 // streams
 var localStream;
@@ -100,20 +61,18 @@ var constraints = {
   video: true 
 };
 
-// PeerConnection ICE protocol configuration (either Firefox or Chrome)
-// var peerConnectionConfig = webrtcDetectedBrowser === 'Chrome' ? 
-//     { 'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
-//     { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
 
-// var peerConnectionConstraints = {
-//     'optional': [{ 'DtlsSrtpKeyAgreement': true }],
-//     'mandatory': { googIPv6: true }
-// };
-var servers = {
-  iceServers: [ {
-    url : 'stun:stun.l.google.com:19302'
-  } ]
+// Use Google's public servers for STUN
+// STUN is a component of the actual WebRTC connection
+var peerConnectionConfig = webrtcDetectedBrowser === 'Chrome' ? 
+    { 'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
+    { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
+
+var peerConnectionConstraints = {
+    'optional': [{ 'DtlsSrtpKeyAgreement': true }],
+    'mandatory': { googIPv6: true }
 };
+
 
 
 
@@ -179,85 +138,140 @@ function log(message){
 //
 /////////////////////////////////////////////////////////////////
 
-function onAddIceCandidateSuccess() {
-  log('[+] Success to AddIceCandidate.');
-}
-
-function onAddIceCandidateError(error) {
-  log('[-] Failed to add Ice Candidate: ' + error.message);
-}
 
 
 
-// Create Offer
-function createOffer() {
-    log('[+] createOffer.');
-    peerConnection.createOffer(setLocalSessionDescription, function (error) {
-      log('[-] createOffer: ' + error);
-    }, sdpConstraints);
+///////// 시그널
 
 
-}
+// Handle a WebRTC offer request from a remote client
+var handleOfferSignal = function(sdp) {
+  running = true;
+  initiateWebRTCState();
+  startSendingCandidates();
 
+  peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+  peerConnection.createAnswer(function(sessionDescription) {
+    log('[+] Sending answer.');
+    peerConnection.setLocalDescription(sessionDescription);
 
-// Create Answer
-function createAnswer() {
-    log('[+] createAnswer.');
-    peerConnection.createAnswer(setLocalSessionDescription, function (error) {
-      log('[-] createAnswer: ' + error);
-    }, sdpConstraints);
-}
+    var param_sdp = {
+      message : 'sdp',
+      sender : Omlet.getIdentity().name, 
+      sessionDescription : sessionDescription
+    };
 
-
-// Success handler for createOffer and createAnswer
-function setLocalSessionDescription(sessionDescription) {
-  log("[+] setLocalSessionDescription.");
-  peerConnection.setLocalDescription(sessionDescription);
-
-  var param_sdp = {
-    message : 'sessionDescription',
-    sessionDescription : sessionDescription
-  };
-  documentApi.update(myDocId, addMessage, param_sdp, function () {
-      documentApi.get(myDocId, function () {}); 
-    }, function (error) {
-    log("[-] setLocalSessionDescription-update: " + error);
+    documentApi.update(myDocId, addMessage, param_sdp, function () {
+        documentApi.get(myDocId, function () {}); 
+      }, function (error) {
+        log("[-] handleOfferSignal-createAnswer-update: " + error);
+    });
   });
-}
+};
+
+// Handle a WebRTC answer response to our offer we gave the remote client
+var handleAnswerSignal = function(sdp) {
+  peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+};
+
+// Handle an ICE candidate notification from the remote client
+var handleCandidateSignal = function(message) {
+  var candidate = new RTCIceCandidate(message);
+  peerConnection.addIceCandidate(candidate);
+};
 
 
-// ICE candidates management
-function handleIceCandidate(event) {
+
+
+
+
+//////// 초기화 작업
+
+// Function to initiate the WebRTC peerconnection and dataChannel
+var initiateWebRTCState = function() {
+  peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
+  peerConnection.addStream(localStream);
+  peerConnection.onaddstream = handleRemoteStreamAdded;
+  peerConnection.onremovestream = handleRemoteStreamRemoved;
+};
+
+
+
+
+
+///////// 연결 (Connect)
+
+// Function to offer to start a WebRTC connection with a peer
+var connect = function() {
+  running = true;
+  startSendingCandidates();
+
+  peerConnection.createOffer(function(sessionDescription) {
+    log('[+] Sending offer.');
+    peerConnection.setLocalDescription(sessionDescription);
+
+    var param_sdp = {
+      message : 'sdp',
+      sender : Omlet.getIdentity().name, 
+      sessionDescription : sessionDescription
+    };
+
+    documentApi.update(myDocId, addMessage, param_sdp, function () {
+        documentApi.get(myDocId, function () {}); 
+      }, function (error) {
+        log("[-] connect-createOffer-update: " + error);
+    });
+  });
+};
+
+
+
+
+
+
+/////////  ICE Candidate 리스너
+
+// Add listener functions to ICE Candidate events
+var startSendingCandidates = function() {
+  peerConnection.oniceconnectionstatechange = handleICEConnectionStateChange;
+  peerConnection.onicecandidate = handleICECandidate;
+};
+
+// This is how we determine when the WebRTC connection has ended
+// This is most likely because the other peer left the page
+var handleICEConnectionStateChange = function() {
+  log('[+] iceGatheringState: ' + peerConnection.iceGatheringState + ', iceConnectionState: ' + peerConnection.iceConnectionState);
+
+  if (peerConnection.iceConnectionState == 'disconnected') { 
+  }
+};
+
+
+// Handle ICE Candidate events by sending them to our remote
+// Send the ICE Candidates via the signal channel
+var handleICECandidate = function(event) {
   if (event.candidate) {
-    log('[+] handleIceCandidate event.');
+    log('[+] Sending  candidate.');
 
     var param_iceCandidate = {
       message : 'candidate',
-      candidate : event.candidate.candidate,
-      sdpMid : event.candidate.sdpMid,
-      sdpMLineIndex : event.candidate.sdpMLineIndex
+      candidate : event.candidate.candidate
+      // message : 'candidate',
+      // candidate : event.candidate.candidate,
+      // sdpMid : event.candidate.sdpMid,
+      // sdpMLineIndex : event.candidate.sdpMLineIndex
     };
 
     documentApi.update(myDocId, addMessage, param_iceCandidate , function () {
       documentApi.get(myDocId, function () {}); 
     },  function (error) {
-      log('[-] handleIceCandidate-update: ' + error);
+      log('[-] handleICECandidate-update: ' + error);
     });
   } 
   else {
-    log('[-] End of candidates.');
+    log('[-] All candidates sent');
   }
-}
-
-function handleIceCandidateChange(ice_state) {
-  log('[+] iceGatheringState: ' + peerConnection.iceGatheringState + ', iceConnectionState: ' + peerConnection.iceConnectionState);
-}
-
-
-function onMessage(msg){
-  log('[+] Received message: ' + msg.data); 
-  receiveTextarea.value += msg.data + '\n';
-}
+};
 
 
 
@@ -284,10 +298,6 @@ function handleUserMedia(stream) {
   }, function (error) {
     log('[-] handleUserMedia-update: ' + error);
   });
-
-  if (chatDoc.creator.name === Omlet.getIdentity().name) {
-    start(false, true);
-  }
 }
 
 
@@ -306,55 +316,9 @@ function handleRemoteStreamRemoved(event) {
 }
 
 
-// PeerConnection management
-function createPeerConnection(data, video) {
-  try {
-    log("[+] createPeerConnection()");
-    peerConnection = new webkitRTCPeerConnection(servers);
-    // peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
 
-    log("[+] Attach local Stream.");
-    peerConnection.addStream(localStream);
-    log('[+] isStarted = true');
-    isStarted = true;
 
-    log('[+] onicecandidate');
 
-    peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-  }
-  catch (e) {
-    log('[-] Failed to create RTCPeerConnection: ' + e.message);
-    return;
-  }
-
-  // video: true
-  if(video) {
-    peerConnection.onaddstream = handleRemoteStreamAdded;
-    peerConnection.onremovestream = handleRemoteStreamRemoved;
-  }
-
-  // data: true
-  if(data) {
-    log("[+] Creating data channel.");
-
-    var dataChannelOptions = {
-      ordered: true
-    };
-    try {
-      dataChannel = peerConnection.createDataChannel("datachannel", dataChannelOptions);
-      dataChannel.onerror = errorCallback;
-      dataChannel.onmessage = onMessage;
-      dataChannel.onopen = handleDataChannelState;
-      dataChannel.onclose = handleDataChannelState;
-
-    }
-    catch (e) {
-      log('[-] Failed to create data channel.\n' + e.message);
-      return;
-    }
-  }
-}
 
 
 
@@ -373,19 +337,6 @@ Omlet.document = {
   unwatch: function(reference, success, error)
 }
 */
-
-function start(data, video) {
-  log('[+] start()');
-
-  if (!isStarted && typeof localStream != 'undefined' && chatDoc.channelReady) {
-    log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
-
-    createPeerConnection(data, video);
-    if (chatDoc.creator.name === Omlet.getIdentity().name) {
-      createOffer();
-    }
-  }
-}
 
 
 function stop() {
@@ -534,60 +485,55 @@ function ReceiveDoc(doc) {
 }
 
 
-function handleMessage(doc) {
-  chatDoc = doc;
 
-  if (chatDoc.numOfUser > 2)
+
+
+////////// param 핸들링
+
+
+// This is the general handler for a message from our remote client
+// Determine what type of message it is, and call the appropriate handler
+var handleMessage = function(doc) {
+  if (doc.numOfUser > 2)
     return ;
 
-  if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === userMedia'); 
+  var sender = doc.sender;
+  var msg = doc.message;
+  log('[+] Recieved a \'' + msg + '\' signal from ' + sender);
 
-    start(false, true);
-  }
-  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-    log('[+] chatDoc.sessionDescription.type === offer')
-    log('[+] isStarted: ' + isStarted);
-
-    if (!isStarted) {
-      start(false, true);
-    }
-
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] handleMessage-setRemoteDescription-offer');
-      createAnswer();
-    }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-offer: ' + error);
-    });
-  } 
-  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
-    log('[+] chatDoc.sessionDescription.type === answer')
-    
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] handleMessage-setRemoteDescription-answer');
-    }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-    });
-  } 
-  else if (chatDoc.message === 'candidate' && isStarted) {
-    log('[+] chatDoc.message === candidate')
-
-    var candidate = new RTCIceCandidate({
-      candidate : chatDoc.candidate,
-      // sdpMid : chatDoc.sdpMid,
-      sdpMLineIndex : chatDoc.sdpMLineIndex
-    }, onAddIceCandidateSuccess, function (error) {
-      log('[-] handleMessage-RTCIceCandidate: ' + error);
-    });
-    
-    peerConnection.addIceCandidate(candidate);
-  }
-  else if (chatDoc.message === 'clear' && isStarted) { 
-    log('[+] chatDoc.message === clear');
+  if (doc.message === 'clear') { 
+    log('[+] doc.message === clear');
 
     sessionTerminated();
   }
-}
+  else if (msg == 'candidate' && running) {
+    log('[+] doc.message === candidate');
+
+    var message = {
+      candidate : doc.candidate,
+      sdpMLineIndex : doc.sdpMLineIndex
+    };
+    handleCandidateSignal(message);
+  }
+  else if (doc.sessionDescription.type === 'answer' && doc.creator.name === Omlet.getIdentity().name) { 
+    log('[+] doc.sessionDescription.type === answer');
+
+    handleAnswerSignal(doc.sessionDescription);
+  }
+  else if (doc.sessionDescription.type === 'offer' && doc.creator.name !== Omlet.getIdentity().name) {
+    log('[+] doc.sessionDescription.type === offer');
+
+    handleOfferSignal(doc.sessionDescription);
+  }
+  else if (doc.message === 'userMedia' && doc.creator.name === Omlet.getIdentity().name) {
+    log('[+] doc.message === userMedia'); 
+
+    if (doc.channelReady) {
+      initiateWebRTCState();
+      connect();
+    }
+  }
+};
 
 
 /*****************************************
@@ -642,18 +588,8 @@ function errorCallback(error) {
 function addMessage(old, parameters) {
   if (parameters.message !== 'undefined')  old.message = parameters.message;
 
-  if (parameters.message === 'userMedia') {
-    old.numOfUser = old.numOfUser + 1;
-  }
-  else if (parameters.message === 'channelReady') {
-    old.channelReady = parameters.channelReady;
-  }
-  else if (parameters.message === 'candidate') {
-    old.candidate = parameters.candidate;
-    old.sdpMid = parameters.sdpMid;
-    old.sdpMLineIndex = parameters.sdpMLineIndex;
-  }
-  else if (parameters.message === 'clear') {
+
+  if (parameters.message === 'clear') {
     old.chatId = chatId;
     old.creator = identity;
     old.message = '';
@@ -662,8 +598,19 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  else if (parameters.message === 'sessionDescription') {
+  else if (parameters.message === 'candidate') {
+    old.candidate = parameters.candidate;
+    // old.sdpMid = parameters.sdpMid;
+    // old.sdpMLineIndex = parameters.sdpMLineIndex;
+  }
+  else if (parameters.message === 'sdp') {
     old.sessionDescription = parameters.sessionDescription; 
+  }
+  else if (parameters.message === 'channelReady') {
+    old.channelReady = parameters.channelReady;
+  }
+  else if (parameters.message === 'userMedia') {
+    old.numOfUser = old.numOfUser + 1;
   }
 
   old.timestamp = Date.now();
@@ -829,8 +776,6 @@ function joinAV() {
       message : 'channelReady',
       channelReady : true
     };
-
-    // param_channelReadyOn
     documentApi.update(myDocId, addMessage, param_channelReadyOn, function () {
       documentApi.get(myDocId, function () {}); 
     }, function (error) {
@@ -866,214 +811,3 @@ Omlet.ready(function() {
     // No Doc --> Use traditional Style
   }
 });
-
-
-
-
-
-
-
-
-// // Handle an incoming message on the announcement channel
-// var handleAnnounceChannelMessage = function(snapshot) {
-//   var message = snapshot.val();
-//   if (message.id != id && message.sharedKey == sharedKey) {
-//     console.log('Discovered matching announcement from ' + message.id);
-//     remote = message.id;
-//     initiateWebRTCState();
-//     connect();
-//   }
-// };
-
-// /* == Signal Channel Functions ==
-//  * The signal channels are used to delegate the WebRTC connection between 
-//  * two peers once they have found each other via the announcement channel.
-//  * 
-//  * This is done on Firebase as well. Once the two peers communicate the
-//  * necessary information to 'find' each other via WebRTC, the signalling
-//  * channel is no longer used and the connection becomes peer-to-peer.
-//  */
-
-// // Send a message to the remote client via Firebase
-// var sendSignalChannelMessage = function(message) {
-//   message.sender = id;
-//   database.child('messages').child(remote).push(message);
-// };
-
-// // Handle a WebRTC offer request from a remote client
-// var handleOfferSignal = function(message) {
-//   running = true;
-//   remote = message.sender;
-//   initiateWebRTCState();
-//   startSendingCandidates();
-//   peerConnection.setRemoteDescription(new RTCSessionDescription(message));
-//   peerConnection.createAnswer(function(sessionDescription) {
-//     console.log('Sending answer to ' + message.sender);
-//     peerConnection.setLocalDescription(sessionDescription);
-//     sendSignalChannelMessage(sessionDescription);
-//   });
-// };
-
-// // Handle a WebRTC answer response to our offer we gave the remote client
-// var handleAnswerSignal = function(message) {
-//   peerConnection.setRemoteDescription(new RTCSessionDescription(message));
-// };
-
-// // Handle an ICE candidate notification from the remote client
-// var handleCandidateSignal = function(message) {
-//   var candidate = new RTCIceCandidate(message);
-//   peerConnection.addIceCandidate(candidate);
-// };
-
-// // This is the general handler for a message from our remote client
-// // Determine what type of message it is, and call the appropriate handler
-// var handleSignalChannelMessage = function(snapshot) {
-//   var message = snapshot.val();
-//   var sender = message.sender;
-//   var type = message.type;
-//   console.log('Recieved a \'' + type + '\' signal from ' + sender);
-//   if (type == 'offer') handleOfferSignal(message);
-//   else if (type == 'answer') handleAnswerSignal(message);
-//   else if (type == 'candidate' && running) handleCandidateSignal(message);
-// };
-
-// /* == ICE Candidate Functions ==
-//  * ICE candidates are what will connect the two peers
-//  * Both peers must find a list of suitable candidates and exchange their list
-//  * We exchange this list over the signalling channel (Firebase)
-//  */
-
-// // Add listener functions to ICE Candidate events
-// var startSendingCandidates = function() {
-//   peerConnection.oniceconnectionstatechange = handleICEConnectionStateChange;
-//   peerConnection.onicecandidate = handleICECandidate;
-// };
-
-// // This is how we determine when the WebRTC connection has ended
-// // This is most likely because the other peer left the page
-// var handleICEConnectionStateChange = function() {
-//   if (peerConnection.iceConnectionState == 'disconnected') {
-//     console.log('Client disconnected!');
-//     $('#status').addClass("disconnected").removeClass("connected").text("Not Connected");
-//     sendAnnounceChannelMessage();
-//   }
-// };
-
-// // Handle ICE Candidate events by sending them to our remote
-// // Send the ICE Candidates via the signal channel
-// var handleICECandidate = function(event) {
-//   var candidate = event.candidate;
-//   if (candidate) {
-//     candidate.type = 'candidate';
-//     console.log('Sending candidate to ' + remote);
-//     sendSignalChannelMessage(candidate);
-//   } else {
-//     console.log('All candidates sent');
-//   }
-// };
-
-//  == Data Channel Functions ==
-//  * The WebRTC connection is established by the time these functions run
-//  * The hard part is over, and these are the functions we really want to use
-//  * 
-//  * The functions below relate to sending and receiving WebRTC messages over
-//  * the peer-to-peer data channels 
- 
-
-// // This is our receiving data channel event
-// // We receive this channel when our peer opens a sending channel
-// // We will bind to trigger a handler when an incoming message happens
-// var handleDataChannel = function(event) {
-//   event.channel.onmessage = handleDataChannelMessage;
-// };
-
-// // This is called on an incoming message from our peer
-// // You probably want to overwrite this to do something more useful!
-// var handleDataChannelMessage = function(event) {
-//   console.log('Recieved Message: ' + event.data);
-//   //$('#messages').append(event.data + "<br />");
-// };
-
-// // This is called when the WebRTC sending data channel is offically 'open'
-// var handleDataChannelOpen = function() {
-//   console.log('Data channel created!');
-//   var msg = new Message('message', 'Hello! I am ' + id)
-//   //dataChannel.send('Hello! I am ' + id);
-//   dataChannel.send(JSON.stringify(msg));
-//   $('#status').addClass("connected").removeClass("disconnected").text("Connected");
-//   $('#startGameBox').hide();
-//   $('#gameContent').show();
-// };
-
-// // Called when the data channel has closed
-// var handleDataChannelClosed = function() {
-//   console.log('The data channel has been closed!');
-//   $('#status').css('color','red').text("Not Connected");
-// };
-
-// // Function to offer to start a WebRTC connection with a peer
-// var connect = function() {
-//   running = true;
-//   startSendingCandidates();
-//   peerConnection.createOffer(function(sessionDescription) {
-//     console.log('Sending offer to ' + remote);
-//     peerConnection.setLocalDescription(sessionDescription);
-//     sendSignalChannelMessage(sessionDescription);
-//   });
-// };
-
-// // Function to initiate the WebRTC peerconnection and dataChannel
-// var initiateWebRTCState = function() {
-//   peerConnection = new webkitRTCPeerConnection(servers);
-//   peerConnection.ondatachannel = handleDataChannel;
-//   dataChannel = peerConnection.createDataChannel('myDataChannel');
-//   dataChannel.onmessage = handleDataChannelMessage;
-//   dataChannel.onopen = handleDataChannelOpen;
-// };
-
-// // Message object to send
-// var Message = function(type, data) {
-//   this.type = type;
-//   this.data = data;
-// }
-
-// var id;              // Our unique ID
-// var sharedKey;       // Unique identifier for two clients to find each other
-// var remote;          // ID of the remote peer -- set once they send an offer
-// var peerConnection;  // This is our WebRTC connection
-// var dataChannel;     // This is our outgoing data channel within WebRTC
-// var running = false; // Keep track of our connection state
-
-// // Use Google's public servers for STUN
-// // STUN is a component of the actual WebRTC connection
-// var servers = {
-//   iceServers: [ {
-//     url : 'stun:stun.l.google.com:19302'
-//   } ]
-// };
-
-// // Generate this browser a unique ID
-// // On Firebase peers use this unique ID to address messages to each other
-// // after they have found each other in the announcement channel
-// id = Math.random().toString().replace('.', '');
-
-// // Unique identifier for two clients to use
-// // They MUST share this to find each other
-// // Each peer waits in the announcement channel to find its matching identifier
-// // When it finds its matching identifier, it initiates a WebRTC offer with
-// // that client. This unique identifier can be pretty much anything in practice.
-// //sharedKey = prompt("Please enter a shared identifier");
-
-// // Configure, connect, and set up Firebase
-// // You probably want to replace the text below with your own Firebase URL
-// var firebaseUrl = 'https://amber-torch-4774.firebaseio.com/';
-// var database = new Firebase(firebaseUrl);
-// var announceChannel = database.child('announce');
-// var signalChannel = database.child('messages').child(id);
-// signalChannel.on('child_added', handleSignalChannelMessage);
-// announceChannel.on('child_added', handleAnnounceChannelMessage);
-
-// // Send a message to the announcement channel
-// // If our partner is already waiting, they will send us a WebRTC offer
-// // over our Firebase signalling channel and we can begin delegating WebRTC
-// //sendAnnounceChannelMessage();
