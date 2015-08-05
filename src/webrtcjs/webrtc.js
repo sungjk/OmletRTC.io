@@ -230,8 +230,8 @@ var connect = function() {
 
 // Add listener functions to ICE Candidate events
 var startSendingCandidates = function() {
-  peerConnection.oniceconnectionstatechange = handleICEConnectionStateChange;
   peerConnection.onicecandidate = handleICECandidate;
+  peerConnection.oniceconnectionstatechange = handleICEConnectionStateChange;
 };
 
 // This is how we determine when the WebRTC connection has ended
@@ -258,7 +258,6 @@ var handleICECandidate = function(event) {
       // sdpMid : event.candidate.sdpMid,
       // sdpMLineIndex : event.candidate.sdpMLineIndex
     };
-
     documentApi.update(myDocId, addMessage, param_iceCandidate , function () {
       documentApi.get(myDocId, function () {}); 
     },  function (error) {
@@ -598,7 +597,7 @@ function addMessage(old, parameters) {
     // old.sdpMid = parameters.sdpMid;
     // old.sdpMLineIndex = parameters.sdpMLineIndex;
   }
-  if (parameters.message === 'clear') {
+  else if (parameters.message === 'clear') {
     old.chatId = chatId;
     old.creator = identity;
     old.message = '';
@@ -607,7 +606,6 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  
   else if (parameters.message === 'sdp') {
     old.sessionDescription = parameters.sessionDescription; 
   }
