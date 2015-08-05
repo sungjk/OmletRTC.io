@@ -50,6 +50,13 @@ var localVideo = getQuery("#localVideo");
 var remoteVideo = getQuery("#remoteVideo");
 
 
+createButton.onclick = create;
+clearButton.onclick = clearDocument;
+getDocButton.onclick = getDocument;
+joinDataButton.onclick = joinData;
+joinAVButton.onclick = joinAV;
+
+
 
 // streams
 var localStream;
@@ -95,23 +102,11 @@ var param_clear = {
   message : 'clear'
 };
 var param_userMedia = {
+  sender : Omlet.getIdentity().name,
   message : 'userMedia'
 };
 
 
-
- /****************************************************************
- *
- *  EventHandler for click button 
- *
- *  @since  2015.07.23
- *
- ****************************************************************/
-createButton.onclick = create;
-clearButton.onclick = clearDocument;
-getDocButton.onclick = getDocument;
-joinDataButton.onclick = joinData;
-joinAVButton.onclick = joinAV;
 
 
 
@@ -494,41 +489,43 @@ function ReceiveDoc(doc) {
 // This is the general handler for a message from our remote client
 // Determine what type of message it is, and call the appropriate handler
 var handleMessage = function(doc) {
-  if (doc.numOfUser > 2)
+  chatDoc = doc;
+  
+  if (chatDoc.numOfUser > 2)
     return ;
 
-  var sender = doc.sender;
-  var msg = doc.message;
+  var sender = chatDoc.sender;
+  var msg = chatDoc.message;
   log('[+] Recieved a \'' + msg + '\' signal from ' + sender);
 
-  if (doc.message === 'clear') { 
-    log('[+] doc.message === clear');
+  if (chatDoc.message === 'clear') { 
+    log('[+] chatDoc.message === clear');
 
     sessionTerminated();
   }
   else if (msg == 'candidate' && running) {
-    log('[+] doc.message === candidate');
+    log('[+] chatDoc.message === candidate');
 
     var message = {
-      candidate : doc.candidate,
-      sdpMLineIndex : doc.sdpMLineIndex
+      candidate : chatDoc.candidate,
+      sdpMLineIndex : chatDoc.sdpMLineIndex
     };
     handleCandidateSignal(message);
   }
-  else if (doc.sessionDescription.type === 'answer' && doc.creator.name === Omlet.getIdentity().name) { 
-    log('[+] doc.sessionDescription.type === answer');
+  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
+    log('[+] chatDoc.sessionDescription.type === answer');
 
-    handleAnswerSignal(doc.sessionDescription);
+    handleAnswerSignal(chatDoc.sessionDescription);
   }
-  else if (doc.sessionDescription.type === 'offer' && doc.creator.name !== Omlet.getIdentity().name) {
-    log('[+] doc.sessionDescription.type === offer');
+  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+    log('[+] chatDoc.sessionDescription.type === offer');
 
-    handleOfferSignal(doc.sessionDescription);
+    handleOfferSignal(chatDoc.sessionDescription);
   }
-  else if (doc.message === 'userMedia' && doc.creator.name === Omlet.getIdentity().name) {
-    log('[+] doc.message === userMedia'); 
+  else if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
+    log('[+] chatDoc.message === userMedia'); 
 
-    if (doc.channelReady) {
+    if (chatDoc.channelReady) {
       initiateWebRTCState();
       connect();
     }
@@ -584,11 +581,22 @@ function errorCallback(error) {
  *****************************************/
 
 
+
 // 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
   if (parameters.message !== 'undefined')  old.message = parameters.message;
 
-
+  if (parameters.message === 'userMedia') {
+    old.numOfUser = old.numOfUser + 1;
+  }
+  else if (parameters.message === 'channelReady') {
+    old.channelReady = parameters.channelReady;
+  }
+  else if (parameters.message === 'candidate') {
+    old.candidate = parameters.candidate;
+    // old.sdpMid = parameters.sdpMid;
+    // old.sdpMLineIndex = parameters.sdpMLineIndex;
+  }
   if (parameters.message === 'clear') {
     old.chatId = chatId;
     old.creator = identity;
@@ -598,20 +606,11 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  else if (parameters.message === 'candidate') {
-    old.candidate = parameters.candidate;
-    // old.sdpMid = parameters.sdpMid;
-    // old.sdpMLineIndex = parameters.sdpMLineIndex;
-  }
+  
   else if (parameters.message === 'sdp') {
     old.sessionDescription = parameters.sessionDescription; 
   }
-  else if (parameters.message === 'channelReady') {
-    old.channelReady = parameters.channelReady;
-  }
-  else if (parameters.message === 'userMedia') {
-    old.numOfUser = old.numOfUser + 1;
-  }
+  
 
   old.timestamp = Date.now();
 
@@ -770,7 +769,6 @@ function joinAV() {
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
-    isStarted = false;
 
     var param_channelReadyOn = {
       message : 'channelReady',
