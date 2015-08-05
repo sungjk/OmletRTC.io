@@ -161,7 +161,7 @@ var handleOfferSignal = function(sdp) {
       }, function (error) {
         log("[-] handleOfferSignal-createAnswer-update: " + error);
     });
-  });
+  });  
 };
 
 // Handle a WebRTC answer response to our offer we gave the remote client
@@ -200,6 +200,7 @@ var initiateWebRTCState = function() {
 var connect = function() {
   running = true;
   log('[+] running = true;');
+
   startSendingCandidates();
 
   peerConnection.createOffer(function(sessionDescription) {
@@ -295,7 +296,7 @@ function handleUserMedia(stream) {
     log('[-] handleUserMedia-update: ' + error);
   });
 
-  if (chatDoc.channelReady) {
+  if (chatDoc.channelReady && chatDoc.creator.name === Omlet.getIdentity().name) {
     initiateWebRTCState();
     connect();
   }
@@ -768,7 +769,7 @@ function joinAV() {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
     running = false;
     log('[+] running = false;');
-    
+
     // Call getUserMedia()
     log('[+] getUserMedia.');
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
