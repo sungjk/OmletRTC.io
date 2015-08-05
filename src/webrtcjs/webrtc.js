@@ -73,10 +73,11 @@ var constraints = {
 // STUN is a component of the actual WebRTC connection
 var peerConnectionConfig = webrtcDetectedBrowser === 'Chrome' ? 
     { 'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
-    { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
+    { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] 
+};
 
 var peerConnectionConstraints = {
-    'optional': [{ 'DtlsSrtpKeyAgreement': true }],
+    'optional': [{ 'DtlsSrtpKeyAgreement': true }], 
     'mandatory': { googIPv6: true }
 };
 
@@ -184,6 +185,7 @@ var handleCandidateSignal = function(message) {
 // Function to initiate the WebRTC peerconnection and dataChannel
 var initiateWebRTCState = function() {
   peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
+  log('[+] Created RTCPeerConnnection with:\n' + 'config: \'' + JSON.stringify(peerConnectionConfig) + '\';\n' + ' constraints: \'' + JSON.stringify(peerConnectionConstraints) + '\'.');
   peerConnection.addStream(localStream);
   peerConnection.onaddstream = handleRemoteStreamAdded;
   peerConnection.onremovestream = handleRemoteStreamRemoved;
