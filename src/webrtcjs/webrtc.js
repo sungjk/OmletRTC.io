@@ -597,6 +597,8 @@ function errorCallback(error) {
 
 // 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
+  if (parameters.message !== 'undefined')  old.message = parameters.message;
+
   if (parameters.message === 'userMedia') {
     old.numOfUser = old.numOfUser + 1;
   }
@@ -618,13 +620,11 @@ function addMessage(old, parameters) {
     old.sdpMLineIndex = '';
   }
   else if (parameters.message === 'offer') {
-    old.offer = parameters.sessionDescription;
+    old.offer = parameters.offer;
   }
   else if (parameters.message === 'answer') {
-    old.answer = parameters.sessionDescription;
+    old.answer = parameters.answer;
   }
-  
-  if (parameters.message !== 'undefined')  old.message = parameters.message;
   
   // else if (parameters.message === 'sdp') {
   //   old.sessionDescription = parameters.sessionDescription; 
