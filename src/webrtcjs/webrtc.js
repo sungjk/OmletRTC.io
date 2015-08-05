@@ -102,7 +102,6 @@ var param_clear = {
   message : 'clear'
 };
 var param_userMedia = {
-  sender : Omlet.getIdentity().name,
   message : 'userMedia'
 };
 
@@ -293,6 +292,11 @@ function handleUserMedia(stream) {
   }, function (error) {
     log('[-] handleUserMedia-update: ' + error);
   });
+
+  if (chatDoc.channelReady) {
+    initiateWebRTCState();
+    connect();
+  }
 }
 
 
@@ -490,13 +494,13 @@ function ReceiveDoc(doc) {
 // Determine what type of message it is, and call the appropriate handler
 var handleMessage = function(doc) {
   chatDoc = doc;
-  
+
   if (chatDoc.numOfUser > 2)
     return ;
 
   var sender = chatDoc.sender;
   var msg = chatDoc.message;
-  log('[+] Recieved a \'' + msg + '\' signal from ' + sender);
+  // log('[+] Recieved a \'' + msg + '\' signal from ' + sender);
 
   if (chatDoc.message === 'clear') { 
     log('[+] chatDoc.message === clear');
@@ -525,10 +529,10 @@ var handleMessage = function(doc) {
   else if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia'); 
 
-    if (chatDoc.channelReady) {
-      initiateWebRTCState();
-      connect();
-    }
+    // if (chatDoc.channelReady) {
+    //   initiateWebRTCState();
+    //   connect();
+    // }
   }
 };
 
