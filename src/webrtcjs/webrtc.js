@@ -152,10 +152,9 @@ var handleOfferSignal = function(sdp) {
     peerConnection.setLocalDescription(sessionDescription);
 
     var param_sdp = {
-      message : 'sdp',
-      sessionDescription : sessionDescription
+      'message' : 'sdp',
+      'sessionDescription' : sessionDescription
     };
-
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {}); 
       }, function (error) {
@@ -201,18 +200,15 @@ var initiateWebRTCState = function() {
 var connect = function() {
   running = true;
   log('[+] running = true;');
-
   startSendingCandidates();
-
   peerConnection.createOffer(function(sessionDescription) {
     log('[+] Sending offer.');
     peerConnection.setLocalDescription(sessionDescription);
 
     var param_sdp = {
-      message : 'sdp',
-      sessionDescription : sessionDescription
+      'message' : 'sdp',
+      'sessionDescription' : sessionDescription
     };
-
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {}); 
       }, function (error) {
@@ -609,7 +605,6 @@ function addMessage(old, parameters) {
   else if (parameters.message === 'sdp') {
     old.sessionDescription = parameters.sessionDescription; 
   }
-  
 
   old.timestamp = Date.now();
 
