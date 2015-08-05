@@ -152,8 +152,10 @@ var handleOfferSignal = function(sdp) {
     peerConnection.setLocalDescription(sessionDescription);
 
     var param_sdp = {
-      'message' : 'sdp',
-      'sessionDescription' : sessionDescription
+      message : 'answer',
+      answer : sessionDescription
+      // 'message' : 'sdp',
+      // 'sessionDescription' : sessionDescription
     };
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {}); 
@@ -206,8 +208,10 @@ var connect = function() {
     peerConnection.setLocalDescription(sessionDescription);
 
     var param_sdp = {
-      'message' : 'sdp',
-      'sessionDescription' : sessionDescription
+      message : 'offer',
+      offer : sessionDescription
+      // 'message' : 'sdp',
+      // 'sessionDescription' : sessionDescription
     };
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {}); 
@@ -415,6 +419,8 @@ function initConnectionInfo() {
     'numOfUser' : numOfUser,
     'channelReady' : false,
     'sessionDescription' : '',
+    'offer' : '',
+    'answer' : '',
     'candidate' : '',
     'sdpMid' : '',
     'sdpMLineIndex' : '',
@@ -508,16 +514,27 @@ var handleMessage = function(doc) {
     };
     handleCandidateSignal(message);
   }
-  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
-    log('[+] chatDoc.sessionDescription.type === answer');
+  else if (msg == 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
+    log('[+] chatDoc.message === answer');
 
     handleAnswerSignal(chatDoc.sessionDescription);
   }
-  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-    log('[+] chatDoc.sessionDescription.type === offer');
+  else if (msg == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+    log('[+] chatDoc.message === offer');
 
     handleOfferSignal(chatDoc.sessionDescription);
   }
+
+  // else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
+  //   log('[+] chatDoc.sessionDescription.type === answer');
+
+  //   handleAnswerSignal(chatDoc.sessionDescription);
+  // }
+  // else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+  //   log('[+] chatDoc.sessionDescription.type === offer');
+
+  //   handleOfferSignal(chatDoc.sessionDescription);
+  // }
   else if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia'); 
 
@@ -602,9 +619,15 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  else if (parameters.message === 'sdp') {
-    old.sessionDescription = parameters.sessionDescription; 
+  else if (parameters.message === 'answer') {
+    old.answer = parameters.sessionDescription;
   }
+  else if (parameters.message === 'offer') {
+    old.offer = parameters.sessionDescription;
+  }
+  // else if (parameters.message === 'sdp') {
+  //   old.sessionDescription = parameters.sessionDescription; 
+  // }
 
   old.timestamp = Date.now();
 
