@@ -141,6 +141,7 @@ function log(message){
 // Handle a WebRTC offer request from a remote client
 var handleOfferSignal = function(sdp) {
   running = true;
+  log('[+] running = true;');
   initiateWebRTCState();
   startSendingCandidates();
 
@@ -198,6 +199,7 @@ var initiateWebRTCState = function() {
 // Function to offer to start a WebRTC connection with a peer
 var connect = function() {
   running = true;
+  log('[+] running = true;');
   startSendingCandidates();
 
   peerConnection.createOffer(function(sessionDescription) {
@@ -764,7 +766,9 @@ function joinAV() {
   // Caller
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
-
+    running = false;
+    log('[+] running = false;');
+    
     // Call getUserMedia()
     log('[+] getUserMedia.');
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
@@ -773,6 +777,8 @@ function joinAV() {
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
+    running = false;
+    log('[+] running = false;');
 
     var param_channelReadyOn = {
       message : 'channelReady',
