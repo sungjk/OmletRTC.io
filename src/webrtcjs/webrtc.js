@@ -500,12 +500,12 @@ var handleMessage = function(doc) {
   var msg = chatDoc.message;
   // log('[+] Recieved a \'' + msg + '\' signal from ' + sender);
 
-  if (chatDoc.message === 'clear') { 
+  if (msg === 'clear') { 
     log('[+] chatDoc.message === clear');
 
     sessionTerminated();
   }
-  else if (msg == 'candidate' && running) {
+  else if (msg === 'candidate' && running) {
     log('[+] chatDoc.message === candidate');
 
     var message = {
@@ -514,15 +514,15 @@ var handleMessage = function(doc) {
     };
     handleCandidateSignal(message);
   }
-  else if (msg == 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
+  else if (msg === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.message === answer');
 
-    handleAnswerSignal(chatDoc.sessionDescription);
+    handleAnswerSignal(chatDoc.answer);
   }
-  else if (msg == 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+  else if (msg === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.message === offer');
 
-    handleOfferSignal(chatDoc.sessionDescription);
+    handleOfferSignal(chatDoc.offer);
   }
 
   // else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
