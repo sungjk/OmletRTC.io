@@ -152,7 +152,6 @@ var handleOfferSignal = function(sdp) {
 
     var param_sdp = {
       message : 'sdp',
-      sender : Omlet.getIdentity().name, 
       sessionDescription : sessionDescription
     };
 
@@ -209,7 +208,6 @@ var connect = function() {
 
     var param_sdp = {
       message : 'sdp',
-      sender : Omlet.getIdentity().name, 
       sessionDescription : sessionDescription
     };
 
@@ -295,11 +293,6 @@ function handleUserMedia(stream) {
   }, function (error) {
     log('[-] handleUserMedia-update: ' + error);
   });
-
-  if (chatDoc.channelReady && chatDoc.creator.name === Omlet.getIdentity().name) {
-    initiateWebRTCState();
-    connect();
-  }
 }
 
 
@@ -501,7 +494,6 @@ var handleMessage = function(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  var sender = chatDoc.sender;
   var msg = chatDoc.message;
   // log('[+] Recieved a \'' + msg + '\' signal from ' + sender);
 
@@ -532,10 +524,10 @@ var handleMessage = function(doc) {
   else if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia'); 
 
-    // if (chatDoc.channelReady) {
-    //   initiateWebRTCState();
-    //   connect();
-    // }
+    if (chatDoc.channelReady) {
+      initiateWebRTCState();
+      connect();
+    }
   }
 };
 
