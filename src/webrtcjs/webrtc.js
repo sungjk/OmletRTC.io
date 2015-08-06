@@ -502,7 +502,7 @@ var handleMessage = function(doc) {
 
     sessionTerminated();
   }
-  else if (msg == 'candidate' && chatDoc.channelReady) {
+  else if (msg == 'candidate' && running) {
     log('[+] chatDoc.message === candidate');
 
     var message = {
