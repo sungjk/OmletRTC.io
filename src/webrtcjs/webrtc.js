@@ -151,7 +151,7 @@ var handleOfferSignal = function(sdp) {
     peerConnection.setLocalDescription(sessionDescription);
 
     var param_sdp = {
-      message : 'sdp',
+      message : 'sessionDescription',
       sessionDescription : sessionDescription
     };
 
@@ -208,7 +208,7 @@ var connect = function() {
     peerConnection.setLocalDescription(sessionDescription);
 
     var param_sdp = {
-      message : 'sdp',
+      message : 'sessionDescription',
       sessionDescription : sessionDescription
     };
 
@@ -615,7 +615,7 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  else if (parameters.message === 'sdp') {
+  else if (parameters.message === 'sessionDescription') {
     old.sessionDescription = parameters.sessionDescription; 
 
     old.candidate = '';
