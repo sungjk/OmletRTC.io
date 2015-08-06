@@ -211,7 +211,6 @@ var connect = function() {
       message : 'sessionDescription',
       sessionDescription : sessionDescription
     };
-
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {}); 
       }, function (error) {
@@ -606,18 +605,18 @@ function addMessage(old, parameters) {
     // old.sdpMid = parameters.sdpMid;
     old.sessionDescription = '';
   }
+  else if (parameters.message === 'sessionDescription') {
+    old.sessionDescription = parameters.sessionDescription; 
+
+    // old.candidate = '';
+    // old.sdpMLineIndex = '';
+  }
   else if (parameters.message === 'clear') {
     old.chatId = chatId;
     old.creator = identity;
     old.message = '';
     old.numOfUser = 0;
     old.sessionDescription = '';
-    old.candidate = '';
-    old.sdpMLineIndex = '';
-  }
-  else if (parameters.message === 'sessionDescription') {
-    old.sessionDescription = parameters.sessionDescription; 
-
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
