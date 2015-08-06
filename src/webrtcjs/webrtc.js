@@ -487,11 +487,13 @@ function ReceiveDoc(doc) {
 // Determine what type of message it is, and call the appropriate handler
 var handleMessage = function(doc) {
   chatDoc = doc;
+  log('[+] 1111111111111111111111');
 
   if (chatDoc.numOfUser > 2)
     return ;
 
   var msg = chatDoc.message;
+  log('[+] 22222222222222222222222');
   // log('[+] Recieved a \'' + msg + '\' signal from ' + sender);
 
   if (msg === 'clear') { 
