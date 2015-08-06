@@ -493,7 +493,7 @@ var handleMessage = function(doc) {
     return ;
 
   var msg = chatDoc.message;
-  log('[+] 22222222222222222222222');
+  log('[+] message: ' + msg);
   // log('[+] Recieved a \'' + msg + '\' signal from ' + sender);
 
   if (msg === 'clear') { 
