@@ -153,9 +153,7 @@ var handleOfferSignal = function(sdp) {
 
     var param_sdp = {
       message : 'answer',
-      answer : sessionDescription
-      // 'message' : 'sdp',
-      // 'sessionDescription' : sessionDescription
+      sdp : sessionDescription
     };
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {}); 
@@ -209,9 +207,7 @@ var connect = function() {
 
     var param_sdp = {
       message : 'offer',
-      offer : sessionDescription
-      // 'message' : 'sdp',
-      // 'sessionDescription' : sessionDescription
+      sdp : sessionDescription
     };
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {}); 
@@ -418,9 +414,7 @@ function initConnectionInfo() {
     'message' : '',
     'numOfUser' : numOfUser,
     'channelReady' : false,
-    'sessionDescription' : '',
-    'offer' : '',
-    'answer' : '',
+    'sdp' : '',
     'candidate' : '',
     'sdpMid' : '',
     'sdpMLineIndex' : '',
@@ -517,12 +511,12 @@ var handleMessage = function(doc) {
   else if (msg === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
     log('[+] chatDoc.message === answer');
 
-    handleAnswerSignal(chatDoc.answer);
+    handleAnswerSignal(chatDoc.sdp);
   }
   else if (msg === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.message === offer');
 
-    handleOfferSignal(chatDoc.offer);
+    handleOfferSignal(chatDoc.sdp);
   }
 
   // else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
