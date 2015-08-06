@@ -154,7 +154,6 @@ var handleOfferSignal = function(sdp) {
       message : 'sessionDescription',
       sessionDescription : sessionDescription
     };
-
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {}); 
       }, function (error) {
@@ -491,7 +490,7 @@ var handleMessage = function(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  var msg = chatDoc.message;
+  // var msg = chatDoc.message;
   // log('[+] Recieved a \'' + msg + '\' signal from ' + sender);
 
   if (chatDoc.message === 'clear') { 
@@ -499,7 +498,7 @@ var handleMessage = function(doc) {
 
     sessionTerminated();
   }
-  else if (msg == 'candidate' && running) {
+  else if (chatDoc.message == 'candidate' && running) {
     log('[+] chatDoc.message === candidate');
 
     var message = {
@@ -589,8 +588,9 @@ function errorCallback(error) {
     // 'timestamp' : Date.now()
 
 
-// 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
+  //var msg = parameters.message;
+
   if (parameters.message !== 'undefined')  old.message = parameters.message;
 
   if (parameters.message === 'userMedia') {
@@ -603,7 +603,7 @@ function addMessage(old, parameters) {
     old.candidate = parameters.candidate;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
     // old.sdpMid = parameters.sdpMid;
-    old.sessionDescription = '';
+    // old.sessionDescription = '';
   }
   else if (parameters.message === 'sessionDescription') {
     old.sessionDescription = parameters.sessionDescription; 
