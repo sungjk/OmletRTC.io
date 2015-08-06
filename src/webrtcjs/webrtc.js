@@ -251,11 +251,9 @@ var handleICECandidate = function(event) {
 
     var param_iceCandidate = {
       message : 'candidate',
-      candidate : event.candidate.candidate
-      // message : 'candidate',
-      // candidate : event.candidate.candidate,
+      candidate : event.candidate.candidate,
+      sdpMLineIndex : event.candidate.sdpMLineIndex
       // sdpMid : event.candidate.sdpMid,
-      // sdpMLineIndex : event.candidate.sdpMLineIndex
     };
     documentApi.update(myDocId, addMessage, param_iceCandidate , function () {
       documentApi.get(myDocId, function () {}); 
@@ -580,6 +578,17 @@ function errorCallback(error) {
  *****************************************/
 
 
+    // 'chatId' : chatId,
+    // 'creator' : identity,
+    // 'message' : '',
+    // 'numOfUser' : numOfUser,
+    // 'channelReady' : false,
+    // 'sessionDescription' : '',
+    // 'candidate' : '',
+    // 'sdpMid' : '',
+    // 'sdpMLineIndex' : '',
+    // 'timestamp' : Date.now()
+
 
 // 여기에 message 핸들링을 넣어놓는 것도 고려해보면 굿
 function addMessage(old, parameters) {
@@ -593,8 +602,9 @@ function addMessage(old, parameters) {
   }
   else if (parameters.message === 'candidate') {
     old.candidate = parameters.candidate;
+    old.sdpMLineIndex = parameters.sdpMLineIndex;
     // old.sdpMid = parameters.sdpMid;
-    // old.sdpMLineIndex = parameters.sdpMLineIndex;
+    old.sessionDescription = '';
   }
   else if (parameters.message === 'clear') {
     old.chatId = chatId;
@@ -607,6 +617,9 @@ function addMessage(old, parameters) {
   }
   else if (parameters.message === 'sdp') {
     old.sessionDescription = parameters.sessionDescription; 
+
+    old.candidate = '';
+    old.sdpMLineIndex = '';
   }
   
 
