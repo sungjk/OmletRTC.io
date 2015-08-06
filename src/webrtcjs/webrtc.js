@@ -152,9 +152,10 @@ var handleOfferSignal = function(sdp) {
     peerConnection.setLocalDescription(sessionDescription);
 
     var param_sdp = {
-      message : 'answer',
-      sdp : sessionDescription
+      message : 'sdp',
+      sessionDescription : sessionDescription
     };
+
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {}); 
       }, function (error) {
@@ -200,15 +201,18 @@ var initiateWebRTCState = function() {
 var connect = function() {
   running = true;
   log('[+] running = true;');
+
   startSendingCandidates();
+
   peerConnection.createOffer(function(sessionDescription) {
     log('[+] Sending offer.');
     peerConnection.setLocalDescription(sessionDescription);
 
     var param_sdp = {
-      message : 'offer',
-      sdp : sessionDescription
+      message : 'sdp',
+      sessionDescription : sessionDescription
     };
+
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {}); 
       }, function (error) {
@@ -414,7 +418,7 @@ function initConnectionInfo() {
     'message' : '',
     'numOfUser' : numOfUser,
     'channelReady' : false,
-    'sdp' : '',
+    'sessionDescription' : '',
     'candidate' : '',
     'sdpMid' : '',
     'sdpMLineIndex' : '',
@@ -487,21 +491,19 @@ function ReceiveDoc(doc) {
 // Determine what type of message it is, and call the appropriate handler
 var handleMessage = function(doc) {
   chatDoc = doc;
-  log('[+] 1111111111111111111111');
 
   if (chatDoc.numOfUser > 2)
     return ;
 
   var msg = chatDoc.message;
-  log('[+] message: ' + msg);
   // log('[+] Recieved a \'' + msg + '\' signal from ' + sender);
 
-  if (msg === 'clear') { 
+  if (chatDoc.message === 'clear') { 
     log('[+] chatDoc.message === clear');
 
     sessionTerminated();
   }
-  else if (msg === 'candidate' && running) {
+  else if (msg == 'candidate' && running) {
     log('[+] chatDoc.message === candidate');
 
     var message = {
@@ -510,27 +512,16 @@ var handleMessage = function(doc) {
     };
     handleCandidateSignal(message);
   }
-  else if (msg === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
-    log('[+] chatDoc.message === answer');
+  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
+    log('[+] chatDoc.sessionDescription.type === answer');
 
-    handleAnswerSignal(chatDoc.sdp);
+    handleAnswerSignal(chatDoc.sessionDescription);
   }
-  else if (msg === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === offer');
+  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+    log('[+] chatDoc.sessionDescription.type === offer');
 
-    handleOfferSignal(chatDoc.sdp);
+    handleOfferSignal(chatDoc.sessionDescription);
   }
-
-  // else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
-  //   log('[+] chatDoc.sessionDescription.type === answer');
-
-  //   handleAnswerSignal(chatDoc.sessionDescription);
-  // }
-  // else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-  //   log('[+] chatDoc.sessionDescription.type === offer');
-
-  //   handleOfferSignal(chatDoc.sessionDescription);
-  // }
   else if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia'); 
 
@@ -615,16 +606,10 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  else if (parameters.message === 'offer') {
-    old.offer = parameters.offer;
-  }
-  else if (parameters.message === 'answer') {
-    old.answer = parameters.answer;
+  else if (parameters.message === 'sdp') {
+    old.sessionDescription = parameters.sessionDescription; 
   }
   
-  // else if (parameters.message === 'sdp') {
-  //   old.sessionDescription = parameters.sessionDescription; 
-  // }
 
   old.timestamp = Date.now();
 
