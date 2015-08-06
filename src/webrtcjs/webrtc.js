@@ -26,7 +26,6 @@ var chatDoc;
 // sessionDescription constraints
 var sdpConstraints = {};
 
-// var remote;          // ID of the remote peer -- set once they send an offer
 var peerConnection;  // This is our WebRTC connection
 var dataChannel;     // dataChannel object
 var running = false; // Keep track of our connection state
@@ -503,7 +502,7 @@ var handleMessage = function(doc) {
 
     sessionTerminated();
   }
-  else if (msg == 'candidate' && running) {
+  else if (msg == 'candidate' && chatDoc.channelReady) {
     log('[+] chatDoc.message === candidate');
 
     var message = {
@@ -677,9 +676,6 @@ function create() {
       myDocId = d.Document;
       location.hash = "#/docId/" + myDocId;
 
-      // update: function(reference, func, parameters, success, error)
-      // The func argument to update is called to generate the document or to update it with the new parameters. 
-      // It is passed the old document as the first argument, and the app specified parameters as the second.
       documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
         // update successCallback
         documentApi.get(myDocId, DocumentCreated, errorCallback);
