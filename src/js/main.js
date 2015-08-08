@@ -25,7 +25,7 @@ var sdpConstraints = {};
  *  @since  2015.07.23
  *
  *****************************************/
-var createButton = get("createButton");
+var createButton = getQuery("createButton");
 var clearButton = get("clearButton");
 var getDocButton = get("getDocButton");
 var joinDataButton = get("joinDataButton");
