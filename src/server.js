@@ -197,8 +197,15 @@ app.set('view engine', 'jade');
 
 app.get('/',function(req,res){
 	res.render( 'index' , {cid:req.param("channel") , video:req.param("video") ,data:req.param("data") } );
-	res.sendFile(__dirname + '/index.html');
+	res.sendFile(__dirname + '/edit-index.html');
 	//res.sendFile(__dirname + '/webRTCBench.html');
+});
+
+app.get('/index.html', function(req,res){
+	res.sendFile(__dirname + '/index.html');
+});
+app.get('/edit-index.html', function(req,res){
+	res.sendFile(__dirname + '/edit-index.html');
 });
 
 app.get('/js/main.js', function(req,res){
