@@ -25,7 +25,7 @@ var sdpConstraints = {};
  *  @since  2015.07.23
  *
  *****************************************/
-var createButton = getQuery("createButton");
+var createButton = get("createButton");
 var clearButton = get("clearButton");
 var getDocButton = get("getDocButton");
 var joinDataButton = get("joinDataButton");
@@ -248,6 +248,7 @@ function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
     peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
+    log('[+] Created RTCPeerConnnection with:\n' + 'config: \'' + JSON.stringify(peerConnectionConfig) + '\';\n' + ' constraints: \'' + JSON.stringify(peerConnectionConstraints) + '\'.');
 
     log("[+] Attach local Stream.");
     peerConnection.addStream(localStream);
