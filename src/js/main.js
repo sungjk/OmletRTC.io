@@ -483,6 +483,7 @@ function ReceiveDoc(doc) {
 
 function handleMessage(doc) {
   chatDoc = doc;
+  log('[+] message: ' + chatDoc.message);
 
   if (chatDoc.numOfUser > 2)
     return ;
