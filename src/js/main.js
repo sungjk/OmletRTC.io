@@ -48,7 +48,7 @@ var constraints = {
 };
 
 // PeerConnection ICE protocol configuration (either Firefox or Chrome)
-var peerConnectionConfig = webrtcDetectedBrowser === 'Chrome' ? 
+var peerConnectionConfig = webrtcDetectedBrowser === 'Firefox' ? 
     { 'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
     { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] };
 
@@ -157,7 +157,7 @@ function setLocalSessionDescription(sessionDescription) {
   peerConnection.setLocalDescription(sessionDescription);
 
   var param_sdp = {
-    message : 'sessionDescription',
+    message : 'sdp',
     sessionDescription : sessionDescription
   };
   documentApi.update(myDocId, addMessage, param_sdp, function () {
@@ -607,7 +607,7 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  else if (parameters.message === 'sessionDescription') {
+  else if (parameters.message === 'sdp') {
     old.sessionDescription = parameters.sessionDescription; 
   }
 
