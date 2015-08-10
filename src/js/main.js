@@ -149,8 +149,11 @@ function createOffer() {
       }, function (error) {
         log("[-] createOffer-update: " + error);
     });
-  });
+  }, function (error) {
+      log('[-] createOffer: ' + error);
+  }, sdpConstraints);
 }
+
 
 // ICE candidates management
 function handleIceCandidate(event) {
@@ -559,7 +562,9 @@ function handleOfferMessage(sdp) {
       }, function (error) {
         log("[-] handleOfferMessage-createAnswer-update: " + error);
     });
-  });  
+  }, function (error) {
+    log('[-] createAnswer: ' + error);
+  }, sdpConstraints);
 }
 
 // Handle a WebRTC answer response to our offer we gave the remote client
