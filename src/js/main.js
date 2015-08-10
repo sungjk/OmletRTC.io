@@ -138,7 +138,7 @@ function createOffer() {
     var param_offer = {
       sender : Omlet.getIdentity().name,
       message : 'offer',
-      sessionDescription : sessionDescription
+      offer : sessionDescription
     };
     documentApi.update(myDocId, addMessage, param_offer, function () {
         documentApi.get(myDocId, function () {}); 
@@ -482,23 +482,7 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (msg == 'answer' && creator === user) { 
-    log('[+] chatDoc.sessionDescription.type === answer')
-
-    handleAnswerMessage(chatDoc.sessionDescription);
-  }
-  else if (msg == 'offer' && creator !== user) {
-  // else if (chatDoc.sessionDescription.type === 'offer' && creator !== user) {
-    log('[+] chatDoc.sessionDescription.type === offer');
-    log('[+] isStarted: ' + isStarted);
-
-    if (!isStarted) {
-      start(false, true);
-    }
-
-    handleOfferMessage(chatDoc.sessionDescription);
-  }
-  else if (msg === 'candidate' && isStarted && sender !== user) {
+  if (msg === 'candidate' && isStarted && sender !== user) {
     log('[+] chatDoc.message === candidate')
 
     var candidate = new RTCIceCandidate({
@@ -510,6 +494,22 @@ function handleMessage(doc) {
     });
     
     peerConnection.addIceCandidate(candidate);
+  }
+  else if (chatDoc.answer.type === 'answer' && creator === user) { 
+    log('[+] chatDoc.sessionDescription.type === answer')
+
+    handleAnswerMessage(chatDoc.sessionDescription);
+  }
+  // else if (msg === 'offer' && creator !== user) {
+  else if (chatDoc.offer.type === 'offer' && creator !== user) {
+    log('[+] chatDoc.sessionDescription.type === offer');
+    log('[+] isStarted: ' + isStarted);
+
+    if (!isStarted) {
+      start(false, true);
+    }
+
+    handleOfferMessage(chatDoc.sessionDescription);
   }
   else if (msg === 'userMedia' && creator === user) {
     log('[+] chatDoc.message === userMedia'); 
@@ -538,7 +538,7 @@ function handleOfferMessage(sdp) {
     var param_answer = {
       sender : Omlet.getIdentity().name,
       message : 'answer',
-      sessionDescription : sessionDescription
+      answer : sessionDescription
     };
     documentApi.update(myDocId, addMessage, param_answer, function () {
         documentApi.get(myDocId, function () {}); 
@@ -620,10 +620,12 @@ function addMessage(old, parameters) {
     old.sdpMLineIndex = parameters.sdpMLineIndex;
   }
   else if (msg === 'offer') {
-    old.sessionDescription = parameters.sessionDescription;
+    old.offer = parameters.offer;
+    old.answer = '';
   }
   else if (msg === 'answer') {
-    olf.sessionDescription = parameters.sessionDescription;
+    old.answer = parameters.answer;
+    old.offer = '';
   }
   else if (msg === 'channelReady') {
     old.channelReady = parameters.channelReady;
