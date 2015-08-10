@@ -77,10 +77,7 @@ var param_join = {
 var param_clear = {
   message : 'clear'
 };
-var param_userMedia = {
-  sender : Omlet.getIdentity().name,
-  message : 'userMedia'
-};
+
 
 
 
@@ -198,6 +195,10 @@ function handleUserMedia(stream) {
   log('[+] attachMediaStream(localVideo, stream)');
   attachMediaStream(localVideo, stream);
 
+  var param_userMedia = {
+    sender : Omlet.getIdentity().name,
+    message : 'userMedia'
+  };
   documentApi.update(myDocId, addMessage, param_userMedia, function() { 
     documentApi.get(myDocId, addUser, function (error) {
       log('[-] handleUserMedia-update-get: ' + error);
