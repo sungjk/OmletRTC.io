@@ -131,28 +131,55 @@ function onAddIceCandidateError(error) {
 
 
 
+// // Create Offer
+// function createOffer() {
+//   log('[+] createOffer.');
+
+//   peerConnection.createOffer(function (sessionDescription) {
+//     log('[+] Sending offer.');
+//     peerConnection.setLocalDescription(sessionDescription);
+
+//     var param_offer = {
+//       sender : Omlet.getIdentity().name,
+//       message : 'offer',
+//       sessionDescription : sessionDescription
+//     };
+//     documentApi.update(myDocId, addMessage, param_offer, function () {
+//         documentApi.get(myDocId, function () {}); 
+//       }, function (error) {
+//         log("[-] createOffer-update: " + error);
+//     });
+//   }, function (error) {
+//       log('[-] createOffer: ' + error);
+//   }, sdpConstraints);
+// }
+
 // Create Offer
 function createOffer() {
-  log('[+] createOffer.');
-
-  peerConnection.createOffer(function (sessionDescription) {
-    log('[+] Sending offer.');
-    peerConnection.setLocalDescription(sessionDescription);
-
-    var param_offer = {
-      sender : Omlet.getIdentity().name,
-      message : 'offer',
-      sessionDescription : sessionDescription
-    };
-    documentApi.update(myDocId, addMessage, param_offer, function () {
-        documentApi.get(myDocId, function () {}); 
-      }, function (error) {
-        log("[-] createOffer-update: " + error);
-    });
-  }, function (error) {
+    log('[+] createOffer.');
+    peerConnection.createOffer(setLocalSessionDescription, function (error) {
       log('[-] createOffer: ' + error);
-  }, sdpConstraints);
+    }, sdpConstraints);
 }
+
+// Success handler for createOffer and createAnswer
+function setLocalSessionDescription(sessionDescription) {
+  log("[+] setLocalSessionDescription.");
+  peerConnection.setLocalDescription(sessionDescription);
+
+  var param_offer = {
+    sender : Omlet.getIdentity().name,
+    message : 'offer',
+    sessionDescription : sessionDescription
+  };
+  documentApi.update(myDocId, addMessage, param_offer, function () {
+      documentApi.get(myDocId, function () {}); 
+    }, function (error) {
+      log("[-] createOffer-update: " + error);
+  });
+}
+
+
 
 
 // ICE candidates management
