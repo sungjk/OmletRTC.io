@@ -482,13 +482,13 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (msg === 'answer' && creator === user) { 
+  if (msg == 'answer' && creator === user) { 
     log('[+] chatDoc.sessionDescription.type === answer')
 
     handleAnswerMessage(chatDoc.sessionDescription);
   }
-  // else if (msg === 'offer' && creator !== user) {
-  else if (chatDoc.sessionDescription.type === 'offer' && creator !== user) {
+  else if (msg == 'offer' && creator !== user) {
+  // else if (chatDoc.sessionDescription.type === 'offer' && creator !== user) {
     log('[+] chatDoc.sessionDescription.type === offer');
     log('[+] isStarted: ' + isStarted);
 
