@@ -78,6 +78,7 @@ var param_clear = {
   message : 'clear'
 };
 var param_userMedia = {
+  sender : Omlet.getIdentity().name,
   message : 'userMedia'
 };
 
@@ -471,7 +472,7 @@ function handleMessage(doc) {
   chatDoc = doc;
   var user = Omlet.getIdentity().name;
   var sender = chatDoc.sender;
-  var creator = chatDoc.creator.name;
+  var creator = chatDoc.creator;
   var msg = chatDoc.message;
   log('[+] sender: ' + sender + ', message: ' + msg);
 
@@ -636,6 +637,7 @@ function addMessage(old, parameters) {
     old.channelReady = parameters.channelReady;
   }
   else if (msg === 'userMedia') {
+    old.sender = parameters.sender;
     old.numOfUser = old.numOfUser + 1;
   }
   else if (msg === 'clear') {
@@ -646,7 +648,7 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  
+
   // else if (msg === 'sdp') {
   //   old.sessionDescription = parameters.sessionDescription; 
   // }
