@@ -127,59 +127,28 @@ function onAddIceCandidateError(error) {
   log('[-] Failed to add Ice Candidate: ' + error.message);
 }
 
-
-
-
-
-// // Create Offer
-// function createOffer() {
-//   log('[+] createOffer.');
-
-//   peerConnection.createOffer(function (sessionDescription) {
-//     log('[+] Sending offer.');
-//     peerConnection.setLocalDescription(sessionDescription);
-
-//     var param_offer = {
-//       sender : Omlet.getIdentity().name,
-//       message : 'offer',
-//       sessionDescription : sessionDescription
-//     };
-//     documentApi.update(myDocId, addMessage, param_offer, function () {
-//         documentApi.get(myDocId, function () {}); 
-//       }, function (error) {
-//         log("[-] createOffer-update: " + error);
-//     });
-//   }, function (error) {
-//       log('[-] createOffer: ' + error);
-//   }, sdpConstraints);
-// }
-
 // Create Offer
 function createOffer() {
-    log('[+] createOffer.');
-    peerConnection.createOffer(setLocalSessionDescription, function (error) {
+  log('[+] createOffer.');
+
+  peerConnection.createOffer(function (sessionDescription) {
+    log('[+] Sending offer.');
+    peerConnection.setLocalDescription(sessionDescription);
+
+    var param_offer = {
+      sender : Omlet.getIdentity().name,
+      message : 'offer',
+      sessionDescription : sessionDescription
+    };
+    documentApi.update(myDocId, addMessage, param_offer, function () {
+        documentApi.get(myDocId, function () {}); 
+      }, function (error) {
+        log("[-] createOffer-update: " + error);
+    });
+  }, function (error) {
       log('[-] createOffer: ' + error);
-    }, sdpConstraints);
+  }, sdpConstraints);
 }
-
-// Success handler for createOffer and createAnswer
-function setLocalSessionDescription(sessionDescription) {
-  log("[+] setLocalSessionDescription.");
-  peerConnection.setLocalDescription(sessionDescription);
-
-  var param_offer = {
-    sender : Omlet.getIdentity().name,
-    message : 'offer',
-    sessionDescription : sessionDescription
-  };
-  documentApi.update(myDocId, addMessage, param_offer, function () {
-      documentApi.get(myDocId, function () {}); 
-    }, function (error) {
-      log("[-] createOffer-update: " + error);
-  });
-}
-
-
 
 
 // ICE candidates management
@@ -517,14 +486,9 @@ function handleMessage(doc) {
     log('[+] chatDoc.sessionDescription.type === answer')
 
     handleAnswerMessage(chatDoc.sessionDescription);
-
-    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-    //   log('[+] handleMessage-setRemoteDescription-answer');
-    // }, function (error) {
-    //   log('[-] handleMessage-setRemoteDescription-answer: ' + error);
-    // });
   }
-  else if (msg === 'offer' && creator !== user) {
+  // else if (msg === 'offer' && creator !== user) {
+  else if (chatDoc.sessionDescription.type === 'offer' && creator !== user) {
     log('[+] chatDoc.sessionDescription.type === offer');
     log('[+] isStarted: ' + isStarted);
 
@@ -533,14 +497,6 @@ function handleMessage(doc) {
     }
 
     handleOfferMessage(chatDoc.sessionDescription);
-
-
-    // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-    //   log('[+] handleMessage-setRemoteDescription-offer');
-    //   createAnswer();
-    // }, function (error) {
-    //   log('[-] handleMessage-setRemoteDescription-offer: ' + error);
-    // });
   }
   else if (msg === 'candidate' && isStarted && sender !== user) {
     log('[+] chatDoc.message === candidate')
