@@ -409,7 +409,6 @@ function initConnectionInfo() {
     'channelReady' : false,
     'offer' : '',
     'answer' : '',
-    // 'sessionDescription' : '',
     'candidate' : '',
     'sdpMid' : '',
     'sdpMLineIndex' : '',
