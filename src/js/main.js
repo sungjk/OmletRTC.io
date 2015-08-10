@@ -315,7 +315,6 @@ function start(data, video) {
 
     createPeerConnection(data, video);
     if (chatDoc.creator.name === Omlet.getIdentity().name) {
-
       createOffer();
     }
   }
@@ -490,7 +489,7 @@ function handleMessage(doc) {
   if (msg === 'answer' && creator === user) { 
     log('[+] chatDoc.sessionDescription.type === answer')
 
-    handleAnswerMessage(chatDoc.answer);
+    handleAnswerMessage(chatDoc.sessionDescription);
 
     // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
     //   log('[+] handleMessage-setRemoteDescription-answer');
@@ -506,7 +505,7 @@ function handleMessage(doc) {
       start(false, true);
     }
 
-    handleOfferMessage(chatDoc.offer);
+    handleOfferMessage(chatDoc.sessionDescription);
 
 
     // peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
