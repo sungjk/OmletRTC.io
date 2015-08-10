@@ -465,43 +465,6 @@ function ReceiveDoc(doc) {
 }
 
 
-  chatDoc = doc;
-  var msg = chatDoc.message;
-  var creator = chatDoc.creator.name;
-  var user = Omlet.getIdentity().name;
-  log('[+] message: ' + msg);
-
-  if (chatDoc.numOfUser > 2)
-    return ;
-
-  if (msg === 'candidate' && isStarted) {
-    var candidate = {
-      candidate : chatDoc.candidate,
-      sdpMLineIndex : chatDoc.sdpMLineIndex
-    };
-    handleCandidateMessage(candidate);
-  }
-  else if (msg === 'answer' && creator === user) {
-    handleAnswerMessage(chatDoc.answer);
-  }
-  else if (msg === 'offer' && creator !== user) {
-    if (!isStarted) {
-      start(false, true);
-    }
-
-    handleOfferMessage(chatDoc.offer);
-  }
-  else if (chatDoc.message === 'userMedia' && creator === user) {
-    log('[+] chatDoc.message === userMedia'); 
-
-    start(false, true);
-  }
-  else if (chatDoc.message === 'clear' && isStarted) { 
-    log('[+] chatDoc.message === clear');
-
-    sessionTerminated();
-  }
-
 function handleMessage(doc) {
   chatDoc = doc;
   var user = Omlet.getIdentity().name;
