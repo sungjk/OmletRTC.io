@@ -477,7 +477,7 @@ function handleMessage(doc) {
   var sender = chatDoc.sender;
   var creator = chatDoc.creator.name;
   var msg = chatDoc.message;
-  log('[+] user: ' + user + ', sender: ' + sender + ', message: ' + msg);
+  log('[+] sender: ' + sender + ', message: ' + msg);
 
   if (chatDoc.numOfUser > 2)
     return ;
@@ -498,7 +498,7 @@ function handleMessage(doc) {
   else if (chatDoc.answer.type === 'answer' && creator === user) { 
     log('[+] chatDoc.sessionDescription.type === answer')
 
-    handleAnswerMessage(chatDoc.sessionDescription);
+    handleAnswerMessage(chatDoc.answer);
   }
   // else if (msg === 'offer' && creator !== user) {
   else if (chatDoc.offer.type === 'offer' && creator !== user) {
@@ -509,7 +509,7 @@ function handleMessage(doc) {
       start(false, true);
     }
 
-    handleOfferMessage(chatDoc.sessionDescription);
+    handleOfferMessage(chatDoc.offer);
   }
   else if (msg === 'userMedia' && creator === user) {
     log('[+] chatDoc.message === userMedia'); 
