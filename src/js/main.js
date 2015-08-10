@@ -473,7 +473,7 @@ function handleMessage(doc) {
   chatDoc = doc;
   var user = Omlet.getIdentity().name;
   var sender = chatDoc.sender;
-  var creator = chatDoc.creator;
+  var creator = chatDoc.creator.name;
   var msg = chatDoc.message;
   log('[+] sender: ' + sender + ', message: ' + msg);
 
@@ -523,7 +523,7 @@ function handleMessage(doc) {
     //   log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     // });
   }
-  else if (msg === 'userMedia' && creator === Omlet.getIdentity().name) {
+  else if (msg === 'userMedia' && creator === user) {
     log('[+] chatDoc.message === userMedia'); 
 
     start(false, true);
