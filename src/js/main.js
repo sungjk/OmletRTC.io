@@ -135,7 +135,7 @@ function onAddIceCandidateError(error) {
 function createOffer() {
   log('[+] createOffer.');
 
-  peerConnection.createOffer(function(sessionDescription) {
+  peerConnection.createOffer(function (sessionDescription) {
     log('[+] Sending offer.');
     peerConnection.setLocalDescription(sessionDescription);
 
@@ -548,7 +548,7 @@ function handleOfferMessage(sdp) {
     log('[-] handleOfferMessage-setRemoteDescription: ' + error);
   });
 
-  peerConnection.createAnswer(function(sessionDescription) {
+  peerConnection.createAnswer(function (sessionDescription) {
     log('[+] Sending answer.');
     peerConnection.setLocalDescription(sessionDescription);
 
