@@ -170,7 +170,6 @@ function setLocalSessionDescription(sessionDescription) {
 
 // ICE candidates management
 function handleIceCandidate(event) {
-  // if (event.candidate && !isCandidate) {
   if (event.candidate) {
     log('[+] handleIceCandidate event.');
     isCandidate = true;
@@ -634,6 +633,7 @@ function addMessage(old, parameters) {
     old.sdpMLineIndex = '';
   }
   else if (parameters.message === 'sessionDescription') {
+    old.candidate = '';
     old.sessionDescription = parameters.sessionDescription;
   }
 
