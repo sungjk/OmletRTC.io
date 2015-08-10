@@ -481,20 +481,8 @@ function handleMessage(doc) {
     return ;
 
 
-  if (msg === 'candidate' && isStarted && sender !== user) {
-    log('[+] chatDoc.message === candidate')
 
-    var candidate = new RTCIceCandidate({
-      candidate : chatDoc.candidate,
-      // sdpMid : chatDoc.sdpMid,
-      sdpMLineIndex : chatDoc.sdpMLineIndex
-    }, onAddIceCandidateSuccess, function (error) {
-      log('[-] handleMessage-RTCIceCandidate: ' + error);
-    });
-    
-    peerConnection.addIceCandidate(candidate);
-  }
-  else if (msg === 'answer' && creator === user) { 
+  if (msg === 'answer' && creator === user) { 
     log('[+] chatDoc.sessionDescription.type === answer')
 
     handleAnswerMessage(chatDoc.answer);
@@ -504,7 +492,7 @@ function handleMessage(doc) {
     // }, function (error) {
     //   log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     // });
-  } 
+  }
   else if (msg === 'offer' && creator !== user) {
     log('[+] chatDoc.sessionDescription.type === offer');
     log('[+] isStarted: ' + isStarted);
@@ -522,6 +510,19 @@ function handleMessage(doc) {
     // }, function (error) {
     //   log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     // });
+  }
+  else if (msg === 'candidate' && isStarted && sender !== user) {
+    log('[+] chatDoc.message === candidate')
+
+    var candidate = new RTCIceCandidate({
+      candidate : chatDoc.candidate,
+      // sdpMid : chatDoc.sdpMid,
+      sdpMLineIndex : chatDoc.sdpMLineIndex
+    }, onAddIceCandidateSuccess, function (error) {
+      log('[-] handleMessage-RTCIceCandidate: ' + error);
+    });
+    
+    peerConnection.addIceCandidate(candidate);
   }
   else if (msg === 'userMedia' && creator === user) {
     log('[+] chatDoc.message === userMedia'); 
