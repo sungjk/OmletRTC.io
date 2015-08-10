@@ -129,22 +129,6 @@ function onAddIceCandidateError(error) {
 
 
 
-// Success handler for createOffer and createAnswer
-function setLocalSessionDescription(sessionDescription) {
-  log("[+] setLocalSessionDescription.");
-  peerConnection.setLocalDescription(sessionDescription);
-
-  var param_sdp = {
-    message : 'sessionDescription',
-    sessionDescription : sessionDescription
-  };
-  documentApi.update(myDocId, addMessage, param_sdp, function () {
-      documentApi.get(myDocId, function () {});
-    }, function (error) {
-    log("[-] setLocalSessionDescription-update: " + error);
-  });
-}
-
 
 
 // Create Offer
@@ -157,7 +141,7 @@ function createOffer() {
 
     var param_offer = {
       message : 'offer',
-      'offer' : sessionDescription
+      offer : sessionDescription
     };
     documentApi.update(myDocId, addMessage, param_offer, function () {
         documentApi.get(myDocId, function () {}); 
@@ -424,7 +408,7 @@ function initConnectionInfo() {
     'numOfUser' : numOfUser,
     'channelReady' : false,
     'offer' : '',
-    'asnwer' : '',
+    'answer' : '',
     // 'sessionDescription' : '',
     'candidate' : '',
     'sdpMid' : '',
