@@ -390,21 +390,21 @@ function initDocumentAPI() {
 
 
 function DocumentCreated(doc) {
-    var callbackurl = window.location.href.replace("chat-maker.html" , "webrtc-data.html") ;
-    //var callbackurl = "https://apprtc.appspot.com/r/807748194";
-    //callbackurl = "https://webrtcbench-dbh3099.rhcloud.com/cindex.html#/docId/" + myDocId;
-    callbackurl = "https://webrtcbench-dbh3099.rhcloud.com/index.html#/docId/" + myDocId;
+  var callbackurl = "http://203.246.112.144:3310/index.html#/docId/" + myDocId;
 
-  var rdl = Omlet.createRDL({
-      appName: "webrtc-data",
+  if(Omlet.isInstalled()) {
+    var rdl = Omlet.createRDL({
+      appName: "OmletRTC",
       noun: "poll",
-      displayTitle: "UCI-OmletRTC",
-      displayThumbnailUrl: "https://dhorh0z3k6ro7.cloudfront.net/apps/quikpoll/images/quikpoll.png",
+      displayTitle: "OmletRTC",
+      displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
       displayText: 'Client: ' + ip() + '\nServer:' + location.host,
       json: doc,
       callback: callbackurl
     });
+
     Omlet.exit(rdl);
+  }
 }
 
 
