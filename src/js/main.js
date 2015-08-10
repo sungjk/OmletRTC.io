@@ -131,23 +131,60 @@ function onAddIceCandidateError(error) {
 
 
 
+// // Create Offer
+// function createOffer() {
+//     log('[+] createOffer.');
+//     peerConnection.createOffer(setLocalSessionDescription, function (error) {
+//       log('[-] createOffer: ' + error);
+//     }, sdpConstraints);
+// }
+
 // Create Offer
 function createOffer() {
-    log('[+] createOffer.');
-    peerConnection.createOffer(setLocalSessionDescription, function (error) {
-      log('[-] createOffer: ' + error);
-    }, sdpConstraints);
+  log('[+] createOffer.');
+  peerConnection.createOffer(function (sessionDescription) {
+    log('[+] Sending offer.');
+    peerConnection.setLocalDescription(sessionDescription);
 
-
+    var param_offer = {
+      message : 'offer',
+      offer : sessionDescription
+    };
+    documentApi.update(myDocId, addMessage, param_offer, function () {
+        documentApi.get(myDocId, function () {}); 
+      }, function (error) {
+        log("[-] createOffer-update: " + error);
+    });
+  }, function (error) {
+    log('[-] createOffer: ' + error);
+  }, sdpConstraints);
 }
+
 
 
 // Create Answer
 function createAnswer() {
     log('[+] createAnswer.');
-    peerConnection.createAnswer(setLocalSessionDescription, function (error) {
+    // peerConnection.createAnswer(setLocalSessionDescription, function (error) {
+    //   log('[-] createAnswer: ' + error);
+    // }, sdpConstraints);
+
+    peerConnection.createAnswer(function(sessionDescription) {
+      log('[+] Sending answer.');
+      peerConnection.setLocalDescription(sessionDescription);
+
+      var param_sdp = {
+        message : 'answer',
+        answer : sessionDescription
+      };
+      documentApi.update(myDocId, addMessage, param_sdp, function () {
+          documentApi.get(myDocId, function () {}); 
+        }, function (error) {
+          log("[-] createAnswer-update: " + error);
+      });
+    }, function (error) {
       log('[-] createAnswer: ' + error);
-    }, sdpConstraints);
+    }, sdpConstraints);  
 }
 
 
@@ -158,6 +195,7 @@ function setLocalSessionDescription(sessionDescription) {
 
   var param_sdp = {
     message : 'sessionDescription',
+    sender : Omlet.getIdentity().name,
     sessionDescription : sessionDescription
   };
   documentApi.update(myDocId, addMessage, param_sdp, function () {
@@ -237,6 +275,10 @@ function handleUserMedia(stream) {
   log('[+] attachMediaStream(localVideo, stream)');
   attachMediaStream(localVideo, stream);
 
+  var param_userMedia = {
+    sender : Omlet.getIdentity().name,
+    message : 'userMedia'
+  };
   documentApi.update(myDocId, addMessage, param_userMedia, function() {
     documentApi.get(myDocId, addUser, function (error) {
       log('[-] handleUserMedia-update-get: ' + error);
@@ -441,7 +483,9 @@ function initConnectionInfo() {
     'message' : '',
     'numOfUser' : numOfUser,
     'channelReady' : false,
-    'sessionDescription' : '',
+    'offer' : '',
+    'answer' : '',
+    // 'sessionDescription' : '',
     'candidate' : '',
     'sdpMid' : '',
     'sdpMLineIndex' : '',
@@ -525,16 +569,18 @@ function handleMessage(doc) {
 
     peerConnection.addIceCandidate(candidate);
   }
-  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
+  // else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
+  else if (chatDoc.message === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === answer')
 
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.answer), function () {
       log('[+] handleMessage-setRemoteDescription-answer');
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     });
   }
-  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+  // else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+  else if (chatDoc.message === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer');
     log('[+] isStarted: ' + isStarted);
 
@@ -542,7 +588,7 @@ function handleMessage(doc) {
       start(false, true);
     }
 
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.offer), function () {
       log('[+] handleMessage-setRemoteDescription-offer');
       createAnswer();
     }, function (error) {
@@ -610,7 +656,8 @@ function errorCallback(error) {
  *****************************************/
 
 function addMessage(old, parameters) {
-  if (parameters.message !== 'undefined')  old.message = parameters.message;
+  if (parameters.message !== '')  old.message = parameters.message;
+  if (parameters.sender !== '')  old.sender = parameters.sender;
 
   if (parameters.message === 'userMedia') {
     old.numOfUser = old.numOfUser + 1;
@@ -623,19 +670,31 @@ function addMessage(old, parameters) {
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
+    // old.sessionDescription = '';
+
+    old.answer = '';
+    old.offer = '';
   }
   else if (parameters.message === 'clear') {
     old.chatId = '';
     old.creator = '';
     old.numOfUser = 0;
-    old.sessionDescription = '';
+    // old.sessionDescription = '';
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  else if (parameters.message === 'sessionDescription') {
+  else if (parameters.message === 'offer') {
     old.candidate = '';
-    old.sessionDescription = parameters.sessionDescription;
+    old.offer = parameters.offer;
   }
+  else if (parameters.message === 'answer') {
+    old.candidate = '';
+    old.answer = parameters.answer;
+  }
+  // else if (parameters.message === 'sessionDescription') {
+  //   old.candidate = '';
+  //   old.sessionDescription = parameters.sessionDescription;
+  // }
 
   old.timestamp = Date.now();
 
