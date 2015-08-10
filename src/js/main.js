@@ -505,7 +505,7 @@ function handleMessage(doc) {
     //   log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     // });
   } 
-  else if (msg === 'offer' && creator !== Omlet.getIdentity().name) {
+  else if (msg === 'offer' && creator !== user) {
     log('[+] chatDoc.sessionDescription.type === offer');
     log('[+] isStarted: ' + isStarted);
 
@@ -523,7 +523,7 @@ function handleMessage(doc) {
     //   log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     // });
   }
-  else if (msg === 'userMedia' && creator === user) {
+  else if (msg === 'userMedia' && creator === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia'); 
 
     start(false, true);
