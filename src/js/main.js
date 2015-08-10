@@ -620,17 +620,23 @@ function addMessage(old, parameters) {
 
   if (msg !== 'undefined')  old.message = msg;
 
-  if (msg === 'userMedia') {
-    old.numOfUser = old.numOfUser + 1;
-  }
-  else if (msg === 'channelReady') {
-    old.channelReady = parameters.channelReady;
-  }
-  else if (msg === 'candidate') {
+  if (msg === 'candidate') {
     old.sender = parameters.sender;
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
+  }
+  else if (msg === 'offer') {
+    old.offer = parameters.offer;
+  }
+  else if (msg === 'answer') {
+    olf.answer = parameters.answer;
+  }
+  else if (msg === 'channelReady') {
+    old.channelReady = parameters.channelReady;
+  }
+  else if (msg === 'userMedia') {
+    old.numOfUser = old.numOfUser + 1;
   }
   else if (msg === 'clear') {
     old.chatId = '';
@@ -640,12 +646,7 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  else if (msg === 'offer') {
-    old.offer = parameters.offer;
-  }
-  else if (msg === 'answer') {
-    olf.answer = parameters.answer;
-  }
+  
   // else if (msg === 'sdp') {
   //   old.sessionDescription = parameters.sessionDescription; 
   // }
