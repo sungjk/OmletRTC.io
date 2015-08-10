@@ -475,7 +475,7 @@ function handleMessage(doc) {
   var sender = chatDoc.sender;
   var creator = chatDoc.creator.name;
   var msg = chatDoc.message;
-  log('[+] sender: ' + sender + ', message: ' + msg);
+  log('[+] user: ' + user + ', sender: ' + sender + ', message: ' + msg);
 
   if (chatDoc.numOfUser > 2)
     return ;
