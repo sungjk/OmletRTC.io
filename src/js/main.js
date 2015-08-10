@@ -140,6 +140,7 @@ function createOffer() {
     peerConnection.setLocalDescription(sessionDescription);
 
     var param_offer = {
+      sender : Omlet.getIdentity().name,
       message : 'offer',
       offer : sessionDescription
     };
@@ -549,6 +550,7 @@ function handleOfferMessage(sdp) {
     peerConnection.setLocalDescription(sessionDescription);
 
     var param_answer = {
+      sender : Omlet.getIdentity().name,
       message : 'answer',
       answer : sessionDescription
     };
@@ -622,9 +624,9 @@ function addMessage(old, parameters) {
   var msg = parameters.message;
 
   if (msg !== 'undefined')  old.message = msg;
+  if (parameters.sender !== 'undefined')  old.sender = parameters.sender;
 
   if (msg === 'candidate') {
-    old.sender = parameters.sender;
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
@@ -639,7 +641,6 @@ function addMessage(old, parameters) {
     old.channelReady = parameters.channelReady;
   }
   else if (msg === 'userMedia') {
-    old.sender = parameters.sender;
     old.numOfUser = old.numOfUser + 1;
   }
   else if (msg === 'clear') {
