@@ -505,7 +505,7 @@ function handleMessage(doc) {
     //   log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     // });
   } 
-  else if (msg === 'offer' && creator !== user) {
+  else if (msg === 'offer' && creator !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer');
     log('[+] isStarted: ' + isStarted);
 
