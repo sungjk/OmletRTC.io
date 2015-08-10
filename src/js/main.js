@@ -147,7 +147,7 @@ function createOffer() {
     peerConnection.setLocalDescription(sessionDescription);
 
     var param_offer = {
-      message : 'offer',
+      message : 'offering',
       offer : sessionDescription
     };
     documentApi.update(myDocId, addMessage, param_offer, function () {
@@ -570,7 +570,7 @@ function handleMessage(doc) {
     peerConnection.addIceCandidate(candidate);
   }
   // else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
-  else if (chatDoc.message === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
+  else if (chatDoc.message === 'answering' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === answer')
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.answer), function () {
@@ -580,7 +580,7 @@ function handleMessage(doc) {
     });
   }
   // else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-  else if (chatDoc.message === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+  else if (chatDoc.message === 'offering' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer');
     log('[+] isStarted: ' + isStarted);
 
@@ -683,11 +683,11 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  else if (parameters.message === 'offer') {
+  else if (parameters.message === 'offering') {
     old.candidate = '';
     old.offer = parameters.offer;
   }
-  else if (parameters.message === 'answer') {
+  else if (parameters.message === 'answering') {
     old.candidate = '';
     old.answer = parameters.answer;
   }
