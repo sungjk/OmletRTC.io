@@ -211,7 +211,7 @@ function send_SDP() {
   log('[+] send_SDP: ' + peerConnection.localDescription);
 
     var param_sdp = {
-      message : 'sessionDescription'
+      message : 'sessionDescription',
       sender : Omlet.getIdentity().name,
       sessionDescription : peerConnection.localDescription
     };
