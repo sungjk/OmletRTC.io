@@ -142,7 +142,7 @@ function createOffer() {
     var param_offer = {
       sender : Omlet.getIdentity().name,
       message : 'offer',
-      offer : sessionDescription
+      sessionDescription : sessionDescription
     };
     documentApi.update(myDocId, addMessage, param_offer, function () {
         documentApi.get(myDocId, function () {}); 
@@ -413,6 +413,7 @@ function initConnectionInfo() {
     'channelReady' : false,
     'offer' : '',
     'answer' : '',
+    'sessionDescription' : '',
     'candidate' : '',
     'sdpMid' : '',
     'sdpMLineIndex' : '',
@@ -555,7 +556,7 @@ function handleOfferMessage(sdp) {
     var param_answer = {
       sender : Omlet.getIdentity().name,
       message : 'answer',
-      answer : sessionDescription
+      sessionDescription : sessionDescription
     };
     documentApi.update(myDocId, addMessage, param_answer, function () {
         documentApi.get(myDocId, function () {}); 
@@ -637,10 +638,10 @@ function addMessage(old, parameters) {
     old.sdpMLineIndex = parameters.sdpMLineIndex;
   }
   else if (msg === 'offer') {
-    old.offer = parameters.offer;
+    old.sessionDescription = parameters.sessionDescription;
   }
   else if (msg === 'answer') {
-    olf.answer = parameters.answer;
+    olf.sessionDescription = parameters.sessionDescription;
   }
   else if (msg === 'channelReady') {
     old.channelReady = parameters.channelReady;
