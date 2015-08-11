@@ -557,6 +557,55 @@ function handleMessage(doc) {
 
     peerConnection.addIceCandidate(candidate);
   }
+  else if (chatDoc.sessionDescription != '') {
+    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
+
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+      log('[+] setRemoteSDP ' + chatDoc.sessionDescription.type);
+
+      if (peerConnection.remoteDescription.type == 'answer') {
+        // Sends ice candidates to the other peer
+        log('[+] onicecandidate');
+        peerConnection.onicecandidate = handleIceCandidate;
+        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+      }
+      else {
+        createAnswer();
+      }
+
+    }, function (error) {
+      log('[-] setRemoteSDP_Answer: ' + error);
+    });
+
+
+    // if(chatDoc.creator.name === Omlet.getIdentity().name) {
+    //   peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+    //     log('[+] setRemoteSDP_Answer.');
+
+    //     if (peerConnection.remoteDescription.type == 'answer') {
+    //       // Sends ice candidates to the other peer
+    //       log('[+] onicecandidate');
+    //       peerConnection.onicecandidate = handleIceCandidate;
+    //       peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    //     }
+    //   }, function (error) {
+    //     log('[-] setRemoteSDP_Answer: ' + error);
+    //   });
+    // }
+    // else {
+    //   peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+    //     log('[+] setRemoteSDP_Offer.');
+
+    //     if (peerConnection.remoteDescription.type == 'offer') {
+    //       createAnswer();
+    //     }
+    //   }, function (error) {
+    //     log('[-] setRemoteSDP_Offer: ' + error);
+    //   });
+    // }
+  }
+
+
   else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
 
