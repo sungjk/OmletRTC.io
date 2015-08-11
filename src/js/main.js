@@ -159,7 +159,7 @@ function createAnswer() {
           log('[+] onicecandidate');
           peerConnection.onicecandidate = handleIceCandidate;
           peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-    
+
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
@@ -577,12 +577,7 @@ function handleMessage(doc) {
     log('[+] chatDoc.sessionDescription.type === offer');
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[-] handleMessage-setRemoteDescription-offer');
-
-      // Sends ice candidates to the other peer
-      log('[+] onicecandidate');
-      peerConnection.onicecandidate = handleIceCandidate;
-      peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+      log('[+] handleMessage-setRemoteDescription-offer');
 
       if (peerConnection.remoteDescription.type == 'offer') {
         createAnswer();
