@@ -673,12 +673,12 @@ function addMessage(old, parameters) {
     old.userJoin = false;
   }
 
-  if (parameters.sessionDescription !== 'undefined') {
+  if (parameters.sessionDescription != 'undefined') {
     // old.message = parameters.message;
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
   }
-  if (parameters.candidate !== '') {
+  if (parameters.candidate != '') {
     // old.message = parameters.message;
     old.sender = parameters.sender;
     old.candidate = parameters.candidate;
