@@ -470,7 +470,7 @@ function initConnectionInfo() {
     'sender' : '',
     'message' : '',
     'numOfUser' : numOfUser,
-    'channelReady' : false,
+    'userJoin' : false,
     'sessionDescription' : '',
     'candidate' : '',
     'sdpMid' : '',
@@ -540,11 +540,10 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
-
+  // log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
 
   if (chatDoc.candidate !== '' && chatDoc.sender !== Omlet.getIdentity().name) {
-    log('[+] candidate: ' + chatDoc.candidate); //JSON.stringify(chatDoc.candidate));
+    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
     
     var candidate = new RTCIceCandidate({
       candidate : chatDoc.candidate,
@@ -557,10 +556,10 @@ function handleMessage(doc) {
     peerConnection.addIceCandidate(candidate);
   }
   else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
-    log('[+] chatDoc.sessionDescription.type === answer')
+    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] setRemoteDescription-answer');
+      log('[+] setRemoteSDP_Answer.');
 
       if (peerConnection.remoteDescription.type == 'answer') {
         // Sends ice candidates to the other peer
@@ -569,23 +568,25 @@ function handleMessage(doc) {
         peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
       }
     }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-answer: ' + error);
+      log('[-] setRemoteSDP_Answer: ' + error);
     });
   }
   else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-    log('[+] chatDoc.sessionDescription.type === offer');
+    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] setRemoteDescription-offer');
+      log('[+] setRemoteSDP_Offer.');
 
       if (peerConnection.remoteDescription.type == 'offer') {
         createAnswer();
       }
     }, function (error) {
-      log('[-] handleMessage-setRemoteDescription-offer: ' + error);
+      log('[-] setRemoteSDP_Offer: ' + error);
     });
   }
-  else if (chatDoc.message === 'userJoin' && chatDoc.creator.name === Omlet.getIdentity().name) {
+  else if (chatDoc.userJoin && chatDoc.creator.name === Omlet.getIdentity().name) {
+    log('[+] sender: ' + chatDoc.sender + ', message: userJoin');
+
     createOffer();
   }
   else if (chatDoc.message === 'clear' && isStarted) {
@@ -646,29 +647,17 @@ function errorCallback(error) {
 function addMessage(old, parameters) {
   // if (parameters.message !== '')  old.message = parameters.message;
 
-  // if (parameters.message === 'userMedia') {
-  //   old.message = parameters.message;
-  //   old.numOfUser = old.numOfUser + 1;
-  // }
-  // else if (parameters.message === 'userJoin') {
   if (parameters.message === 'userJoin') {
-    old.message = parameters.message;
     old.sender = parameters.sender;
-
-    old.candidate = '';
+    old.userJoin = true;
   }
   else if (parameters.message === 'channelReady') {
-    old.message = parameters.message;
     old.channelReady = parameters.channelReady;
-
-    old.candidate = '';
   }
   else if (parameters.message === 'sessionDescription') {
     // old.message = parameters.message;
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
-
-    old.candidate = '';
   }
   else if (parameters.message === 'candidate') {
     // old.message = parameters.message;
@@ -676,8 +665,6 @@ function addMessage(old, parameters) {
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
-
-    old.sessionDescription = '';
   }
   else if (parameters.message === 'clear') {
     old.message = parameters.message;
@@ -689,7 +676,7 @@ function addMessage(old, parameters) {
     old.sdpMLineIndex = '';
   }
 
-
+  old.message = '';
   old.timestamp = Date.now();
 
   return old;
@@ -831,18 +818,6 @@ function joinAV() {
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
-    isStarted = false;
-
-    var param_channelReadyOn = {
-      message : 'channelReady',
-      sender : Omlet.getIdentity().name,
-      channelReady : true
-    };
-    documentApi.update(myDocId, addMessage, param_channelReadyOn, function () {
-      documentApi.get(myDocId, function () {});
-    }, function (error) {
-      log("[-] joinAV-update-channelReadyOn: " + error);
-    });
 
     // Call getUserMedia()
     log('[+] getUserMedia.');
