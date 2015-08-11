@@ -323,8 +323,6 @@ function createPeerConnection(data, video) {
 
   // video: true
   if(video) {
-    log("[+] Attach local Stream.");
-    
     peerConnection.onaddstream = handleRemoteStreamAdded;
     peerConnection.onremovestream = handleRemoteStreamRemoved;
   }
@@ -542,10 +540,11 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.message === 'sessionDescription')
+  if (chatDoc.sessionDescription.type === 'offer' || chatDoc.sessionDescription.type === 'answer')
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
   else
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
+
 
   if (chatDoc.candidate !== '' && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] candidate: ' + chatDoc.candidate); //JSON.stringify(chatDoc.candidate));
@@ -664,12 +663,12 @@ function addMessage(old, parameters) {
     old.channelReady = parameters.channelReady;
   }
   else if (parameters.message === 'sessionDescription') {
-    old.message = parameters.message;
+    // old.message = parameters.message;
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
   }
   else if (parameters.message === 'candidate') {
-    old.message = parameters.message;
+    // old.message = parameters.message;
     old.sender = parameters.sender;
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
