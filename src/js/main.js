@@ -666,6 +666,8 @@ function addMessage(old, parameters) {
     // old.message = parameters.message;
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
+    
+    old.candidate = '';
   }
   else if (parameters.message === 'candidate') {
     // old.message = parameters.message;
@@ -673,6 +675,8 @@ function addMessage(old, parameters) {
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
+
+    old.sessionDescription = '';
   }
   else if (parameters.message === 'clear') {
     old.message = parameters.message;
