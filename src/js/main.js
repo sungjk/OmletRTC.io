@@ -239,13 +239,13 @@ function handleUserMedia(stream) {
   log('[+] attachMediaStream(localVideo, stream)');
   attachMediaStream(localVideo, stream);
 
-  documentApi.update(myDocId, addMessage, param_userMedia, function() {
-    documentApi.get(myDocId, addUser, function (error) {
-      log('[-] handleUserMedia-update-get: ' + error);
-    });
-  }, function (error) {
-    log('[-] handleUserMedia-update: ' + error);
-  });
+  // documentApi.update(myDocId, addMessage, param_userMedia, function() {
+  //   documentApi.get(myDocId, addUser, function (error) {
+  //     log('[-] handleUserMedia-update-get: ' + error);
+  //   });
+  // }, function (error) {
+  //   log('[-] handleUserMedia-update: ' + error);
+  // });
 
   // both 
   createPeerConnection(false, true);
@@ -621,11 +621,12 @@ function errorCallback(error) {
 function addMessage(old, parameters) {
   // if (parameters.message !== '')  old.message = parameters.message;
 
-  if (parameters.message === 'userMedia') {
-    old.message = parameters.message;
-    old.numOfUser = old.numOfUser + 1;
-  }
-  else if (parameters.message === 'userJoin') {
+  // if (parameters.message === 'userMedia') {
+  //   old.message = parameters.message;
+  //   old.numOfUser = old.numOfUser + 1;
+  // }
+  // else if (parameters.message === 'userJoin') {
+  if (parameters.message === 'userJoin') {
     old.message = parameters.message;
     old.sender = parameters.sender;
   }
