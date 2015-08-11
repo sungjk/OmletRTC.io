@@ -154,17 +154,20 @@ function createAnswer() {
 // Success handler for createOffer and createAnswer
 function setLocalSessionDescription(sessionDescription) {
   log("[+] setLocalSessionDescription.");
-  peerConnection.setLocalDescription(sessionDescription);
 
-  var param_sdp = {
-    message : 'sessionDescription',
-    sender : Omlet.getIdentity().name,
-    sessionDescription : sessionDescription
-  };
-  documentApi.update(myDocId, addMessage, param_sdp, function () {
-      documentApi.get(myDocId, function () {});
-    }, function (error) {
-    log("[-] setLocalSessionDescription-update: " + error);
+  peerConnection.setLocalDescription(sessionDescription, function () {
+    var param_sdp = {
+      message : 'sessionDescription',
+      sender : Omlet.getIdentity().name,
+      sessionDescription : sessionDescription
+    };
+    documentApi.update(myDocId, addMessage, param_sdp, function () {
+        documentApi.get(myDocId, function () {});
+      }, function (error) {
+      log("[-] setLocalSessionDescription-update: " + error);
+    });
+  }, function (error) {
+    log('[-] setLocalSessionDescription: ' + error);
   });
 }
 
@@ -232,8 +235,6 @@ function send_SDP() {
 
 // From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
 function handleUserMedia(stream) {
-  log('[+] >>>>> handleUserMedia <<<<<');
-
   localStream = stream;
   log('[+] attachMediaStream(localVideo, stream)');
   attachMediaStream(localVideo, stream);
@@ -245,10 +246,6 @@ function handleUserMedia(stream) {
   }, function (error) {
     log('[-] handleUserMedia-update: ' + error);
   });
-
-  if (chatDoc.creator.name === Omlet.getIdentity().name) {
-    start(false, true);
-  }
 }
 
 
@@ -273,20 +270,14 @@ function createPeerConnection(data, video) {
     log("[+] createPeerConnection()");
     peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
 
-    log("[+] Attach local Stream.");
-    peerConnection.addStream(localStream);
     log('[+] isStarted = true');
     isStarted = true;
 
-
-    if (chatDoc.creator.name === Omlet.getIdentity().name) {
-      createOffer();
-
-      log('[+] onicecandidate');
-      peerConnection.onicecandidate = handleIceCandidate;
-      peerConnection.onicegatheringstatechange = handleIceGatheringChange;
-      peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-    }
+    // Sends ice candidates to the other peer
+    log('[+] onicecandidate');
+    peerConnection.onicecandidate = handleIceCandidate;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    // peerConnection.onicegatheringstatechange = handleIceGatheringChange;
   }
   catch (e) {
     log('[-] Failed to create RTCPeerConnection: ' + e.message);
@@ -295,6 +286,8 @@ function createPeerConnection(data, video) {
 
   // video: true
   if(video) {
+    log("[+] Attach local Stream.");
+    peerConnection.addStream(localStream);
     peerConnection.onaddstream = handleRemoteStreamAdded;
     peerConnection.onremovestream = handleRemoteStreamRemoved;
   }
@@ -514,7 +507,7 @@ function handleMessage(doc) {
     return ;
 
 
-  if (chatDoc.message === 'candidate' && isStarted && chatDoc.sender !== Omlet.getIdentity().name) {
+  if (chatDoc.message === 'candidate' && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] chatDoc.message === candidate')
 
     var candidate = new RTCIceCandidate({
@@ -538,11 +531,6 @@ function handleMessage(doc) {
   }
   else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer');
-    log('[+] isStarted: ' + isStarted);
-
-    if (!isStarted) {
-      start(false, true);
-    }
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[-] handleMessage-setRemoteDescription-offer');
@@ -553,36 +541,9 @@ function handleMessage(doc) {
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     });
-
-    log('[+] onicecandidate');
-    peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.onicegatheringstatechange = handleIceGatheringChange;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-
-//
-
-    // if (signal.signal_type === "new_ice_candidate") {
-    //   log("[+] Remote peer is adding ICE.");
-    //   remotePeerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate), onAddIceCandidateSuccess, onAddIceCandidateError);
-    // }
-    // else if (signal.signal_type === "new_description") {
-    //   log("[+] Remote peer is setting remote description");
-    //   remotePeerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp), function () {
-    //     log("[+] Remote peer is checking for offer.");
-
-    //     if (remotePeerConnection.remoteDescription.type == "offer") {
-    //       log("[+] Remote peer is creating answer.");
-    //       remotePeerConnection.createAnswer(onNewDescriptionCreated_2, logError);
-    //     }
-    //   }, logError);
-    // }
-//
-
   }
-  else if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === userMedia');
-
-    start(false, true);
+  else if (chatDoc.message === 'userJoin' && chatDoc.creator.name === Omlet.getIdentity().name) {
+    createOffer();
   }
   else if (chatDoc.message === 'clear' && isStarted) {
     log('[+] chatDoc.message === clear');
@@ -800,24 +761,14 @@ function joinAV() {
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
 
-    isStarted = false;
-    var param_channelReadyOff = {
-      message : 'channelReady',
-      channelReady : false
-    };
-
-    // param_channelReadyOff
-    documentApi.update(myDocId, addMessage, param_channelReadyOff, function () {
-      documentApi.get(myDocId, function () {});
-    }, function (error) {
-      log("[-] joinAV-update-channelReadyOff: " + error);
-    });
-
     // Call getUserMedia()
     log('[+] getUserMedia.');
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
       log("[-] joinAV-getUserMedia-caller: " + error);
     });
+
+
+    createPeerConnection(false, true);
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
@@ -827,8 +778,6 @@ function joinAV() {
       message : 'channelReady',
       channelReady : true
     };
-
-    // param_channelReadyOn
     documentApi.update(myDocId, addMessage, param_channelReadyOn, function () {
       documentApi.get(myDocId, function () {});
     }, function (error) {
@@ -839,6 +788,17 @@ function joinAV() {
     log('[+] getUserMedia.');
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
       log("[-] joinAV-getUserMedia-callee: " + error);
+    });
+
+    createPeerConnection(false, true);
+
+    var param_userJoin = {
+      message : 'userJoin',
+    };
+    documentApi.update(myDocId, addMessage, param_userJoin, function () {
+      documentApi.get(myDocId, function () {});
+    }, function (error) {
+      log("[-] joinAV-update-userJoin: " + error);
     });
   }
 }
