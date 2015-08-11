@@ -155,9 +155,9 @@ function createAnswer() {
           documentApi.get(myDocId, function () {});
 
           // Sends ice candidates to the other peer
-          // log('[+] onicecandidate');
-          // peerConnection.onicecandidate = handleIceCandidate;
-          // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+          log('[+] onicecandidate');
+          peerConnection.onicecandidate = handleIceCandidate;
+          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
@@ -312,9 +312,9 @@ function createPeerConnection(data, video) {
     isStarted = true;
 
     // // Sends ice candidates to the other peer
-    log('[+] onicecandidate');
-    peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    // log('[+] onicecandidate');
+    // peerConnection.onicecandidate = handleIceCandidate;
+    // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
     // peerConnection.onicegatheringstatechange = handleIceGatheringChange;
   }
   catch (e) {
@@ -565,9 +565,9 @@ function handleMessage(doc) {
 
       if (peerConnection.remoteDescription.type == 'answer') {
         // Sends ice candidates to the other peer
-        // log('[+] onicecandidate');
-        // peerConnection.onicecandidate = handleIceCandidate;
-        // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+        log('[+] onicecandidate');
+        peerConnection.onicecandidate = handleIceCandidate;
+        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
       }
     }, function (error) {
       log('[-] setRemoteSDP_Answer: ' + error);
