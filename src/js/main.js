@@ -308,9 +308,6 @@ function createPeerConnection(data, video) {
     log("[+] Attach local Stream.");
     peerConnection.addStream(localStream);
 
-    log('[+] isStarted = true');
-    isStarted = true;
-
     // // Sends ice candidates to the other peer
     // log('[+] onicecandidate');
     // peerConnection.onicecandidate = handleIceCandidate;
@@ -543,7 +540,7 @@ function handleMessage(doc) {
 
   // log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
 
-  if (chatDoc.candidate != null && chatDoc.sender !== Omlet.getIdentity().name) {
+  if (chatDoc.candidate != '' && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
 
     
@@ -558,7 +555,7 @@ function handleMessage(doc) {
     peerConnection.addIceCandidate(candidate);
   }
   else if (chatDoc.sessionDescription != '') {
-    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
+    log('[+] sender: ' + chatDoc.sender + ', message: ');// + chatDoc.sessionDescription.type);
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[+] setRemoteSDP ' + chatDoc.sessionDescription.type);
