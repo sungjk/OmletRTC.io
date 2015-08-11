@@ -144,11 +144,6 @@ function createOffer() {
 function createAnswer() {
   log('[+] createAnswer.');
   peerConnection.createAnswer(function (sessionDescription) {
-    // Sends ice candidates to the other peer
-    log('[+] onicecandidate');
-    peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-
     log("[+] setLocalSessionDescription.");
     peerConnection.setLocalDescription(sessionDescription, function () {
       var param_sdp = {
@@ -158,12 +153,17 @@ function createAnswer() {
       };
       documentApi.update(myDocId, addMessage, param_sdp, function () {
           documentApi.get(myDocId, function () {});
+
+          // Sends ice candidates to the other peer
+          log('[+] onicecandidate');
+          peerConnection.onicecandidate = handleIceCandidate;
+          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
     }, function (error) {
       log('[-] setLocalSessionDescription: ' + error);
-    });    
+    });
   }, function (error) {
     log('[-] createAnswer: ' + error);
   }, sdpConstraints);
@@ -564,10 +564,12 @@ function handleMessage(doc) {
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[+] handleMessage-setRemoteDescription-answer');
 
-      // Sends ice candidates to the other peer
-      log('[+] onicecandidate');
-      peerConnection.onicecandidate = handleIceCandidate;
-      peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+      if (peerConnection.remoteDescription.type == 'answer') {
+        // Sends ice candidates to the other peer
+        log('[+] onicecandidate');
+        peerConnection.onicecandidate = handleIceCandidate;
+        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+      }
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     });
