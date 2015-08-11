@@ -269,7 +269,8 @@ function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
     peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
-
+    peerConnection.addStream(localStream);
+    
     log('[+] isStarted = true');
     isStarted = true;
 
@@ -287,7 +288,7 @@ function createPeerConnection(data, video) {
   // video: true
   if(video) {
     log("[+] Attach local Stream.");
-    peerConnection.addStream(localStream);
+    
     peerConnection.onaddstream = handleRemoteStreamAdded;
     peerConnection.onremovestream = handleRemoteStreamRemoved;
   }
@@ -793,7 +794,7 @@ function joinAV() {
     createPeerConnection(false, true);
 
     var param_userJoin = {
-      message : 'userJoin',
+      message : 'userJoin'
     };
     documentApi.update(myDocId, addMessage, param_userJoin, function () {
       documentApi.get(myDocId, function () {});
