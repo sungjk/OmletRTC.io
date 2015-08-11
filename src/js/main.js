@@ -561,6 +561,16 @@ function handleMessage(doc) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
 
     if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
+      var param_flag = {
+        sender : Omlet.getIdentity().name,
+        flag : false
+      };
+      documentApi.update(myDocId, addMessage, param_flag, function () {
+        documentApi.get(myDocId, function () {});
+      }, function (error) {
+        log("[-] update-flag: " + error);
+      })
+
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
         log('[+] setRemoteSDP_Answer.');
 
@@ -569,17 +579,7 @@ function handleMessage(doc) {
           // log('[+] onicecandidate');
           // peerConnection.onicecandidate = handleIceCandidate;
           // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-        }
-
-        var param_flag = {
-          sender : Omlet.getIdentity().name,
-          flag : false
-        };
-        documentApi.update(myDocId, addMessage, param_flag, function () {
-          documentApi.get(myDocId, function () {});
-        }, function (error) {
-          log("[-] update-flag: " + error);
-        })        
+        }   
       }, function (error) {
         log('[-] setRemoteSDP_Answer: ' + error);
       });
@@ -688,7 +688,7 @@ function addMessage(old, parameters) {
     old.userJoin = false;
   }
 
-  if (parameters.flag === false) {
+  if (parameters.flag !== null && !parameters.flag) {
     old.flag = false;
     old.sender = parameters.sender;
   }
