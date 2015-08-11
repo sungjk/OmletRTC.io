@@ -247,7 +247,21 @@ function handleUserMedia(stream) {
     log('[-] handleUserMedia-update: ' + error);
   });
 
+  // both 
   createPeerConnection(false, true);
+
+  // only callee
+  if(chatDoc.creator.name !== Omlet.getIdentity().name) {
+    var param_userJoin = {
+      message : 'userJoin',
+      sender : Omlet.getIdentity().name
+    };
+    documentApi.update(myDocId, addMessage, param_userJoin, function () {
+      documentApi.get(myDocId, function () {});
+    }, function (error) {
+      log("[-] joinAV-update-userJoin: " + error);
+    });
+  }
 }
 
 
@@ -794,17 +808,6 @@ function joinAV() {
     log('[+] getUserMedia.');
     navigator.getUserMedia(constraints, handleUserMedia, function (error) {
       log("[-] joinAV-getUserMedia-callee: " + error);
-    });
-
-
-    var param_userJoin = {
-      message : 'userJoin',
-      sender : Omlet.getIdentity().name
-    };
-    documentApi.update(myDocId, addMessage, param_userJoin, function () {
-      documentApi.get(myDocId, function () {});
-    }, function (error) {
-      log("[-] joinAV-update-userJoin: " + error);
     });
   }
 }
