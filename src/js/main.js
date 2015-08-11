@@ -547,7 +547,7 @@ function handleMessage(doc) {
   else
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
 
-  if (chatDoc.candidate !== undefined && chatDoc.sender !== Omlet.getIdentity().name) {
+  if (chatDoc.candidate !== '' && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] candidate: ' + chatDoc.candidate); //JSON.stringify(chatDoc.candidate));
     
     var candidate = new RTCIceCandidate({
