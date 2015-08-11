@@ -627,7 +627,6 @@ function addMessage(old, parameters) {
   }
   else if (parameters.message === 'sessionDescription') {
     old.sender = parameters.sender;
-    old.candidate = '';
     old.sessionDescription = parameters.sessionDescription;
   }
   else if (parameters.message === 'candidate') {
@@ -635,7 +634,6 @@ function addMessage(old, parameters) {
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
-    old.sessionDescription = '';
   }
   else if (parameters.message === 'clear') {
     old.chatId = '';
