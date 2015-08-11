@@ -687,7 +687,7 @@ function addMessage(old, parameters) {
     old.userJoin = false;
   }
 
-  if (old.flag && parameters.flag != null)
+  if (parameters.flag != null && !parameters.flag)
     old.flag = false;
 
   if (parameters.sessionDescription !== null) {
