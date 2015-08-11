@@ -186,7 +186,7 @@ function setLocalSessionDescription(sessionDescription) {
         log('[+] onicecandidate');
         peerConnection.onicecandidate = handleIceCandidate;
         peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-          
+
       }, function (error) {
       log("[-] setLocalSessionDescription-update: " + error);
     });
@@ -544,7 +544,7 @@ function handleMessage(doc) {
     return ;
 
   if (chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
-    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
+    log('[+] sender: ' + chatDoc.sender + ', message: candidate');
 
     var candidate = new RTCIceCandidate({
       candidate : chatDoc.candidate,
@@ -557,7 +557,7 @@ function handleMessage(doc) {
     peerConnection.addIceCandidate(candidate);
   }
   else if (chatDoc.sessionDescription) {
-    log('[+] sender: ' + chatDoc.sender + ', message: ');// + chatDoc.sessionDescription.type);
+    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[+] setRemoteSDP ' + chatDoc.sessionDescription.type);
