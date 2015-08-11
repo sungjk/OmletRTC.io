@@ -159,7 +159,7 @@ function setLocalSessionDescription(sessionDescription) {
   var param_sdp = {
     message : 'sessionDescription',
     sender : Omlet.getIdentity().name,
-    sessionDescription1 : sessionDescription
+    sessionDescription : sessionDescription
   };
   documentApi.update(myDocId, addMessage, param_sdp, function () {
       documentApi.get(myDocId, function () {});
@@ -213,7 +213,7 @@ function send_SDP() {
     var param_sdp = {
       message : 'sessionDescription',
       sender : Omlet.getIdentity().name,
-      sessionDescription1 : peerConnection.localDescription
+      sessionDescription : peerConnection.localDescription
     };
     documentApi.update(myDocId, addMessage, param_sdp , function () {
       documentApi.get(myDocId, function () {});
@@ -443,7 +443,7 @@ function initConnectionInfo() {
     'message' : '',
     'numOfUser' : numOfUser,
     'channelReady' : false,
-    'sessionDescription1' : '',
+    'sessionDescription' : '',
     'candidate' : '',
     'sdpMid' : '',
     'sdpMLineIndex' : '',
@@ -527,16 +527,16 @@ function handleMessage(doc) {
 
     peerConnection.addIceCandidate(candidate);
   }
-  else if (chatDoc.sessionDescription1.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
+  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === answer')
 
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription1), function () {
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[+] handleMessage-setRemoteDescription-answer');
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     });
   }
-  else if (chatDoc.sessionDescription1.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer');
     log('[+] isStarted: ' + isStarted);
 
@@ -544,7 +544,7 @@ function handleMessage(doc) {
       start(false, true);
     }
 
-    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription1), function () {
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[+] handleMessage-setRemoteDescription-offer');
       createAnswer();
     }, function (error) {
@@ -625,18 +625,20 @@ function addMessage(old, parameters) {
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
+    old.sessionDescription = '';
   }
   else if (parameters.message === 'clear') {
     old.chatId = '';
     old.creator = '';
     old.numOfUser = 0;
-    old.sessionDescription1 = '';
+    old.sessionDescription = '';
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
   else if (parameters.message === 'sessionDescription') {
+    old.sender = parameters.sender;
     old.candidate = '';
-    old.sessionDescription1 = parameters.sessionDescription1;
+    old.sessionDescription = parameters.sessionDescription;
   }
 
   old.timestamp = Date.now();
