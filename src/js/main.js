@@ -602,6 +602,7 @@ function handleMessage(doc) {
       log("[-] joinAV-update-userJoin: " + error);
     })
     
+    log("[-] sessionDescription: " + chatDoc.sessionDescription);
   }
   else if (chatDoc.message === 'clear' && isStarted) {
     log('[+] chatDoc.message === clear');
@@ -673,7 +674,7 @@ function addMessage(old, parameters) {
     old.userJoin = false;
   }
 
-  if (parameters.sessionDescription.type === 'offer' || parameters.sessionDescription.type === 'answer') {
+  if (parameters.sessionDescription === 'sessionDescription') {
     // old.message = parameters.message;
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
