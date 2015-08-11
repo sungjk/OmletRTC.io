@@ -154,17 +154,18 @@ function createAnswer() {
       };
       documentApi.update(myDocId, addMessage, param_sdp, function () {
           documentApi.get(myDocId, function () {});
+
+          // Sends ice candidates to the other peer
+          log('[+] onicecandidate');
+          peerConnection.onicecandidate = handleIceCandidate;
+          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
     }, function (error) {
       log('[-] setLocalSessionDescription: ' + error);
-    });
-
-    // Sends ice candidates to the other peer
-    log('[+] onicecandidate');
-    peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;    
+    });    
   }, function (error) {
     log('[-] createAnswer: ' + error);
   }, sdpConstraints);
