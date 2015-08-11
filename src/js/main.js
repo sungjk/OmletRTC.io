@@ -469,10 +469,10 @@ function initConnectionInfo() {
     'message' : ,
     'numOfUser' : numOfUser,
     'userJoin' : false,
-    'sessionDescription' : ,
-    'candidate' : ,
-    'sdpMid' : ,
-    'sdpMLineIndex' : ,
+    'sessionDescription' : null,
+    'candidate' : null,
+    'sdpMid' : null,
+    'sdpMLineIndex' : null,
     'timestamp' : Date.now()
   };
 
@@ -540,7 +540,7 @@ function handleMessage(doc) {
 
   // log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
 
-  if (chatDoc.candidate !== undefined && chatDoc.sender !== Omlet.getIdentity().name) {
+  if (chatDoc.candidate !== null && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
 
     
@@ -554,7 +554,7 @@ function handleMessage(doc) {
 
     peerConnection.addIceCandidate(candidate);
   }
-  else if (chatDoc.sessionDescription !== undefined) {
+  else if (chatDoc.sessionDescription !== null) {
     log('[+] sender: ' + chatDoc.sender + ', message: ');// + chatDoc.sessionDescription.type);
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
@@ -720,11 +720,11 @@ function addMessage(old, parameters) {
     // if (chatDoc.sessionDescription === '')
     //   log('[+] 2');
 
-  if (parameters.sessionDescription !== undefined) {
+  if (parameters.sessionDescription !== null) {
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
   }
-  if (parameters.candidate !== undefined) {
+  if (parameters.candidate !== null) {
     old.sender = parameters.sender;
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
