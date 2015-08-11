@@ -538,9 +538,7 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  // log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
-
-  if (!chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
+  if (chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
 
     var candidate = new RTCIceCandidate({
@@ -553,7 +551,7 @@ function handleMessage(doc) {
 
     peerConnection.addIceCandidate(candidate);
   }
-  else if (!chatDoc.sessionDescription) {
+  else if (chatDoc.sessionDescription) {
     log('[+] sender: ' + chatDoc.sender + ', message: ');// + chatDoc.sessionDescription.type);
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
