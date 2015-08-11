@@ -278,8 +278,12 @@ function createPeerConnection(data, video) {
     log('[+] isStarted = true');
     isStarted = true;
 
-    log('[+] onicecandidate');
 
+    if (chatDoc.creator.name === Omlet.getIdentity().name) {
+      createOffer();
+    }
+
+    log('[+] onicecandidate');
     peerConnection.onicecandidate = handleIceCandidate;
     peerConnection.onicegatheringstatechange = handleIceGatheringChange;
     peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
@@ -347,9 +351,6 @@ function start(data, video) {
     log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
 
     createPeerConnection(data, video);
-    if (chatDoc.creator.name === Omlet.getIdentity().name) {
-      createOffer();
-    }
   }
 }
 
