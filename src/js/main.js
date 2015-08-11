@@ -540,10 +540,7 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.sessionDescription.type === 'offer' || chatDoc.sessionDescription.type === 'answer')
-    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
-  else
-    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
+  log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
 
 
   if (chatDoc.candidate !== '' && chatDoc.sender !== Omlet.getIdentity().name) {
@@ -657,16 +654,20 @@ function addMessage(old, parameters) {
   if (parameters.message === 'userJoin') {
     old.message = parameters.message;
     old.sender = parameters.sender;
+
+    old.candidate = '';
   }
   else if (parameters.message === 'channelReady') {
     old.message = parameters.message;
     old.channelReady = parameters.channelReady;
+
+    old.candidate = '';
   }
   else if (parameters.message === 'sessionDescription') {
     // old.message = parameters.message;
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
-    
+
     old.candidate = '';
   }
   else if (parameters.message === 'candidate') {
