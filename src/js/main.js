@@ -147,7 +147,7 @@ function createAnswer() {
     log("[+] setLocalSessionDescription.");
     peerConnection.setLocalDescription(sessionDescription, function () {
       var param_sdp = {
-        message : 'sessionDescription',
+        // message : 'sessionDescription',
         sender : Omlet.getIdentity().name,
         sessionDescription : sessionDescription
       };
@@ -155,9 +155,9 @@ function createAnswer() {
           documentApi.get(myDocId, function () {});
 
           // Sends ice candidates to the other peer
-          log('[+] onicecandidate');
-          peerConnection.onicecandidate = handleIceCandidate;
-          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+          // log('[+] onicecandidate');
+          // peerConnection.onicecandidate = handleIceCandidate;
+          // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
@@ -176,7 +176,7 @@ function setLocalSessionDescription(sessionDescription) {
 
   peerConnection.setLocalDescription(sessionDescription, function () {
     var param_sdp = {
-      message : 'sessionDescription',
+      // message : 'sessionDescription',
       sender : Omlet.getIdentity().name,
       sessionDescription : sessionDescription
     };
@@ -198,7 +198,7 @@ function handleIceCandidate(event) {
     isCandidate = true;
 
     var param_iceCandidate = {
-      message : 'candidate',
+      // message : 'candidate',
       sender : Omlet.getIdentity().name,
       candidate : event.candidate.candidate,
       sdpMid : event.candidate.sdpMid,
@@ -233,7 +233,7 @@ function send_SDP() {
   log('[+] send_SDP: ' + peerConnection.localDescription);
 
     var param_sdp = {
-      message : 'sessionDescription',
+      // message : 'sessionDescription',
       sender : Omlet.getIdentity().name,
       sessionDescription : peerConnection.localDescription
     };
@@ -272,7 +272,8 @@ function handleUserMedia(stream) {
   // only callee
   if(chatDoc.creator.name !== Omlet.getIdentity().name) {
     var param_userJoin = {
-      message : 'userJoin',
+      // message : 'userJoin',
+      userJoin : true,
       sender : Omlet.getIdentity().name
     };
     documentApi.update(myDocId, addMessage, param_userJoin, function () {
@@ -311,9 +312,9 @@ function createPeerConnection(data, video) {
     isStarted = true;
 
     // // Sends ice candidates to the other peer
-    // log('[+] onicecandidate');
-    // peerConnection.onicecandidate = handleIceCandidate;
-    // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    log('[+] onicecandidate');
+    peerConnection.onicecandidate = handleIceCandidate;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
     // peerConnection.onicegatheringstatechange = handleIceGatheringChange;
   }
   catch (e) {
@@ -563,9 +564,9 @@ function handleMessage(doc) {
 
       if (peerConnection.remoteDescription.type == 'answer') {
         // Sends ice candidates to the other peer
-        log('[+] onicecandidate');
-        peerConnection.onicecandidate = handleIceCandidate;
-        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+        // log('[+] onicecandidate');
+        // peerConnection.onicecandidate = handleIceCandidate;
+        // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
       }
     }, function (error) {
       log('[-] setRemoteSDP_Answer: ' + error);
@@ -647,31 +648,25 @@ function errorCallback(error) {
 function addMessage(old, parameters) {
   // if (parameters.message !== '')  old.message = parameters.message;
 
-  if (parameters.message === 'userJoin') {
+  if (parameters.userJoin) {
     old.sender = parameters.sender;
     old.userJoin = true;
   }
-  else if (parameters.message === 'channelReady') {
-    old.channelReady = parameters.channelReady;
-  }
-  else if (parameters.message === 'sessionDescription') {
+  if (parameters.sessionDescription === 'sessionDescription') {
     // old.message = parameters.message;
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
 
     old.userJoin = false;
-    old.candidate = '';
   }
-  else if (parameters.message === 'candidate') {
+  if (parameters.candidate !== '') {
     // old.message = parameters.message;
     old.sender = parameters.sender;
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
-
-    old.sessionDescription = '';
   }
-  else if (parameters.message === 'clear') {
+  if (parameters.message === 'clear') {
     old.message = parameters.message;
     old.chatId = '';
     old.creator = '';
