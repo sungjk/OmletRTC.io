@@ -540,6 +540,8 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
+  log('[+] sender: ' + chatDoc.sender + ', flag: ' + chatDoc.flag);
+
   if (chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
 
@@ -554,7 +556,7 @@ function handleMessage(doc) {
     log('[+] addIceCandidate.');
     peerConnection.addIceCandidate(candidate);
   }
-  
+
   if (chatDoc.sessionDescription && chatDoc.flag) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
 
