@@ -190,7 +190,7 @@ function handleIceCandidate(event) {
     });
   }
   else {
-    send_SDP();
+    // send_SDP();
   }
 }
 
@@ -203,7 +203,7 @@ function handleIceGatheringChange(event) {
   log('[+] handleIceGatheringChange.');
 
   if (event.currentTarget && event.currentTarget.iceGatheringState === 'complete') {
-    send_SDP();
+    // send_SDP();
   }
 }
 
