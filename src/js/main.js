@@ -545,7 +545,11 @@ function handleMessage(doc) {
     }
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      createAnswer();
+      log('[-] handleMessage-setRemoteDescription-offer');
+
+      if (peerConnection.remoteDescription.type == 'offer') {
+        createAnswer();
+      }
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     });
@@ -555,7 +559,25 @@ function handleMessage(doc) {
     peerConnection.onicegatheringstatechange = handleIceGatheringChange;
     peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 
-    
+//
+
+    // if (signal.signal_type === "new_ice_candidate") {
+    //   log("[+] Remote peer is adding ICE.");
+    //   remotePeerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate), onAddIceCandidateSuccess, onAddIceCandidateError);
+    // }
+    // else if (signal.signal_type === "new_description") {
+    //   log("[+] Remote peer is setting remote description");
+    //   remotePeerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp), function () {
+    //     log("[+] Remote peer is checking for offer.");
+
+    //     if (remotePeerConnection.remoteDescription.type == "offer") {
+    //       log("[+] Remote peer is creating answer.");
+    //       remotePeerConnection.createAnswer(onNewDescriptionCreated_2, logError);
+    //     }
+    //   }, logError);
+    // }
+//
+
   }
   else if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia');
