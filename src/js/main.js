@@ -556,11 +556,11 @@ function handleMessage(doc) {
 
     peerConnection.addIceCandidate(candidate);
   }
-  else if (chatDoc.sessionDescription) {
+  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] setRemoteSDP ' + chatDoc.sessionDescription.type);
+      log('[+] setRemoteSDP_Answer.');
 
       if (peerConnection.remoteDescription.type == 'answer') {
         // Sends ice candidates to the other peer
@@ -568,71 +568,23 @@ function handleMessage(doc) {
         // peerConnection.onicecandidate = handleIceCandidate;
         // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
       }
-      else {
+    }, function (error) {
+      log('[-] setRemoteSDP_Answer: ' + error);
+    });
+  }
+  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
+
+    peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
+      log('[+] setRemoteSDP_Offer.');
+
+      if (peerConnection.remoteDescription.type == 'offer') {
         createAnswer();
       }
-
     }, function (error) {
-      log('[-] setRemoteSDP: ' + error);
+      log('[-] setRemoteSDP_Offer: ' + error);
     });
-
-
-    // if(chatDoc.creator.name === Omlet.getIdentity().name) {
-    //   peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-    //     log('[+] setRemoteSDP_Answer.');
-
-    //     if (peerConnection.remoteDescription.type == 'answer') {
-    //       // Sends ice candidates to the other peer
-    //       log('[+] onicecandidate');
-    //       peerConnection.onicecandidate = handleIceCandidate;
-    //       peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-    //     }
-    //   }, function (error) {
-    //     log('[-] setRemoteSDP_Answer: ' + error);
-    //   });
-    // }
-    // else {
-    //   peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-    //     log('[+] setRemoteSDP_Offer.');
-
-    //     if (peerConnection.remoteDescription.type == 'offer') {
-    //       createAnswer();
-    //     }
-    //   }, function (error) {
-    //     log('[-] setRemoteSDP_Offer: ' + error);
-    //   });
-    // }
   }
-
-  // else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
-  //   log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
-
-  //   peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-  //     log('[+] setRemoteSDP_Answer.');
-
-  //     if (peerConnection.remoteDescription.type == 'answer') {
-  //       // Sends ice candidates to the other peer
-  //       log('[+] onicecandidate');
-  //       peerConnection.onicecandidate = handleIceCandidate;
-  //       peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-  //     }
-  //   }, function (error) {
-  //     log('[-] setRemoteSDP_Answer: ' + error);
-  //   });
-  // }
-  // else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-  //   log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
-
-  //   peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-  //     log('[+] setRemoteSDP_Offer.');
-
-  //     if (peerConnection.remoteDescription.type == 'offer') {
-  //       createAnswer();
-  //     }
-  //   }, function (error) {
-  //     log('[-] setRemoteSDP_Offer: ' + error);
-  //   });
-  // }
   else if (chatDoc.userJoin && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: userJoin');
 
