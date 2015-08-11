@@ -154,12 +154,6 @@ function createAnswer() {
       };
       documentApi.update(myDocId, addMessage, param_sdp, function () {
           documentApi.get(myDocId, function () {});
-
-          // Sends ice candidates to the other peer
-          log('[+] onicecandidate');
-          peerConnection.onicecandidate = handleIceCandidate;
-          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
@@ -542,6 +536,7 @@ function handleMessage(doc) {
   chatDoc = doc;
   log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
 
+
   if (chatDoc.numOfUser > 2)
     return ;
 
@@ -580,6 +575,12 @@ function handleMessage(doc) {
       log('[+] handleMessage-setRemoteDescription-offer');
 
       if (peerConnection.remoteDescription.type == 'offer') {
+
+        // Sends ice candidates to the other peer
+        log('[+] onicecandidate');
+        peerConnection.onicecandidate = handleIceCandidate;
+        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+        
         createAnswer();
       }
     }, function (error) {
