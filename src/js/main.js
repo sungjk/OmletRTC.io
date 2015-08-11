@@ -540,10 +540,9 @@ function handleMessage(doc) {
 
   // log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
 
-  if (chatDoc.candidate !== null && chatDoc.sender !== Omlet.getIdentity().name) {
+  if (!chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
 
-    
     var candidate = new RTCIceCandidate({
       candidate : chatDoc.candidate,
       // sdpMid : chatDoc.sdpMid,
@@ -554,7 +553,7 @@ function handleMessage(doc) {
 
     peerConnection.addIceCandidate(candidate);
   }
-  else if (chatDoc.sessionDescription !== null) {
+  else if (!chatDoc.sessionDescription) {
     log('[+] sender: ' + chatDoc.sender + ', message: ');// + chatDoc.sessionDescription.type);
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
@@ -743,7 +742,7 @@ function addMessage(old, parameters) {
     old.sdpMLineIndex = '';
   }
 
-  old.message = '';
+  old.message = null;
   old.timestamp = Date.now();
 
   return old;
