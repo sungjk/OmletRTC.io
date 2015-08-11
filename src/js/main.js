@@ -673,7 +673,7 @@ function addMessage(old, parameters) {
     old.userJoin = false;
   }
 
-  if (parameters.sessionDescription === 'sessionDescription') {
+  if (parameters.sessionDescription !== 'undefined') {
     // old.message = parameters.message;
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
