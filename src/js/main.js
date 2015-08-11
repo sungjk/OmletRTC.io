@@ -602,7 +602,19 @@ function handleMessage(doc) {
       log("[-] joinAV-update-userJoin: " + error);
     })
     
-    log("[-] sessionDescription: " + chatDoc.sessionDescription);
+
+    if (chatDoc.sessionDescription == '')
+      log('[+] 1');
+    if (chatDoc.sessionDescription === '')
+      log('[+] 2');
+    if (chatDoc.sessionDescription == null)
+      log('[+] 3');
+    if (chatDoc.sessionDescription === null)
+      log('[+] 4');
+    if (chatDoc.sessionDescription == undefined)
+      log('[+] 5');
+    if (chatDoc.sessionDescription === undefined)
+      log('[+] 6');
   }
   else if (chatDoc.message === 'clear' && isStarted) {
     log('[+] chatDoc.message === clear');
