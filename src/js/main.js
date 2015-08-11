@@ -544,6 +544,12 @@ function handleMessage(doc) {
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     });
+
+
+    // Sends ice candidates to the other peer
+    log('[+] onicecandidate');
+    peerConnection.onicecandidate = handleIceCandidate;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
   }
   else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer');
@@ -558,6 +564,12 @@ function handleMessage(doc) {
 
       if (peerConnection.remoteDescription.type == 'offer') {
         createAnswer();
+
+
+        // Sends ice candidates to the other peer
+        log('[+] onicecandidate');
+        peerConnection.onicecandidate = handleIceCandidate;
+        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
       }
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
@@ -565,11 +577,6 @@ function handleMessage(doc) {
   }
   else if (chatDoc.message === 'userJoin' && chatDoc.creator.name === Omlet.getIdentity().name) {
     createOffer();
-
-    // Sends ice candidates to the other peer
-    log('[+] onicecandidate');
-    peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
   }
   else if (chatDoc.message === 'clear' && isStarted) {
     log('[+] chatDoc.message === clear');
