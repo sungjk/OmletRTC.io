@@ -466,7 +466,7 @@ function initConnectionInfo() {
     'chatId' : chatId,
     'creator' : identity,
     'sender' : null,
-    'message' : ,
+    'message' : null,
     'numOfUser' : numOfUser,
     'userJoin' : false,
     'sessionDescription' : null,
