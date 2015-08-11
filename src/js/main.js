@@ -471,6 +471,7 @@ function initConnectionInfo() {
     'numOfUser' : numOfUser,
     'userJoin' : false,
     'sessionDescription' : null,
+    'flag' : true,
     'candidate' : null,
     'sdpMid' : null,
     'sdpMLineIndex' : null,
@@ -540,7 +541,7 @@ function handleMessage(doc) {
     return ;
 
   if (chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
-    log('[+] sender: ' + chatDoc.sender + ', message: candidate');
+    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
 
     var candidate = new RTCIceCandidate({
       candidate : chatDoc.candidate,
@@ -550,9 +551,11 @@ function handleMessage(doc) {
       log('[-] handleMessage-RTCIceCandidate: ' + error);
     });
 
+    log('[+] addIceCandidate.');
     peerConnection.addIceCandidate(candidate);
   }
-  else if (chatDoc.sessionDescription) {
+  
+  if (chatDoc.sessionDescription && chatDoc.flag) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
 
     if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
@@ -564,6 +567,15 @@ function handleMessage(doc) {
           // log('[+] onicecandidate');
           // peerConnection.onicecandidate = handleIceCandidate;
           // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+
+          var param_flag = {
+            flag : false
+          };
+          documentApi.update(myDocId, addMessage, param_flag, function () {
+            documentApi.get(myDocId, function () {});
+          }, function (error) {
+            log("[-] update-flag: " + error);
+          })
         }
       }, function (error) {
         log('[-] setRemoteSDP_Answer: ' + error);
@@ -586,7 +598,8 @@ function handleMessage(doc) {
       });
     }
   }
-  else if (chatDoc.userJoin && chatDoc.creator.name === Omlet.getIdentity().name) {
+
+  if (chatDoc.userJoin && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: userJoin');
 
     var param_userJoin = {
@@ -599,7 +612,7 @@ function handleMessage(doc) {
       createOffer();
       //
     }, function (error) {
-      log("[-] joinAV-update-userJoin: " + error);
+      log("[-] upate-userJoin: " + error);
     })
   }
   else if (chatDoc.message === 'clear' && isStarted) {
@@ -672,11 +685,8 @@ function addMessage(old, parameters) {
     old.userJoin = false;
   }
 
-    
-    // if (chatDoc.sessionDescription == '')
-    //   log('[+] 1');
-    // if (chatDoc.sessionDescription === '')
-    //   log('[+] 2');
+  if (!parameters.flag)
+    old.flag = false;
 
   if (parameters.sessionDescription !== null) {
     old.sender = parameters.sender;
