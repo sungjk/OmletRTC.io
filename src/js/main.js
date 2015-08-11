@@ -543,7 +543,7 @@ function handleMessage(doc) {
 
   // log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
 
-  if (chatDoc.candidate !== '' && chatDoc.sender !== Omlet.getIdentity().name) {
+  if (chatDoc.candidate != '' && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
     
     var candidate = new RTCIceCandidate({
@@ -651,7 +651,7 @@ function addMessage(old, parameters) {
   if (parameters.userJoin) {
     old.sender = parameters.sender;
     old.userJoin = true;
-    
+
     old.candidate = '';
     old.sessionDescription = '';
   }
