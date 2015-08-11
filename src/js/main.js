@@ -601,20 +601,6 @@ function handleMessage(doc) {
     }, function (error) {
       log("[-] joinAV-update-userJoin: " + error);
     })
-    
-
-    if (chatDoc.sessionDescription == '')
-      log('[+] 1');
-    if (chatDoc.sessionDescription === '')
-      log('[+] 2');
-    if (chatDoc.sessionDescription == null)
-      log('[+] 3');
-    if (chatDoc.sessionDescription === null)
-      log('[+] 4');
-    if (chatDoc.sessionDescription == undefined)
-      log('[+] 5');
-    if (chatDoc.sessionDescription === undefined)
-      log('[+] 6');
   }
   else if (chatDoc.message === 'clear' && isStarted) {
     log('[+] chatDoc.message === clear');
@@ -677,16 +663,19 @@ function addMessage(old, parameters) {
   if (parameters.userJoin) {
     old.sender = parameters.sender;
     old.userJoin = true;
-
-    old.candidate = null;
-    old.sessionDescription = '';
   }
   else {
     old.sender = parameters.sender;
     old.userJoin = false;
   }
 
-  if (parameters.sessionDescription === 'sessionDescription') {
+    
+    // if (chatDoc.sessionDescription == '')
+    //   log('[+] 1');
+    // if (chatDoc.sessionDescription === '')
+    //   log('[+] 2');
+
+  if (parameters.sessionDescription != '') {
     // old.message = parameters.message;
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
