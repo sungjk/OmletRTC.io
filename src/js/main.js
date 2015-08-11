@@ -589,7 +589,19 @@ function handleMessage(doc) {
   else if (chatDoc.userJoin && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: userJoin');
 
-    createOffer();
+    var param_userJoin = {
+      userJoin : false,
+      sender : Omlet.getIdentity().name
+    };
+    documentApi.update(myDocId, addMessage, param_userJoin, function () {
+      documentApi.get(myDocId, function () {});
+      //
+      createOffer();
+      //
+    }, function (error) {
+      log("[-] joinAV-update-userJoin: " + error);
+    })
+    
   }
   else if (chatDoc.message === 'clear' && isStarted) {
     log('[+] chatDoc.message === clear');
@@ -656,12 +668,15 @@ function addMessage(old, parameters) {
     old.candidate = null;
     old.sessionDescription = '';
   }
+  else {
+    old.sender = parameters.sender;
+    old.userJoin = false;
+  }
+
   if (parameters.sessionDescription === 'sessionDescription') {
     // old.message = parameters.message;
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
-
-    old.userJoin = false;
   }
   if (parameters.candidate !== '') {
     // old.message = parameters.message;
