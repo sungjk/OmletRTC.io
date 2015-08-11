@@ -154,10 +154,6 @@ function createAnswer() {
       documentApi.update(myDocId, addMessage, param_sdp, function () {
           documentApi.get(myDocId, function () {});
 
-          // Sends ice candidates to the other peer
-          log('[+] onicecandidate');
-          peerConnection.onicecandidate = handleIceCandidate;
-          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
@@ -200,7 +196,6 @@ function setLocalSessionDescription(sessionDescription) {
 function handleIceCandidate(event) {
   if (event.candidate) {
     log('[+] handleIceCandidate event.');
-    isCandidate = true;
 
     var param_iceCandidate = {
       // message : 'candidate',
@@ -217,6 +212,7 @@ function handleIceCandidate(event) {
     });
   }
   else {
+    log('[-] handleIceCandidate event.');
     // send_SDP();
   }
 }
@@ -576,6 +572,11 @@ function handleMessage(doc) {
     else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
         log('[+] setRemoteSDP_Offer.');
+
+        // Sends ice candidates to the other peer
+        log('[+] onicecandidate');
+        peerConnection.onicecandidate = handleIceCandidate;
+        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 
         if (peerConnection.remoteDescription.type === 'offer') {
           createAnswer();
