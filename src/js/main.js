@@ -281,6 +281,7 @@ function createPeerConnection(data, video) {
 
     if (chatDoc.creator.name === Omlet.getIdentity().name) {
       createOffer();
+
       log('[+] onicecandidate');
       peerConnection.onicecandidate = handleIceCandidate;
       peerConnection.onicegatheringstatechange = handleIceGatheringChange;
@@ -544,7 +545,7 @@ function handleMessage(doc) {
     }
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] handleMessage-setRemoteDescription-offer');
+      createAnswer();
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
     });
@@ -554,7 +555,7 @@ function handleMessage(doc) {
     peerConnection.onicegatheringstatechange = handleIceGatheringChange;
     peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 
-    createAnswer();
+    
   }
   else if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
     log('[+] chatDoc.message === userMedia');
