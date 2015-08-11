@@ -270,7 +270,7 @@ function createPeerConnection(data, video) {
     log("[+] createPeerConnection()");
     peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
     peerConnection.addStream(localStream);
-    
+
     log('[+] isStarted = true');
     isStarted = true;
 
@@ -602,10 +602,13 @@ function errorCallback(error) {
  *****************************************/
 
 function addMessage(old, parameters) {
-  if (parameters.message !== 'undefined')  old.message = parameters.message;
+  if (parameters.message !== '')  old.message = parameters.message;
 
   if (parameters.message === 'userMedia') {
     old.numOfUser = old.numOfUser + 1;
+  }
+  else if (parameters.message === 'userJoin') {
+    old.sender = parameters.sender;
   }
   else if (parameters.message === 'channelReady') {
     old.channelReady = parameters.channelReady;
@@ -777,6 +780,7 @@ function joinAV() {
 
     var param_channelReadyOn = {
       message : 'channelReady',
+      sender : Omlet.getIdentity().name,
       channelReady : true
     };
     documentApi.update(myDocId, addMessage, param_channelReadyOn, function () {
@@ -794,7 +798,8 @@ function joinAV() {
     createPeerConnection(false, true);
 
     var param_userJoin = {
-      message : 'userJoin'
+      message : 'userJoin',
+      sender : Omlet.getIdentity().name
     };
     documentApi.update(myDocId, addMessage, param_userJoin, function () {
       documentApi.get(myDocId, function () {});
