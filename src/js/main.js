@@ -620,6 +620,11 @@ function addMessage(old, parameters) {
   else if (parameters.message === 'channelReady') {
     old.channelReady = parameters.channelReady;
   }
+  else if (parameters.message === 'sessionDescription') {
+    old.sender = parameters.sender;
+    old.candidate = '';
+    old.sessionDescription = parameters.sessionDescription;
+  }
   else if (parameters.message === 'candidate') {
     old.sender = parameters.sender;
     old.candidate = parameters.candidate;
@@ -635,11 +640,7 @@ function addMessage(old, parameters) {
     old.candidate = '';
     old.sdpMLineIndex = '';
   }
-  else if (parameters.message === 'sessionDescription') {
-    old.sender = parameters.sender;
-    old.candidate = '';
-    old.sessionDescription = parameters.sessionDescription;
-  }
+
 
   old.timestamp = Date.now();
 
