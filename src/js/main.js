@@ -377,7 +377,7 @@ function createPeerConnection(data, video) {
 function start(data, video) {
   log('[+] start()');
 
-  if (!isStarted && typeof localStream != 'undefined' && chatDoc.channelReady) {
+  if (!isStarted && typeof localStream != undefined && chatDoc.channelReady) {
     log('[+] isStarted: ' + isStarted + ', localStream: ' + typeof localStream + ', channelReady: ' + chatDoc.channelReady);
 
     createPeerConnection(data, video);
@@ -547,7 +547,7 @@ function handleMessage(doc) {
   else
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
 
-  if (chatDoc.candidate === 'undefined' && chatDoc.sender !== Omlet.getIdentity().name) {
+  if (chatDoc.candidate !== undefined && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] candidate: ' + chatDoc.candidate); //JSON.stringify(chatDoc.candidate));
     
     var candidate = new RTCIceCandidate({
