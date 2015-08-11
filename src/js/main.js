@@ -572,7 +572,7 @@ function handleMessage(doc) {
         }
 
         var param_flag = {
-          sender : sender : Omlet.getIdentity().name,
+          sender : Omlet.getIdentity().name,
           flag : false
         };
         documentApi.update(myDocId, addMessage, param_flag, function () {
