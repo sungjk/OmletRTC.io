@@ -246,6 +246,8 @@ function handleUserMedia(stream) {
   }, function (error) {
     log('[-] handleUserMedia-update: ' + error);
   });
+
+  createPeerConnection(false, true);
 }
 
 
@@ -269,6 +271,7 @@ function createPeerConnection(data, video) {
   try {
     log("[+] createPeerConnection()");
     peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
+    log("[+] Attach local Stream.");
     peerConnection.addStream(localStream);
 
     log('[+] isStarted = true');
@@ -771,8 +774,6 @@ function joinAV() {
       log("[-] joinAV-getUserMedia-caller: " + error);
     });
 
-
-    createPeerConnection(false, true);
   }
   else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
@@ -795,7 +796,6 @@ function joinAV() {
       log("[-] joinAV-getUserMedia-callee: " + error);
     });
 
-    createPeerConnection(false, true);
 
     var param_userJoin = {
       message : 'userJoin',
