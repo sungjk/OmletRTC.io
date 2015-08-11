@@ -569,16 +569,17 @@ function handleMessage(doc) {
           // log('[+] onicecandidate');
           // peerConnection.onicecandidate = handleIceCandidate;
           // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-
-          var param_flag = {
-            flag : false
-          };
-          documentApi.update(myDocId, addMessage, param_flag, function () {
-            documentApi.get(myDocId, function () {});
-          }, function (error) {
-            log("[-] update-flag: " + error);
-          })
         }
+
+        var param_flag = {
+          sender : sender : Omlet.getIdentity().name,
+          flag : false
+        };
+        documentApi.update(myDocId, addMessage, param_flag, function () {
+          documentApi.get(myDocId, function () {});
+        }, function (error) {
+          log("[-] update-flag: " + error);
+        })        
       }, function (error) {
         log('[-] setRemoteSDP_Answer: ' + error);
       });
@@ -687,8 +688,10 @@ function addMessage(old, parameters) {
     old.userJoin = false;
   }
 
-  if (parameters.flag != null && !parameters.flag)
+  if (parameters.flag === false) {
     old.flag = false;
+    old.sender = parameters.sender;
+  }
 
   if (parameters.sessionDescription !== null) {
     old.sender = parameters.sender;
