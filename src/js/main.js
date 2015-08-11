@@ -155,9 +155,9 @@ function createAnswer() {
           documentApi.get(myDocId, function () {});
 
           // Sends ice candidates to the other peer
-          log('[+] onicecandidate');
-          peerConnection.onicecandidate = handleIceCandidate;
-          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+          // log('[+] onicecandidate');
+          // peerConnection.onicecandidate = handleIceCandidate;
+          // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
@@ -309,10 +309,10 @@ function createPeerConnection(data, video) {
     peerConnection.addStream(localStream);
 
     // // Sends ice candidates to the other peer
-    // log('[+] onicecandidate');
-    // peerConnection.onicecandidate = handleIceCandidate;
-    // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-    // peerConnection.onicegatheringstatechange = handleIceGatheringChange;
+    log('[+] onicecandidate');
+    peerConnection.onicecandidate = handleIceCandidate;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    peerConnection.onicegatheringstatechange = handleIceGatheringChange;
   }
   catch (e) {
     log('[-] Failed to create RTCPeerConnection: ' + e.message);
@@ -559,16 +559,16 @@ function handleMessage(doc) {
 
       if (peerConnection.remoteDescription.type == 'answer') {
         // Sends ice candidates to the other peer
-        log('[+] onicecandidate');
-        peerConnection.onicecandidate = handleIceCandidate;
-        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+        // log('[+] onicecandidate');
+        // peerConnection.onicecandidate = handleIceCandidate;
+        // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
       }
       else {
         createAnswer();
       }
 
     }, function (error) {
-      log('[-] setRemoteSDP_Answer: ' + error);
+      log('[-] setRemoteSDP: ' + error);
     });
 
 
