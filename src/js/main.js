@@ -545,9 +545,9 @@ function handleMessage(doc) {
     return ;
 
 
-  if (chatDoc.message === 'candidate' && chatDoc.sender !== Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === candidate')
-
+  if (chatDoc.candidate === 'undefined' && chatDoc.sender !== Omlet.getIdentity().name) {
+    log('[+] candidate: ' + chatDoc.candidate); //JSON.stringify(chatDoc.candidate));
+    
     var candidate = new RTCIceCandidate({
       candidate : chatDoc.candidate,
       // sdpMid : chatDoc.sdpMid,
@@ -562,7 +562,7 @@ function handleMessage(doc) {
     log('[+] chatDoc.sessionDescription.type === answer')
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] handleMessage-setRemoteDescription-answer');
+      log('[+] setRemoteDescription-answer');
 
       if (peerConnection.remoteDescription.type == 'answer') {
         // Sends ice candidates to the other peer
@@ -578,7 +578,7 @@ function handleMessage(doc) {
     log('[+] chatDoc.sessionDescription.type === offer');
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
-      log('[+] handleMessage-setRemoteDescription-offer');
+      log('[+] setRemoteDescription-offer');
 
       if (peerConnection.remoteDescription.type == 'offer') {
         createAnswer();
