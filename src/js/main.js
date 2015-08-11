@@ -144,8 +144,12 @@ function createOffer() {
 function createAnswer() {
   log('[+] createAnswer.');
   peerConnection.createAnswer(function (sessionDescription) {
-    log("[+] setLocalSessionDescription.");
+    // Sends ice candidates to the other peer
+    log('[+] onicecandidate');
+    peerConnection.onicecandidate = handleIceCandidate;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 
+    log("[+] setLocalSessionDescription.");
     peerConnection.setLocalDescription(sessionDescription, function () {
       var param_sdp = {
         message : 'sessionDescription',
@@ -575,12 +579,6 @@ function handleMessage(doc) {
       log('[+] handleMessage-setRemoteDescription-offer');
 
       if (peerConnection.remoteDescription.type == 'offer') {
-
-        // Sends ice candidates to the other peer
-        log('[+] onicecandidate');
-        peerConnection.onicecandidate = handleIceCandidate;
-        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-        
         createAnswer();
       }
     }, function (error) {
