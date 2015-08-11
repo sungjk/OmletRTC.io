@@ -619,28 +619,34 @@ function errorCallback(error) {
  *****************************************/
 
 function addMessage(old, parameters) {
-  if (parameters.message !== '')  old.message = parameters.message;
+  // if (parameters.message !== '')  old.message = parameters.message;
 
   if (parameters.message === 'userMedia') {
+    old.message = parameters.message;
     old.numOfUser = old.numOfUser + 1;
   }
   else if (parameters.message === 'userJoin') {
+    old.message = parameters.message;
     old.sender = parameters.sender;
   }
   else if (parameters.message === 'channelReady') {
+    old.message = parameters.message;
     old.channelReady = parameters.channelReady;
   }
   else if (parameters.message === 'sessionDescription') {
+    old.message = parameters.message;
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
   }
   else if (parameters.message === 'candidate') {
+    old.message = parameters.message;
     old.sender = parameters.sender;
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
     old.sdpMLineIndex = parameters.sdpMLineIndex;
   }
   else if (parameters.message === 'clear') {
+    old.message = parameters.message;
     old.chatId = '';
     old.creator = '';
     old.numOfUser = 0;
