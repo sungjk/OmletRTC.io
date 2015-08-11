@@ -651,6 +651,9 @@ function addMessage(old, parameters) {
   if (parameters.userJoin) {
     old.sender = parameters.sender;
     old.userJoin = true;
+    
+    old.candidate = '';
+    old.sessionDescription = '';
   }
   if (parameters.sessionDescription === 'sessionDescription') {
     // old.message = parameters.message;
