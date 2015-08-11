@@ -543,8 +543,7 @@ function handleMessage(doc) {
 
   // log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
 
-  if (chatDoc.candidate != '' && chatDoc.sender !== Omlet.getIdentity().name) {
-    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
+  if (chatDoc.candidate != null && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
 
     
@@ -654,7 +653,7 @@ function addMessage(old, parameters) {
     old.sender = parameters.sender;
     old.userJoin = true;
 
-    old.candidate = '';
+    old.candidate = null;
     old.sessionDescription = '';
   }
   if (parameters.sessionDescription === 'sessionDescription') {
