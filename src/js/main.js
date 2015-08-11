@@ -538,12 +538,14 @@ function ReceiveDoc(doc) {
 
 function handleMessage(doc) {
   chatDoc = doc;
-  log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
-
 
   if (chatDoc.numOfUser > 2)
     return ;
 
+  if (chatDoc.message === 'sessionDescription')
+    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
+  else
+    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.message);
 
   if (chatDoc.candidate === 'undefined' && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] candidate: ' + chatDoc.candidate); //JSON.stringify(chatDoc.candidate));
