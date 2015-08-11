@@ -133,21 +133,19 @@ function onAddIceCandidateError(error) {
 
 // Create Offer
 function createOffer() {
-    log('[+] createOffer.');
-    peerConnection.createOffer(setLocalSessionDescription, function (error) {
-      log('[-] createOffer: ' + error);
-    }, sdpConstraints);
-
-
+  log('[+] createOffer.');
+  peerConnection.createOffer(setLocalSessionDescription, function (error) {
+    log('[-] createOffer: ' + error);
+  }, sdpConstraints);
 }
 
 
 // Create Answer
 function createAnswer() {
-    log('[+] createAnswer.');
-    peerConnection.createAnswer(setLocalSessionDescription, function (error) {
-      log('[-] createAnswer: ' + error);
-    }, sdpConstraints);
+  log('[+] createAnswer.');
+  peerConnection.createAnswer(setLocalSessionDescription, function (error) {
+    log('[-] createAnswer: ' + error);
+  }, sdpConstraints);
 }
 
 
@@ -291,10 +289,10 @@ function createPeerConnection(data, video) {
     log('[+] isStarted = true');
     isStarted = true;
 
-    // Sends ice candidates to the other peer
-    log('[+] onicecandidate');
-    peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    // // Sends ice candidates to the other peer
+    // log('[+] onicecandidate');
+    // peerConnection.onicecandidate = handleIceCandidate;
+    // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
     // peerConnection.onicegatheringstatechange = handleIceGatheringChange;
   }
   catch (e) {
@@ -553,6 +551,11 @@ function handleMessage(doc) {
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[-] handleMessage-setRemoteDescription-offer');
 
+      // Sends ice candidates to the other peer
+      log('[+] onicecandidate');
+      peerConnection.onicecandidate = handleIceCandidate;
+      peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+
       if (peerConnection.remoteDescription.type == 'offer') {
         createAnswer();
       }
@@ -562,6 +565,11 @@ function handleMessage(doc) {
   }
   else if (chatDoc.message === 'userJoin' && chatDoc.creator.name === Omlet.getIdentity().name) {
     createOffer();
+
+    // Sends ice candidates to the other peer
+    log('[+] onicecandidate');
+    peerConnection.onicecandidate = handleIceCandidate;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
   }
   else if (chatDoc.message === 'clear' && isStarted) {
     log('[+] chatDoc.message === clear');
