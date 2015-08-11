@@ -155,9 +155,9 @@ function createAnswer() {
           documentApi.get(myDocId, function () {});
 
           // Sends ice candidates to the other peer
-          // log('[+] onicecandidate');
-          // peerConnection.onicecandidate = handleIceCandidate;
-          // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+          log('[+] onicecandidate');
+          peerConnection.onicecandidate = handleIceCandidate;
+          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
@@ -182,6 +182,11 @@ function setLocalSessionDescription(sessionDescription) {
     };
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {});
+
+        log('[+] onicecandidate');
+        peerConnection.onicecandidate = handleIceCandidate;
+        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+          
       }, function (error) {
       log("[-] setLocalSessionDescription-update: " + error);
     });
@@ -309,10 +314,10 @@ function createPeerConnection(data, video) {
     peerConnection.addStream(localStream);
 
     // // Sends ice candidates to the other peer
-    log('[+] onicecandidate');
-    peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-    peerConnection.onicegatheringstatechange = handleIceGatheringChange;
+    // log('[+] onicecandidate');
+    // peerConnection.onicecandidate = handleIceCandidate;
+    // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+    // peerConnection.onicegatheringstatechange = handleIceGatheringChange;
   }
   catch (e) {
     log('[-] Failed to create RTCPeerConnection: ' + e.message);
