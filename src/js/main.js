@@ -143,7 +143,29 @@ function createOffer() {
 // Create Answer
 function createAnswer() {
   log('[+] createAnswer.');
-  peerConnection.createAnswer(setLocalSessionDescription, function (error) {
+  peerConnection.createAnswer(function (sessionDescription) {
+    log("[+] setLocalSessionDescription.");
+
+    peerConnection.setLocalDescription(sessionDescription, function () {
+      var param_sdp = {
+        message : 'sessionDescription',
+        sender : Omlet.getIdentity().name,
+        sessionDescription : sessionDescription
+      };
+      documentApi.update(myDocId, addMessage, param_sdp, function () {
+          documentApi.get(myDocId, function () {});
+        }, function (error) {
+        log("[-] setLocalSessionDescription-update: " + error);
+      });
+    }, function (error) {
+      log('[-] setLocalSessionDescription: ' + error);
+    });
+
+    // Sends ice candidates to the other peer
+    log('[+] onicecandidate');
+    peerConnection.onicecandidate = handleIceCandidate;
+    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;    
+  }, function (error) {
     log('[-] createAnswer: ' + error);
   }, sdpConstraints);
 }
@@ -541,15 +563,14 @@ function handleMessage(doc) {
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
       log('[+] handleMessage-setRemoteDescription-answer');
+
+      // Sends ice candidates to the other peer
+      log('[+] onicecandidate');
+      peerConnection.onicecandidate = handleIceCandidate;
+      peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-answer: ' + error);
     });
-
-
-    // Sends ice candidates to the other peer
-    log('[+] onicecandidate');
-    peerConnection.onicecandidate = handleIceCandidate;
-    peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
   }
   else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
     log('[+] chatDoc.sessionDescription.type === offer');
@@ -564,12 +585,6 @@ function handleMessage(doc) {
 
       if (peerConnection.remoteDescription.type == 'offer') {
         createAnswer();
-
-
-        // Sends ice candidates to the other peer
-        log('[+] onicecandidate');
-        peerConnection.onicecandidate = handleIceCandidate;
-        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
       }
     }, function (error) {
       log('[-] handleMessage-setRemoteDescription-offer: ' + error);
