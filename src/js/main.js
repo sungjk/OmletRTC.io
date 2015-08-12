@@ -683,11 +683,11 @@ function addMessage(old, parameters) {
     old.userJoin = false;
   }
 
-  if (parameters.sessionDescription !== null) {
+  if (parameters.sessionDescription) {
     old.sender = parameters.sender;
     old.sessionDescription = parameters.sessionDescription;
   }
-  if (parameters.candidate !== null) {
+  if (parameters.candidate) {
     old.sender = parameters.sender;
     old.candidate = parameters.candidate;
     old.sdpMid = parameters.sdpMid;
