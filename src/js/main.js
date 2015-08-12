@@ -144,25 +144,33 @@ function createOffer() {
 // Create Answer
 function createAnswer() {
   log('[+] createAnswer.');
-  peerConnection.createAnswer(function (sessionDescription) {
-    log("[+] setLocalSessionDescription.");
-    peerConnection.setLocalDescription(sessionDescription, function () {
-      var param_sdp = {
-        sender : Omlet.getIdentity().name,
-        sessionDescription : sessionDescription
-      };
-      documentApi.update(myDocId, addMessage, param_sdp, function () {
-          documentApi.get(myDocId, function () {});
-        }, function (error) {
-        log("[-] setLocalSessionDescription-update: " + error);
-      });
-    }, function (error) {
-      log('[-] setLocalSessionDescription: ' + error);
-    });
-  }, function (error) {
+  peerConnection.createAnswer(setLocalSessionDescription, function (error) {
     log('[-] createAnswer: ' + error);
   }, sdpConstraints);
 }
+
+// // Create Answer
+// function createAnswer() {
+//   log('[+] createAnswer.');
+//   peerConnection.createAnswer(function (sessionDescription) {
+//     log("[+] setLocalSessionDescription.");
+//     peerConnection.setLocalDescription(sessionDescription, function () {
+//       var param_sdp = {
+//         sender : Omlet.getIdentity().name,
+//         sessionDescription : sessionDescription
+//       };
+//       documentApi.update(myDocId, addMessage, param_sdp, function () {
+//           documentApi.get(myDocId, function () {});
+//         }, function (error) {
+//         log("[-] setLocalSessionDescription-update: " + error);
+//       });
+//     }, function (error) {
+//       log('[-] setLocalSessionDescription: ' + error);
+//     });
+//   }, function (error) {
+//     log('[-] createAnswer: ' + error);
+//   }, sdpConstraints);
+// }
 
 
 // Success handler for createOffer and createAnswer
