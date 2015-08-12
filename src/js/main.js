@@ -131,72 +131,55 @@ function onAddIceCandidateError(error) {
 }
 
 
-
 // Create Offer
 function createOffer() {
   log('[+] createOffer.');
-  peerConnection.createOffer(setLocalSessionDescription, function (error) {
+  peerConnection.createOffer(function (sessionDescription) {
+    log("[+] setLocalSessionDescription.");
+    peerConnection.setLocalDescription(sessionDescription, function () {
+      var param_sdp = {
+        sender : Omlet.getIdentity().name,
+        sessionDescription : sessionDescription
+      };
+      documentApi.update(myDocId, addMessage, param_sdp, function () {
+          documentApi.get(myDocId, function () {});
+
+          log('[+] onicecandidate');
+          peerConnection.onicecandidate = handleIceCandidate;
+          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+
+        }, function (error) {
+        log("[-] setLocalSessionDescription-update: " + error);
+      });
+    }, function (error) {
+      log('[-] setLocalSessionDescription: ' + error);
+    });
+  }, function (error) {
     log('[-] createOffer: ' + error);
   }, sdpConstraints);
 }
 
-
 // Create Answer
 function createAnswer() {
   log('[+] createAnswer.');
-  peerConnection.createAnswer(setLocalSessionDescription, function (error) {
-    log('[-] createAnswer: ' + error);
-  }, sdpConstraints);
-}
-
-// // Create Answer
-// function createAnswer() {
-//   log('[+] createAnswer.');
-//   peerConnection.createAnswer(function (sessionDescription) {
-//     log("[+] setLocalSessionDescription.");
-//     peerConnection.setLocalDescription(sessionDescription, function () {
-//       var param_sdp = {
-//         sender : Omlet.getIdentity().name,
-//         sessionDescription : sessionDescription
-//       };
-//       documentApi.update(myDocId, addMessage, param_sdp, function () {
-//           documentApi.get(myDocId, function () {});
-//         }, function (error) {
-//         log("[-] setLocalSessionDescription-update: " + error);
-//       });
-//     }, function (error) {
-//       log('[-] setLocalSessionDescription: ' + error);
-//     });
-//   }, function (error) {
-//     log('[-] createAnswer: ' + error);
-//   }, sdpConstraints);
-// }
-
-
-// Success handler for createOffer and createAnswer
-function setLocalSessionDescription(sessionDescription) {
-  log("[+] setLocalSessionDescription.");
-
-  peerConnection.setLocalDescription(sessionDescription, function () {
-    var param_sdp = {
-      // message : 'sessionDescription',
-      sender : Omlet.getIdentity().name,
-      sessionDescription : sessionDescription
-    };
-    documentApi.update(myDocId, addMessage, param_sdp, function () {
-        documentApi.get(myDocId, function () {});
-
-        // if (chatDoc.creator.name === Omlet.getIdentity().name) {
-        //   log('[+] onicecandidate');
-        //   peerConnection.onicecandidate = handleIceCandidate;
-        //   peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-        // }
-      }, function (error) {
-      log("[-] setLocalSessionDescription-update: " + error);
+  peerConnection.createAnswer(function (sessionDescription) {
+    log("[+] setLocalSessionDescription.");
+    peerConnection.setLocalDescription(sessionDescription, function () {
+      var param_sdp = {
+        sender : Omlet.getIdentity().name,
+        sessionDescription : sessionDescription
+      };
+      documentApi.update(myDocId, addMessage, param_sdp, function () {
+          documentApi.get(myDocId, function () {});
+        }, function (error) {
+        log("[-] setLocalSessionDescription-update: " + error);
+      });
+    }, function (error) {
+      log('[-] setLocalSessionDescription: ' + error);
     });
   }, function (error) {
-    log('[-] setLocalSessionDescription: ' + error);
-  });
+    log('[-] createAnswer: ' + error);
+  }, sdpConstraints);
 }
 
 
@@ -206,7 +189,6 @@ function handleIceCandidate(event) {
     log('[+] handleIceCandidate event.');
 
     var param_iceCandidate = {
-      // message : 'candidate',
       sender : Omlet.getIdentity().name,
       candidate : event.candidate.candidate,
       sdpMid : event.candidate.sdpMid,
@@ -242,7 +224,6 @@ function send_SDP() {
   log('[+] send_SDP: ' + peerConnection.localDescription);
 
     var param_sdp = {
-      // message : 'sessionDescription',
       sender : Omlet.getIdentity().name,
       sessionDescription : peerConnection.localDescription
     };
@@ -267,28 +248,19 @@ function handleUserMedia(stream) {
   log('[+] attachMediaStream(localVideo, stream)');
   attachMediaStream(localVideo, stream);
 
-  // documentApi.update(myDocId, addMessage, param_userMedia, function() {
-  //   documentApi.get(myDocId, addUser, function (error) {
-  //     log('[-] handleUserMedia-update-get: ' + error);
-  //   });
-  // }, function (error) {
-  //   log('[-] handleUserMedia-update: ' + error);
-  // });
-
   // both 
   createPeerConnection(false, true);
 
   // only callee
   if(chatDoc.creator.name !== Omlet.getIdentity().name) {
     var param_userJoin = {
-      // message : 'userJoin',
       userJoin : true,
       sender : Omlet.getIdentity().name
     };
     documentApi.update(myDocId, addMessage, param_userJoin, function () {
       documentApi.get(myDocId, function () {});
     }, function (error) {
-      log("[-] joinAV-update-userJoin: " + error);
+      log("[-] update-userJoin: " + error);
     });
   }
 }
@@ -570,13 +542,6 @@ function handleMessage(doc) {
     if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
         log('[+] setRemoteSDP_Answer.');
-
-        if (peerConnection.remoteDescription.type === 'answer') {
-          // Sends ice candidates to the other peer
-          log('[+] onicecandidate');
-          peerConnection.onicecandidate = handleIceCandidate;
-          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-        }
       }, function (error) {
         log('[-] setRemoteSDP_Answer: ' + error);
       });
