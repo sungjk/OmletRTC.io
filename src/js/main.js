@@ -147,9 +147,9 @@ function createOffer() {
           documentApi.get(myDocId, function () {});
 
 //
-          log('[+] onicecandidate');
-          peerConnection.onicecandidate = handleIceCandidate;
-          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+          // log('[+] onicecandidate');
+          // peerConnection.onicecandidate = handleIceCandidate;
+          // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 //
 
         }, function (error) {
