@@ -154,7 +154,6 @@ function createAnswer() {
       };
       documentApi.update(myDocId, addMessage, param_sdp, function () {
           documentApi.get(myDocId, function () {});
-
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
@@ -540,8 +539,6 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  log('[+] sender: ' + chatDoc.sender + ', flag: ' + flag);
-
   if (chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
 
@@ -569,12 +566,13 @@ function handleMessage(doc) {
           // log('[+] onicecandidate');
           // peerConnection.onicecandidate = handleIceCandidate;
           // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-        }   
+        }
+
+        flag = false;
       }, function (error) {
         log('[-] setRemoteSDP_Answer: ' + error);
       });
-
-      flag = false;
+      
     }
     else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
