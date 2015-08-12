@@ -560,18 +560,18 @@ function handleMessage(doc) {
     else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
 
         // Sends ice candidates to the other peer
-        log('[+] onicecandidate');
-        peerConnection.onicecandidate = handleIceCandidate;
-        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+        // log('[+] onicecandidate');
+        // peerConnection.onicecandidate = handleIceCandidate;
+        // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
         log('[+] setRemoteSDP_Offer.');
 
 //
-          // // Sends ice candidates to the other peer
-          // log('[+] onicecandidate');
-          // peerConnection.onicecandidate = handleIceCandidate;
-          // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+          // Sends ice candidates to the other peer
+          log('[+] onicecandidate');
+          peerConnection.onicecandidate = handleIceCandidate;
+          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 //
 
         if (peerConnection.remoteDescription.type === 'offer') {
