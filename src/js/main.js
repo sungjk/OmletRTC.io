@@ -186,10 +186,11 @@ function setLocalSessionDescription(sessionDescription) {
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {});
 
-        log('[+] onicecandidate');
-        peerConnection.onicecandidate = handleIceCandidate;
-        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-
+        if (chatDoc.creator.name === Omlet.getIdentity().name) {
+          log('[+] onicecandidate');
+          peerConnection.onicecandidate = handleIceCandidate;
+          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+        }
       }, function (error) {
       log("[-] setLocalSessionDescription-update: " + error);
     });
