@@ -134,8 +134,10 @@ function onAddIceCandidateError(error) {
 // Create Offer
 function createOffer() {
   log('[+] createOffer.');
+
   peerConnection.createOffer(function (sessionDescription) {
     log("[+] setLocalSessionDescription.");
+
     peerConnection.setLocalDescription(sessionDescription, function () {
       var param_sdp = {
         sender : Omlet.getIdentity().name,
@@ -171,6 +173,12 @@ function createAnswer() {
       };
       documentApi.update(myDocId, addMessage, param_sdp, function () {
           documentApi.get(myDocId, function () {});
+
+          // Sends ice candidates to the other peer
+          log('[+] onicecandidate');
+          peerConnection.onicecandidate = handleIceCandidate;
+          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+          
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
@@ -552,10 +560,10 @@ function handleMessage(doc) {
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
         log('[+] setRemoteSDP_Offer.');
 
-        // Sends ice candidates to the other peer
-        log('[+] onicecandidate');
-        peerConnection.onicecandidate = handleIceCandidate;
-        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+        // // Sends ice candidates to the other peer
+        // log('[+] onicecandidate');
+        // peerConnection.onicecandidate = handleIceCandidate;
+        // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 
         if (peerConnection.remoteDescription.type === 'offer') {
           createAnswer();
