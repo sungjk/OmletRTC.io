@@ -189,14 +189,14 @@ function createAnswer() {
 
 // ICE candidates management
 function handleIceCandidate(event) {
-  if (event.candidate.candidate) {
+  if (event.candidate) {
     log('[+] handleIceCandidate event.');
 
     var param_iceCandidate = {
       sender : Omlet.getIdentity().name,
-      candidate : event.candidate.candidate,
-      sdpMid : event.candidate.sdpMid,
-      sdpMLineIndex : event.candidate.sdpMLineIndex
+      label : event.candidate.sdpMLineIndex,
+      id : event.candidate.sdpMid,
+      candidate : event.candidate.candidate
     };
 
     documentApi.update(myDocId, addMessage, param_iceCandidate , function () {
@@ -456,14 +456,13 @@ function initConnectionInfo() {
     'userJoin' : false,
     'sessionDescription' : null,
     'candidate' : null,
-    'sdpMid' : null,
-    'sdpMLineIndex' : null,
+    'id' : null,
+    'label' : null,
     'timestamp' : Date.now()
   };
 
   return info;
 }
-
 
 
 function getDocumentReference() {
@@ -591,8 +590,8 @@ function handleMessage(doc) {
 
     var candidate = new RTCIceCandidate({
       candidate : chatDoc.candidate,
-      sdpMid : chatDoc.sdpMid,
-      sdpMLineIndex : chatDoc.sdpMLineIndex
+      // sdpMid : chatDoc.id,
+      sdpMLineIndex : chatDoc.label
     }, onAddIceCandidateSuccess, function (error) {
       log('[-] handleMessage-RTCIceCandidate: ' + error);
     });
@@ -662,9 +661,6 @@ function addMessage(old, parameters) {
   if (parameters.userJoin) {
     old.sender = parameters.sender;
     old.userJoin = true;
-
-    old.candidate = null; 
-    old.sessionDescription = null;
   }
   else {
     old.sender = parameters.sender;
@@ -678,8 +674,8 @@ function addMessage(old, parameters) {
   if (parameters.candidate) {
     old.sender = parameters.sender;
     old.candidate = parameters.candidate;
-    old.sdpMid = parameters.sdpMid;
-    old.sdpMLineIndex = parameters.sdpMLineIndex;
+    old.id = parameters.id;
+    old.label = parameters.label;
   }
   if (parameters.message === 'clear') {
     old.message = parameters.message;
