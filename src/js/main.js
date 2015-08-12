@@ -188,6 +188,14 @@ function createAnswer() {
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
+
+//
+      // Sends ice candidates to the other peer
+      log('[+] onicecandidate');
+      peerConnection.onicecandidate = handleIceCandidate;
+      peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+//
+
     }, function (error) {
       log('[-] setLocalSessionDescription: ' + error);
     });
@@ -582,10 +590,7 @@ function handleMessage(doc) {
         log('[+] setRemoteSDP_Offer.');
 
 //
-          // Sends ice candidates to the other peer
-          log('[+] onicecandidate');
-          peerConnection.onicecandidate = handleIceCandidate;
-          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+
 //
 
         if (peerConnection.remoteDescription.type === 'offer') {
