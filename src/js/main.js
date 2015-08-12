@@ -554,7 +554,11 @@ function handleMessage(doc) {
       log("[-] upate-userJoin: " + error);
     })
   }
-  
+
+  if (chatDoc.sessionDescription) {
+    log('+ sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
+  }
+
   if (chatDoc.sessionDescription && flag) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
 
