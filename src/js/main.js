@@ -186,11 +186,11 @@ function setLocalSessionDescription(sessionDescription) {
     documentApi.update(myDocId, addMessage, param_sdp, function () {
         documentApi.get(myDocId, function () {});
 
-        if (chatDoc.creator.name === Omlet.getIdentity().name) {
+        // if (chatDoc.creator.name === Omlet.getIdentity().name) {
           log('[+] onicecandidate');
           peerConnection.onicecandidate = handleIceCandidate;
           peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-        }
+        // }
       }, function (error) {
       log("[-] setLocalSessionDescription-update: " + error);
     });
@@ -588,9 +588,9 @@ function handleMessage(doc) {
         log('[+] setRemoteSDP_Offer.');
 
         // Sends ice candidates to the other peer
-        log('[+] onicecandidate');
-        peerConnection.onicecandidate = handleIceCandidate;
-        peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+        // log('[+] onicecandidate');
+        // peerConnection.onicecandidate = handleIceCandidate;
+        // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 
         if (peerConnection.remoteDescription.type === 'offer') {
           createAnswer();
