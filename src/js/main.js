@@ -33,6 +33,7 @@ var remoteVideo = getQuery("#remoteVideo");
 
 var isStarted = false;
 var isCandidate = false;
+var flag = true;
 
 // streams
 var localStream;
@@ -471,7 +472,6 @@ function initConnectionInfo() {
     'numOfUser' : numOfUser,
     'userJoin' : false,
     'sessionDescription' : null,
-    'flag' : true,
     'candidate' : null,
     'sdpMid' : null,
     'sdpMLineIndex' : null,
@@ -540,7 +540,7 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  log('[+] sender: ' + chatDoc.sender + ', flag: ' + chatDoc.flag);
+  log('[+] sender: ' + chatDoc.sender + ', flag: ' + flag);
 
   if (chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
@@ -557,20 +557,10 @@ function handleMessage(doc) {
     peerConnection.addIceCandidate(candidate);
   }
 
-  if (chatDoc.sessionDescription && chatDoc.flag) {
+  if (chatDoc.sessionDescription && flag) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
 
     if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
-      var param_flag = {
-        sender : Omlet.getIdentity().name,
-        flag : false
-      };
-      documentApi.update(myDocId, addMessage, param_flag, function () {
-        documentApi.get(myDocId, function () {});
-      }, function (error) {
-        log("[-] update-flag: " + error);
-      })
-
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
         log('[+] setRemoteSDP_Answer.');
 
@@ -600,6 +590,8 @@ function handleMessage(doc) {
         log('[-] setRemoteSDP_Offer: ' + error);
       });
     }
+
+    flag = false;
   }
 
   if (chatDoc.userJoin && chatDoc.creator.name === Omlet.getIdentity().name) {
@@ -686,11 +678,6 @@ function addMessage(old, parameters) {
   else {
     old.sender = parameters.sender;
     old.userJoin = false;
-  }
-
-  if (parameters.flag !== null && !parameters.flag) {
-    old.flag = false;
-    old.sender = parameters.sender;
   }
 
   if (parameters.sessionDescription !== null) {
