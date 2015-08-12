@@ -148,7 +148,6 @@ function createAnswer() {
     log("[+] setLocalSessionDescription.");
     peerConnection.setLocalDescription(sessionDescription, function () {
       var param_sdp = {
-        // message : 'sessionDescription',
         sender : Omlet.getIdentity().name,
         sessionDescription : sessionDescription
       };
@@ -539,21 +538,23 @@ function handleMessage(doc) {
   if (chatDoc.numOfUser > 2)
     return ;
 
-  if (chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
-    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
+  if (chatDoc.userJoin && chatDoc.creator.name === Omlet.getIdentity().name) {
+    log('[+] sender: ' + chatDoc.sender + ', message: userJoin');
 
-    var candidate = new RTCIceCandidate({
-      candidate : chatDoc.candidate,
-      // sdpMid : chatDoc.sdpMid,
-      sdpMLineIndex : chatDoc.sdpMLineIndex
-    }, onAddIceCandidateSuccess, function (error) {
-      log('[-] handleMessage-RTCIceCandidate: ' + error);
-    });
-
-    log('[+] addIceCandidate.');
-    peerConnection.addIceCandidate(candidate);
+    var param_userJoin = {
+      userJoin : false,
+      sender : Omlet.getIdentity().name
+    };
+    documentApi.update(myDocId, addMessage, param_userJoin, function () {
+      documentApi.get(myDocId, function () {});
+      //
+      createOffer();
+      //
+    }, function (error) {
+      log("[-] upate-userJoin: " + error);
+    })
   }
-
+  
   if (chatDoc.sessionDescription && flag) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
 
@@ -567,12 +568,11 @@ function handleMessage(doc) {
           // peerConnection.onicecandidate = handleIceCandidate;
           // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
         }
-
-        flag = false;
       }, function (error) {
         log('[-] setRemoteSDP_Answer: ' + error);
       });
-      
+
+      flag = false;
     }
     else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
@@ -594,23 +594,22 @@ function handleMessage(doc) {
     }
   }
 
-  if (chatDoc.userJoin && chatDoc.creator.name === Omlet.getIdentity().name) {
-    log('[+] sender: ' + chatDoc.sender + ', message: userJoin');
+  if (chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
+    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.candidate);
 
-    var param_userJoin = {
-      userJoin : false,
-      sender : Omlet.getIdentity().name
-    };
-    documentApi.update(myDocId, addMessage, param_userJoin, function () {
-      documentApi.get(myDocId, function () {});
-      //
-      createOffer();
-      //
-    }, function (error) {
-      log("[-] upate-userJoin: " + error);
-    })
+    var candidate = new RTCIceCandidate({
+      candidate : chatDoc.candidate,
+      // sdpMid : chatDoc.sdpMid,
+      sdpMLineIndex : chatDoc.sdpMLineIndex
+    }, onAddIceCandidateSuccess, function (error) {
+      log('[-] handleMessage-RTCIceCandidate: ' + error);
+    });
+
+    log('[+] addIceCandidate.');
+    peerConnection.addIceCandidate(candidate);
   }
-  else if (chatDoc.message === 'clear' && isStarted) {
+
+  if (chatDoc.message === 'clear' && isStarted) {
     log('[+] chatDoc.message === clear');
 
     sessionTerminated();
