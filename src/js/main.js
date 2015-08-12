@@ -147,14 +147,19 @@ function createOffer() {
           documentApi.get(myDocId, function () {});
 
 //
-          // log('[+] onicecandidate');
-          // peerConnection.onicecandidate = handleIceCandidate;
-          // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+
 //
 
         }, function (error) {
         log("[-] setLocalSessionDescription-update: " + error);
       });
+
+//
+      log('[+] onicecandidate');
+      peerConnection.onicecandidate = handleIceCandidate;
+      peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+//
+
     }, function (error) {
       log('[-] setLocalSessionDescription: ' + error);
     });
@@ -178,9 +183,6 @@ function createAnswer() {
 
           //
 
-          log('[+] onicecandidate');
-          peerConnection.onicecandidate = handleIceCandidate;
-          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 
           //
         }, function (error) {
@@ -560,10 +562,7 @@ function handleMessage(doc) {
 
         //
 
-          log('[+] onicecandidate');
-          peerConnection.onicecandidate = handleIceCandidate;
-          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
-          
+
         //
 
       }, function (error) {
@@ -584,9 +583,9 @@ function handleMessage(doc) {
 
 //
           // Sends ice candidates to the other peer
-          // log('[+] onicecandidate');
-          // peerConnection.onicecandidate = handleIceCandidate;
-          // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+          log('[+] onicecandidate');
+          peerConnection.onicecandidate = handleIceCandidate;
+          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 //
 
         if (peerConnection.remoteDescription.type === 'offer') {
