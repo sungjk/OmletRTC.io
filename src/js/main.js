@@ -573,6 +573,8 @@ function handleMessage(doc) {
       }, function (error) {
         log('[-] setRemoteSDP_Answer: ' + error);
       });
+
+      flag = false;
     }
     else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
@@ -589,9 +591,9 @@ function handleMessage(doc) {
       }, function (error) {
         log('[-] setRemoteSDP_Offer: ' + error);
       });
-    }
 
-    flag = false;
+      flag = false;
+    }
   }
 
   if (chatDoc.userJoin && chatDoc.creator.name === Omlet.getIdentity().name) {
