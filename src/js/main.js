@@ -147,9 +147,9 @@ function createOffer() {
           documentApi.get(myDocId, function () {});
 
 //
-          log('[+] onicecandidate');
-          peerConnection.onicecandidate = handleIceCandidate;
-          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+          // log('[+] onicecandidate');
+          // peerConnection.onicecandidate = handleIceCandidate;
+          // peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
 //
 
         }, function (error) {
@@ -177,7 +177,7 @@ function createAnswer() {
           documentApi.get(myDocId, function () {});
 
           //
-          
+
           log('[+] onicecandidate');
           peerConnection.onicecandidate = handleIceCandidate;
           peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
@@ -557,6 +557,15 @@ function handleMessage(doc) {
     if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
         log('[+] setRemoteSDP_Answer.');
+
+        //
+
+          log('[+] onicecandidate');
+          peerConnection.onicecandidate = handleIceCandidate;
+          peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+          
+        //
+
       }, function (error) {
         log('[-] setRemoteSDP_Answer: ' + error);
       });
