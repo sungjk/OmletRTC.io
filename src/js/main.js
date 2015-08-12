@@ -189,7 +189,7 @@ function createAnswer() {
 
 // ICE candidates management
 function handleIceCandidate(event) {
-  if (event.candidate) {
+  if (event.candidate.candidate) {
     log('[+] handleIceCandidate event.');
 
     var param_iceCandidate = {
@@ -591,7 +591,7 @@ function handleMessage(doc) {
 
     var candidate = new RTCIceCandidate({
       candidate : chatDoc.candidate,
-      // sdpMid : chatDoc.sdpMid,
+      sdpMid : chatDoc.sdpMid,
       sdpMLineIndex : chatDoc.sdpMLineIndex
     }, onAddIceCandidateSuccess, function (error) {
       log('[-] handleMessage-RTCIceCandidate: ' + error);
