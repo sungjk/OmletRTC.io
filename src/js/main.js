@@ -22,11 +22,11 @@ var sdpConstraints = {};
  *  @since  2015.07.23
  *
  *****************************************/
-var createButton = get("createButton");
-var clearButton = get("clearButton");
-var getDocButton = get("getDocButton");
-var joinDataButton = get("joinDataButton");
-var joinAVButton = get("joinAVButton");
+//var createButton = get("createButton");
+//var clearButton = get("clearButton");
+//var getDocButton = get("getDocButton");
+//var joinDataButton = get("joinDataButton");
+//var joinAVButton = get("joinAVButton");
 
 var localVideo = getQuery("#localVideo");
 var remoteVideo = getQuery("#remoteVideo");
@@ -91,11 +91,12 @@ var param_userMedia = {
  *  @since  2015.07.23
  *
  ****************************************************************/
-createButton.onclick = create;
-clearButton.onclick = clearDocument;
-getDocButton.onclick = getDocument;
-joinDataButton.onclick = joinData;
-joinAVButton.onclick = joinAV;
+//createButton.onclick = create;
+//clearButton.onclick = clearDocument;
+//getDocButton.onclick = getDocument;
+//joinDataButton.onclick = joinData;
+//joinAVButton.onclick = joinAV;
+
 
 
 
@@ -420,7 +421,8 @@ function initDocumentAPI() {
 
 
 function DocumentCreated(doc) {
-  var callbackurl = "http://203.246.112.144:3310/index.html#/docId/" + myDocId;
+  var callbackurl = "https://webrtcbench-dbh3099.rhcloud.com/video-calling-interface.html#/docId/" + myDocId;
+  callbackurl = "http://203.246.112.144:3310/index.html#/docId/" + myDocId;
 
   if(Omlet.isInstalled()) {
     var rdl = Omlet.createRDL({
@@ -437,7 +439,9 @@ function DocumentCreated(doc) {
   }
 }
 
-
+function ReceiveDoc(doc) {
+  chatDoc = doc;
+}
 function _loadDocument() {
   if (hasDocument()) {
     myDocId = getDocumentReference();
@@ -448,7 +452,13 @@ function _loadDocument() {
     });
 
     // The successful result of get is the document itself.
-    documentApi.get(myDocId, ReceiveDoc, function (error) {
+    documentApi.get(myDocId, function (doc) {
+      chatDoc = doc;
+
+      if(window.location.href.indexOf("video-calling-interface.html")!=-1){
+        joinAV();
+      }
+    }, function (error) {
       log('[-] _loadDocument-get: ' + error);
     });
   }
@@ -559,20 +569,15 @@ function handleMessage(doc) {
 
   if (chatDoc.sessionDescription && flag) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
-
     ///
 
     ///
-
     if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) {
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
         log('[+] setRemoteSDP_Answer.');
-
         //
 
-
         //
-
       }, function (error) {
         log('[-] setRemoteSDP_Answer: ' + error);
       });
@@ -580,19 +585,14 @@ function handleMessage(doc) {
       flag = false;
     }
     else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-
       //
 
-
       //
-
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
         log('[+] setRemoteSDP_Offer.');
-
 //
 
 //
-
         if (peerConnection.remoteDescription.type === 'offer') {
           createAnswer();
         }
@@ -734,7 +734,7 @@ function addUser(doc) {
 /////////////////////////////////////////////////////////////////
 
 // Clean-up function: collect garbage before unloading browser's window
-window.onbeforeunload = clearDocument;
+//window.onbeforeunload = clearDocument;
 
 function get(id){
   return document.getElementById(id);
@@ -744,7 +744,7 @@ function getQuery(id) {
   return document.querySelector(id);
 }
 
-
+/*
 function create() {
   if(!Omlet.isInstalled()) {
     log("[-] Omlet is not installed.");
@@ -832,9 +832,10 @@ function joinData() {
   //   , errorCallback);
   // }
 }
-
+*/
 
 function joinAV() {
+  log("creator name: "+chatDoc.creator.name);
   // Caller
   if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
