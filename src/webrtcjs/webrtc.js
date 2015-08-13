@@ -1,822 +1,547 @@
-/*
-  //log('[+] my feedMembers: ' + JSON.stringify(Omlet.getFeedMembers()));
-  //log('[+] my identify: ' + JSON.stringify(Omlet.getIdentity()));
-  //log('[+] chat doc identify: ' + JSON.stringify(chatDoc.creator));
-*/
+// Client
 
+// Fallbacks for vendor-specific variables until the spec is finalized.
 
-'use strict';
+var PeerConnection = (window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection);
+var URL = (window.URL || window.webkitURL || window.msURL || window.oURL);
+var getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+var nativeRTCIceCandidate = (window.mozRTCIceCandidate || window.RTCIceCandidate);
+var nativeRTCSessionDescription = (window.mozRTCSessionDescription || window.RTCSessionDescription); // order is very important: "RTCSessionDescription" defined in Nighly but useless
 
-// // Look after different browser vendors' ways of calling the getUserMedia() API method:
-navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-
-//////////////////////////////////////////////////////////////////
-//
-//                Variables 
-//
-/////////////////////////////////////////////////////////////////
-
-// document id for omlet
-var documentApi;
-var myDocId;
-var chatDoc;
-
-
-// sessionDescription constraints
-var sdpConstraints = {};
-
-var peerConnection;  // This is our WebRTC connection
-var dataChannel;     // dataChannel object
-var running = false; // Keep track of our connection state
-
-
-
- /*****************************************
- *
- *  Elements for HTML5 (button & video)
- *
- *  @since  2015.07.23
- *
- *****************************************/
-var createButton = get("createButton");
-var clearButton = get("clearButton");
-var getDocButton = get("getDocButton");
-var joinDataButton = get("joinDataButton");
-var joinAVButton = get("joinAVButton");
-
-var localVideo = getQuery("#localVideo");
-var remoteVideo = getQuery("#remoteVideo");
-
-
-createButton.onclick = create;
-clearButton.onclick = clearDocument;
-getDocButton.onclick = getDocument;
-joinDataButton.onclick = joinData;
-joinAVButton.onclick = joinAV;
-
-
-
-// streams
-var localStream;
-var remoteStream;
-
-// media constraints
-var constraints = { 
-  audio: false,
-  video: true 
+var sdpConstraints = {
+  'mandatory': {
+    'OfferToReceiveAudio': true,
+    'OfferToReceiveVideo': true
+  }
 };
 
-
-// Use Google's public servers for STUN
-// STUN is a component of the actual WebRTC connection
-var peerConnectionConfig = webrtcDetectedBrowser === 'Chrome' ? 
-    { 'iceServers': [{ 'url': 'stun:23.21.150.121' }] } : 
-    { 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] 
-};
-
-var peerConnectionConstraints = {
-    'optional': [{ 'DtlsSrtpKeyAgreement': true }], 
-    'mandatory': { googIPv6: true }
-};
-
-
-
-
- /****************************************************************
- *
- *  Parameters for documentApi.update: 
- *  function(reference, func, parameters, success, error)
- *
- *  @since  2015.07.23
- *
- ****************************************************************/
-
-var param_create = {
-  message : 'create'
-};
-var param_join = {
-  message : 'join'
-};
-var param_clear = {
-  message : 'clear'
-};
-var param_userMedia = {
-  message : 'userMedia'
-};
-
-
-
-
-
-//////////////////////////////////////////////////////////////////
-//
-//                Log console
-//
-/////////////////////////////////////////////////////////////////
-
-
-function log(message){
-  var logArea = get("console");
-  logArea.value += message + '\n';
-  logArea.scrollTop = logArea.scrollHeight;
-}
-
-
-
-
-
-//////////////////////////////////////////////////////////////////
-//
-//                WebRTC Code         
-//
-/////////////////////////////////////////////////////////////////
-
-
-
-
-///////// 시그널
-
-
-// Handle a WebRTC offer request from a remote client
-var handleOfferSignal = function(sdp) {
-  running = true;
-  log('[+] running = true;');
-  initiateWebRTCState();
-  startSendingCandidates();
-
-  peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
-  peerConnection.createAnswer(function(sessionDescription) {
-    log('[+] Sending answer.');
-    peerConnection.setLocalDescription(sessionDescription);
-
-    var param_sdp = {
-      message : 'sessionDescription',
-      sessionDescription : sessionDescription
+if (navigator.webkitGetUserMedia) {
+  if (!webkitMediaStream.prototype.getVideoTracks) {
+    webkitMediaStream.prototype.getVideoTracks = function() {
+      return this.videoTracks;
     };
-    documentApi.update(myDocId, addMessage, param_sdp, function () {
-        documentApi.get(myDocId, function () {}); 
-      }, function (error) {
-        log("[-] handleOfferSignal-createAnswer-update: " + error);
-    });
-  });  
-};
-
-// Handle a WebRTC answer response to our offer we gave the remote client
-var handleAnswerSignal = function(sdp) {
-  peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
-};
-
-// Handle an ICE candidate notification from the remote client
-var handleCandidateSignal = function(message) {
-  var candidate = new RTCIceCandidate(message);
-  peerConnection.addIceCandidate(candidate);
-};
-
-
-
-
-
-
-//////// 초기화 작업
-
-// Function to initiate the WebRTC peerconnection and dataChannel
-var initiateWebRTCState = function() {
-  peerConnection = new RTCPeerConnection(peerConnectionConfig, peerConnectionConstraints);
-  log('[+] Created RTCPeerConnnection with:\n' + 'config: \'' + JSON.stringify(peerConnectionConfig) + '\';\n' + ' constraints: \'' + JSON.stringify(peerConnectionConstraints) + '\'.');
-  peerConnection.addStream(localStream);
-  peerConnection.onaddstream = handleRemoteStreamAdded;
-  peerConnection.onremovestream = handleRemoteStreamRemoved;
-};
-
-
-
-
-
-///////// 연결 (Connect)
-
-// Function to offer to start a WebRTC connection with a peer
-var connect = function() {
-  running = true;
-  log('[+] running = true;');
-
-  startSendingCandidates();
-
-  peerConnection.createOffer(function(sessionDescription) {
-    log('[+] Sending offer.');
-    peerConnection.setLocalDescription(sessionDescription);
-
-    var param_sdp = {
-      message : 'sessionDescription',
-      sessionDescription : sessionDescription
+    webkitMediaStream.prototype.getAudioTracks = function() {
+      return this.audioTracks;
     };
-    documentApi.update(myDocId, addMessage, param_sdp, function () {
-        documentApi.get(myDocId, function () {}); 
-      }, function (error) {
-        log("[-] connect-createOffer-update: " + error);
-    });
-  });
-};
-
-
-
-
-
-
-/////////  ICE Candidate 리스너
-
-// Add listener functions to ICE Candidate events
-var startSendingCandidates = function() {
-  peerConnection.onicecandidate = handleICECandidate;
-  peerConnection.oniceconnectionstatechange = handleICEConnectionStateChange;
-};
-
-// This is how we determine when the WebRTC connection has ended
-// This is most likely because the other peer left the page
-var handleICEConnectionStateChange = function() {
-  log('[+] iceGatheringState: ' + peerConnection.iceGatheringState + ', iceConnectionState: ' + peerConnection.iceConnectionState);
-
-  if (peerConnection.iceConnectionState == 'disconnected') { 
   }
-};
 
-
-// Handle ICE Candidate events by sending them to our remote
-// Send the ICE Candidates via the signal channel
-var handleICECandidate = function(event) {
-  if (event.candidate) {
-    log('[+] Sending  candidate.');
-
-    var param_iceCandidate = {
-      message : 'candidate',
-      candidate : event.candidate.candidate,
-      sdpMLineIndex : event.candidate.sdpMLineIndex
-      // sdpMid : event.candidate.sdpMid,
+  // New syntax of getXXXStreams method in M26.
+  if (!webkitRTCPeerConnection.prototype.getLocalStreams) {
+    webkitRTCPeerConnection.prototype.getLocalStreams = function() {
+      return this.localStreams;
     };
-    documentApi.update(myDocId, addMessage, param_iceCandidate , function () {
-      documentApi.get(myDocId, function () {}); 
-    },  function (error) {
-      log('[-] handleICECandidate-update: ' + error);
-    });
-  } 
-  else {
-    log('[-] All candidates sent');
-  }
-};
-
-
-
- /*****************************************
- *
- *  Handler for media & streaming
- *
- *  @since  2015.07.18
- *
- *****************************************/
-
-// From this point on, execution proceeds based on asynchronous events getUserMedia() handlers
-function handleUserMedia(stream) {
-  log('[+] >>>>> handleUserMedia <<<<<');
-
-  localStream = stream;
-  log('[+] attachMediaStream(localVideo, stream)');
-  attachMediaStream(localVideo, stream);
-
-  documentApi.update(myDocId, addMessage, param_userMedia, function() { 
-    documentApi.get(myDocId, addUser, function (error) {
-      log('[-] handleUserMedia-update-get: ' + error);
-    }); 
-  }, function (error) {
-    log('[-] handleUserMedia-update: ' + error);
-  });
-}
-
-
-// Handler to be called in case of adding remote stream
-function handleRemoteStreamAdded(event) { 
-  log('[+] Remote stream added.'); 
-  attachMediaStream(remoteVideo, event.stream); 
-  log('[+] Remote stream attached.'); 
-  remoteStream = event.stream;
-}
-
-
-// Handler to be called in case of removing remote stream
-function handleRemoteStreamRemoved(event) {
-  log('[+] Remote stream removed. Event: ', event);
-}
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////
-//
-//                Omlet Framework code
-//
-/////////////////////////////////////////////////////////////////
-
-/*
-Omlet.document = {
-  create: function(success, error),
-  get: function(reference, success, error),
-  update: function(reference, func, parameters, success, error),
-  watch: function(reference, onUpdate, success, error),
-  unwatch: function(reference, success, error)
-}
-*/
-
-
-function stop() {
-  isStarted = false;
-
-  if (dataChannel)    dataChannel.close();
-  if (peerConnection) peerConnection.close();
-
-  dataChannel = null;
-  peerConnection = null;
-}
-
-
-function sessionTerminated() {
-  log('[+] Session terminated.');
-  stop();
-
-}
-
-
-
-function initDocumentAPI() {
-  if (!Omlet.isInstalled())  {
-    log("[-] Omlet is not installed." );
-  }
-
-  documentApi = Omlet.document;
-  log("[+] Loading document") ;
-  _loadDocument();
-}
-
-
-function DocumentCreated(doc) {
-    //var callbackurl = window.location.href.replace("chat-maker.html" , "webrtc-data.html") ;
-    var callbackurl = "http://203.246.112.144:3310/index.html#/docId/" + myDocId;
-
-    if(Omlet.isInstalled()) {
-      var rdl = Omlet.createRDL({
-        appName: "OmletRTC",
-        noun: "poll",
-        displayTitle: "OmletRTC",
-        displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-        displayText: 'Client: ' + ip() + '\nServer:' + location.host,
-        json: doc,
-        callback: callbackurl
-      });
-
-      Omlet.exit(rdl);
-    }
-}
-
-
-function _loadDocument() {
-  if (hasDocument()) {
-    myDocId = getDocumentReference();
-    log("[+] Get documentReference id: " + myDocId );
-
-    documentApi.watch(myDocId, updateCallback, watchSuccessCallback, function (error) {
-      log('[-] _loadDocument-watch: ' + error);
-    });
-
-    // The successful result of get is the document itself.
-    documentApi.get(myDocId, ReceiveDoc, function (error) {
-      log('[-] _loadDocument-get: ' + error);
-    });
-  } 
-  else {
-    log("[-] Document is not found." );
+    webkitRTCPeerConnection.prototype.getRemoteStreams = function() {
+      return this.remoteStreams;
+    };
   }
 }
 
+(function() {
+
+  var rtc;
+  if ('undefined' === typeof module) {
+    rtc = this.rtc = {};
+  } else {
+    rtc = module.exports = {};
+  }
 
 
-function initConnectionInfo() {
-  var chatId = 100;
-  var identity = Omlet.getIdentity();
-  var numOfUser = 0;
+  // Holds a connection to the server.
+  rtc._socket = null;
 
-  // Connection info
-  var info = {
-    'chatId' : chatId,
-    'creator' : identity,
-    'message' : '',
-    'numOfUser' : numOfUser,
-    'channelReady' : false,
-    'sessionDescription' : '',
-    'candidate' : '',
-    'sdpMid' : '',
-    'sdpMLineIndex' : '',
-    'timestamp' : Date.now()
+  // Holds identity for the client
+  rtc._me = null;
+
+  // Holds callbacks for certain events.
+  rtc._events = {};
+
+  rtc.on = function(eventName, callback) {
+    rtc._events[eventName] = rtc._events[eventName] || [];
+    rtc._events[eventName].push(callback);
   };
 
-  return info;
-}
+  rtc.fire = function(eventName, _) {
+    var events = rtc._events[eventName];
+    var args = Array.prototype.slice.call(arguments, 1);
 
-
-
-function getDocumentReference() {
-  var docIdParam = window.location.hash.indexOf("/docId/");
-  if (docIdParam == -1) return false;
-
-  var docId = window.location.hash.substring(docIdParam + 7);
-  var end = docId.indexOf("/");
-
-  if (end != -1)
-    docId = docId.substring(0, end);
-
-  return docId;
-}
-
-
-function Initialize(old, parameters) {
-  return parameters;
-}
-
-
-function hasDocument() {
-  var docIdParam = window.location.hash.indexOf("/docId/");
-  return (docIdParam != -1);
-}
-
-
-function watchDocument(docref, OnUpdate) {
-  documentApi.watch(docref, function(updatedDocRef) {
-    if (updatedDocRef != chatDocId) {
-      log("[-] Wrong document.");
+    if (!events) {
+      return;
     }
-    else {
-      //  The successful result of get is the document itself.
-      documentApi.get(updatedDocRef, OnUpdate, errorCallback);
+
+    for (var i = 0, len = events.length; i < len; i++) {
+      events[i].apply(null, args);
     }
-  }, function(result) {
-    var timestamp = result.Expires;
-    var expires = timestamp - new Date().getTime();
-    var timeout = 0.8 * expires;
+  };
 
-    setTimeout(function() {
-      watchDocument(docref, OnUpdate);
-    }, timeout);
-  }, Error);
-}
-
-
-function ReceiveDoc(doc) {
-  chatDoc = doc;
-}
-
-
-
-
-
-////////// param 핸들링
-
-
-// This is the general handler for a message from our remote client
-// Determine what type of message it is, and call the appropriate handler
-var handleMessage = function(doc) {
-  chatDoc = doc;
-
-  if (chatDoc.numOfUser > 2)
-    return ;
-
-  // var msg = chatDoc.message;
-  // log('[+] Recieved a \'' + msg + '\' signal from ' + sender);
-
-  if (chatDoc.message === 'clear') { 
-    log('[+] chatDoc.message === clear');
-
-    sessionTerminated();
-  }
-  else if (chatDoc.message == 'candidate' && running) {
-    log('[+] chatDoc.message === candidate');
-
-    var message = {
-      candidate : chatDoc.candidate,
-      sdpMLineIndex : chatDoc.sdpMLineIndex
+  // Holds the STUN/ICE server to use for PeerConnections.
+  rtc.SERVER = function() {
+    if (navigator.mozGetUserMedia) {
+      return {
+        "iceServers": [{
+          "url": "stun:23.21.150.121"
+        }]
+      };
+    }
+    return {
+      "iceServers": [{
+        "url": "stun:stun.l.google.com:19302"
+      }]
     };
-    handleCandidateSignal(message);
-  }
-  else if (chatDoc.sessionDescription.type === 'answer' && chatDoc.creator.name === Omlet.getIdentity().name) { 
-    log('[+] chatDoc.sessionDescription.type === answer');
-
-    handleAnswerSignal(chatDoc.sessionDescription);
-  }
-  else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
-    log('[+] chatDoc.sessionDescription.type === offer');
-
-    handleOfferSignal(chatDoc.sessionDescription);
-  }
-  else if (chatDoc.message === 'userMedia' && chatDoc.creator.name === Omlet.getIdentity().name) {
-    log('[+] chatDoc.message === userMedia'); 
-
-    if (chatDoc.channelReady) {
-      initiateWebRTCState();
-      connect();
-    }
-  }
-};
+  };
 
 
-/*****************************************
- *
- *  Callback function for documentApi
- *
- *  @since  2015.07.20
- *
- *****************************************/
+  // Reference to the lone PeerConnection instance.
+  rtc.peerConnections = {};
 
-// updateCallback for documentApi.watch
-function updateCallback(chatDocId) {
-  //  The successful result of get is the document itself.
-  documentApi.get(chatDocId, handleMessage , function (error) {
-    log('[-] updateCallback-get: ' + error);
-  });
-}
-
-// successCallback for documentApi.watch
-function watchSuccessCallback() {
-  log("[+] Success to documentApi.watch.");
-}
-
-// updateSuccessCallback for documentApi.update
-function updateSuccessCallback() {
-  log("[+] Success to documentApi.update.");
-}
-
-// simple success log 
-function successCallback() {
-  log("[+] Success!!!!!!.");
-}
-
-// errorCallback for all of function
-function errorCallback(error) {
-  log("[-] " + error);
-}
+  // Array of known peer socket ids
+  rtc.connections = [];
+  // Stream-related variables.
+  rtc.streams = [];
+  rtc.numStreams = 0;
+  rtc.initializedStreams = 0;
 
 
+  // Reference to the data channels
+  rtc.dataChannels = {};
 
-/*****************************************
- *
- *  Function for parameter handling documentApi.update: 
- *  function(reference, func, parameters, success, error)
- *
- *  @since  2015.07.23
- *
- *****************************************/
+  // PeerConnection datachannel configuration
+  rtc.dataChannelConfig = {
+    "optional": [{
+      "RtpDataChannels": true
+    }, {
+      "DtlsSrtpKeyAgreement": true
+    }]
+  };
 
-
-    // 'chatId' : chatId,
-    // 'creator' : identity,
-    // 'message' : '',
-    // 'numOfUser' : numOfUser,
-    // 'channelReady' : false,
-    // 'sessionDescription' : '',
-    // 'candidate' : '',
-    // 'sdpMid' : '',
-    // 'sdpMLineIndex' : '',
-    // 'timestamp' : Date.now()
+  rtc.pc_constraints = {
+    "optional": [{
+      "DtlsSrtpKeyAgreement": true
+    }]
+  };
 
 
-function addMessage(old, parameters) {
-  //var msg = parameters.message;
-
-  if (parameters.message !== 'undefined')  old.message = parameters.message;
-
-  if (parameters.message === 'userMedia') {
-    old.numOfUser = old.numOfUser + 1;
-  }
-  else if (parameters.message === 'channelReady') {
-    old.channelReady = parameters.channelReady;
-  }
-  else if (parameters.message === 'candidate') {
-    old.candidate = parameters.candidate;
-    old.sdpMLineIndex = parameters.sdpMLineIndex;
-    // old.sdpMid = parameters.sdpMid;
-    // old.sessionDescription = '';
-  }
-  else if (parameters.message === 'sessionDescription') {
-    old.sessionDescription = parameters.sessionDescription; 
-
-    // old.candidate = '';
-    // old.sdpMLineIndex = '';
-  }
-  else if (parameters.message === 'clear') {
-    old.chatId = chatId;
-    old.creator = identity;
-    old.message = '';
-    old.numOfUser = 0;
-    old.sessionDescription = '';
-    old.candidate = '';
-    old.sdpMLineIndex = '';
-  }
-  
-
-  old.timestamp = Date.now();
-
-  return old;
-}
-
-
-
-// Message for clear document.
-function msgClear(old, parameters) {
-  old.chatId = '';
-  old.creator = '';
-  old.numOfUser = 0;
-  old.message = 'clear';
-
-  return old;
-}
-
-
-
-function DocumentCleared(doc) {
-  log("[+] Document cleared");
-  log("[+] User in this conversation: " + doc.numOfUser);
-}
-
-
-function addUser(doc) {
-  log("[+] docId: " + doc.chatId + ', numOfUser: ' + doc.numOfUser);
-}
-
-
-
-
-
-//////////////////////////////////////////////////////////////////
-//
-//             Application Code for event handling
-//
-/////////////////////////////////////////////////////////////////
-
-// Clean-up function: collect garbage before unloading browser's window
-window.onbeforeunload = clearDocument;
-
-function get(id){
-  return document.getElementById(id);
-}
-
-function getQuery(id) {
-  return document.querySelector(id);
-}
-
-
-function create() {
-  if(!Omlet.isInstalled()) {
-    log("[-] Omlet is not installed.");
-  }
-  else {
-    log("[+] Omlet is installed.");
-    log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
-
-    documentApi.create(function(d) {
-      // create successCallback
-
-      // Document property is a document reference that can be serialized and can be passed to the other calls.
-      myDocId = d.Document;
-      location.hash = "#/docId/" + myDocId;
-
-      documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
-        // update successCallback
-        documentApi.get(myDocId, DocumentCreated, errorCallback);
-      }, errorCallback);
-    }, errorCallback);
-  }
-}
-
-
-function clearDocument() {
-  if(!Omlet.isInstalled()) {
-    log("[-] Omlet is not installed.");
-  }
-  else {
-    log("[+] Clearing Document.");
-    stop();
-
-    documentApi.update(myDocId, addMessage, param_clear, function() { 
-      documentApi.get(myDocId, DocumentCleared, function (error) {
-        log("[-] clearDocument-update-get: " + error);
+  // check whether data channel is supported.
+  rtc.checkDataChannelSupport = function() {
+    try {
+      // raises exception if createDataChannel is not supported
+      var pc = new PeerConnection(rtc.SERVER(), rtc.dataChannelConfig);
+      var channel = pc.createDataChannel('supportCheck', {
+        reliable: false
       });
-    }, function (error) {
-      log("[-] clearDocument-update: " + error);
-    });
-  }
-}
+      channel.close();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  rtc.dataChannelSupport = rtc.checkDataChannelSupport();
 
 
-function getDocument() {
-  if(!Omlet.isInstalled()) {
-    log("[-] Omlet is not installed.");
-  }
-  else {
-    documentApi.get(myDocId, ReceiveDoc, errorCallback);
-    log("[+] Getting Document. DocId: " + myDocId);
-  }
-}
+  /**
+   * Connects to the websocket server.
+   */
+  rtc.connect = function(server, room) {
+    room = room || ""; // by default, join a room called the blank string
+    rtc._socket = new WebSocket(server);
 
+    rtc._socket.onopen = function() {
 
-function joinData() {
-  // if(Object.keys(chatDoc.participants).length  == 0) {
-  //   initConnection(true, true, false);
+      rtc._socket.send(JSON.stringify({
+        "eventName": "join_room",
+        "data": {
+          "room": room
+        }
+      }));
 
-  //   log("[+] Adding the caller.");
-  //   var param_join = {
-  //     "name" : "caller",
-  //     "value" : {
-  //       "signals": []
-  //     }
-  //   };
+      rtc._socket.onmessage = function(msg) {
+        var json = JSON.parse(msg.data);
+        rtc.fire(json.eventName, json.data);
+      };
 
-  //   documentApi.update(myDocId, addParticipant, param_join, function() { documentApi.get(myDocId, participantAdded, errorCallback); }
-  //   , errorCallback);
-  // }
-  // else {
-  //   initConnection(false, true, false);
+      rtc._socket.onerror = function(err) {
+        console.error('onerror');
+        console.error(err);
+      };
 
-  //   log("[+] Adding the callee.");
-  //   var param_join = {
-  //     "name" : "callee",
-  //     "value" : {
-  //       "signals" : [{
-  //         "signal_type" : "callee_arrived",
-  //         "timestamp" : Date.now()
-  //         }]
-  //     }
-  //   };
+      rtc._socket.onclose = function(data) {
+        rtc.fire('disconnect stream', rtc._socket.id);
+        delete rtc.peerConnections[rtc._socket.id];
+      };
 
-  //   // update: function(reference, func, parameters, success, error),
-  //   documentApi.update(myDocId, addParticipant, param_join, function() { documentApi.get(myDocId, participantAdded, errorCallback); }
-  //   , errorCallback);
-  // }
-}
+      rtc.on('get_peers', function(data) {
+        rtc.connections = data.connections;
+        rtc._me = data.you;
+        // fire connections event and pass peers
+        rtc.fire('connections', rtc.connections);
+      });
 
+      rtc.on('receive_ice_candidate', function(data) {
+        var candidate = new nativeRTCIceCandidate(data);
+        rtc.peerConnections[data.socketId].addIceCandidate(candidate);
+        rtc.fire('receive ice candidate', candidate);
+      });
 
-function joinAV() {
-  // Caller
-  if (chatDoc.creator.name === Omlet.getIdentity().name) {
-    log("[+] " + Omlet.getIdentity().name + " creates the room.");
-    running = false;
-    log('[+] running = false;');
+      rtc.on('new_peer_connected', function(data) {
+        rtc.connections.push(data.socketId);
 
-    // Call getUserMedia()
-    log('[+] getUserMedia.');
-    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] joinAV-getUserMedia-caller: " + error);
-    });
-  }
-  else {  // Callee
-    log("[+] " + Omlet.getIdentity().name + " joins the room.");
-    running = false;
-    log('[+] running = false;');
+        var pc = rtc.createPeerConnection(data.socketId);
+        for (var i = 0; i < rtc.streams.length; i++) {
+          var stream = rtc.streams[i];
+          pc.addStream(stream);
+        }
+      });
 
-    var param_channelReadyOn = {
-      message : 'channelReady',
-      channelReady : true
+      rtc.on('remove_peer_connected', function(data) {
+        rtc.fire('disconnect stream', data.socketId);
+        delete rtc.peerConnections[data.socketId];
+      });
+
+      rtc.on('receive_offer', function(data) {
+        rtc.receiveOffer(data.socketId, data.sdp);
+        rtc.fire('receive offer', data);
+      });
+
+      rtc.on('receive_answer', function(data) {
+        rtc.receiveAnswer(data.socketId, data.sdp);
+        rtc.fire('receive answer', data);
+      });
+
+      rtc.fire('connect');
     };
-    documentApi.update(myDocId, addMessage, param_channelReadyOn, function () {
-      documentApi.get(myDocId, function () {}); 
-    }, function (error) {
-      log("[-] joinAV-update-channelReadyOn: " + error);
-    });
+  };
 
-    // Call getUserMedia()
-    log('[+] getUserMedia.');
-    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] joinAV-getUserMedia-callee: " + error);
+
+  rtc.sendOffers = function() {
+    for (var i = 0, len = rtc.connections.length; i < len; i++) {
+      var socketId = rtc.connections[i];
+      rtc.sendOffer(socketId);
+    }
+  };
+
+  rtc.onClose = function(data) {
+    rtc.on('close_stream', function() {
+      rtc.fire('close_stream', data);
     });
+  };
+
+  rtc.createPeerConnections = function() {
+    for (var i = 0; i < rtc.connections.length; i++) {
+      rtc.createPeerConnection(rtc.connections[i]);
+    }
+  };
+
+  rtc.createPeerConnection = function(id) {
+
+    var config = rtc.pc_constraints;
+    if (rtc.dataChannelSupport) config = rtc.dataChannelConfig;
+
+    var pc = rtc.peerConnections[id] = new PeerConnection(rtc.SERVER(), config);
+    pc.onicecandidate = function(event) {
+      if (event.candidate) {
+        rtc._socket.send(JSON.stringify({
+          "eventName": "send_ice_candidate",
+          "data": {
+            "label": event.candidate.sdpMLineIndex,
+            "candidate": event.candidate.candidate,
+            "socketId": id
+          }
+        }));
+      }
+      rtc.fire('ice candidate', event.candidate);
+    };
+
+    pc.onopen = function() {
+      // TODO: Finalize this API
+      rtc.fire('peer connection opened');
+    };
+
+    pc.onaddstream = function(event) {
+      // TODO: Finalize this API
+      rtc.fire('add remote stream', event.stream, id);
+    };
+
+    if (rtc.dataChannelSupport) {
+      pc.ondatachannel = function(evt) {
+        console.log('data channel connecting ' + id);
+        rtc.addDataChannel(id, evt.channel);
+      };
+    }
+
+    return pc;
+  };
+
+  rtc.sendOffer = function(socketId) {
+    var pc = rtc.peerConnections[socketId];
+
+    var constraints = {
+      "optional": [],
+      "mandatory": {
+        "MozDontOfferDataChannel": true
+      }
+    };
+    // temporary measure to remove Moz* constraints in Chrome
+    if (navigator.webkitGetUserMedia) {
+      for (var prop in constraints.mandatory) {
+        if (prop.indexOf("Moz") != -1) {
+          delete constraints.mandatory[prop];
+        }
+      }
+    }
+    constraints = mergeConstraints(constraints, sdpConstraints);
+
+    pc.createOffer(function(session_description) {
+      session_description.sdp = preferOpus(session_description.sdp);
+      pc.setLocalDescription(session_description);
+      rtc._socket.send(JSON.stringify({
+        "eventName": "send_offer",
+        "data": {
+          "socketId": socketId,
+          "sdp": session_description
+        }
+      }));
+    }, null, sdpConstraints);
+  };
+
+  rtc.receiveOffer = function(socketId, sdp) {
+    var pc = rtc.peerConnections[socketId];
+    rtc.sendAnswer(socketId, sdp);
+  };
+
+  rtc.sendAnswer = function(socketId, sdp) {
+    var pc = rtc.peerConnections[socketId];
+    pc.setRemoteDescription(new nativeRTCSessionDescription(sdp));
+    pc.createAnswer(function(session_description) {
+      pc.setLocalDescription(session_description);
+      rtc._socket.send(JSON.stringify({
+        "eventName": "send_answer",
+        "data": {
+          "socketId": socketId,
+          "sdp": session_description
+        }
+      }));
+      //TODO Unused variable!?
+      var offer = pc.remoteDescription;
+    }, null, sdpConstraints);
+  };
+
+
+  rtc.receiveAnswer = function(socketId, sdp) {
+    var pc = rtc.peerConnections[socketId];
+    pc.setRemoteDescription(new nativeRTCSessionDescription(sdp));
+  };
+
+
+  rtc.createStream = function(opt, onSuccess, onFail) {
+    var options;
+    onSuccess = onSuccess || function() {};
+    onFail = onFail || function() {};
+
+    options = {
+      video: !! opt.video,
+      audio: !! opt.audio
+    };
+
+    if (getUserMedia) {
+      rtc.numStreams++;
+      getUserMedia.call(navigator, options, function(stream) {
+
+        rtc.streams.push(stream);
+        rtc.initializedStreams++;
+        onSuccess(stream);
+        if (rtc.initializedStreams === rtc.numStreams) {
+          rtc.fire('ready');
+        }
+      }, function() {
+        alert("Could not connect stream.");
+        onFail();
+      });
+    } else {
+      alert('webRTC is not yet supported in this browser.');
+    }
+  };
+
+  rtc.addStreams = function() {
+    for (var i = 0; i < rtc.streams.length; i++) {
+      var stream = rtc.streams[i];
+      for (var connection in rtc.peerConnections) {
+        rtc.peerConnections[connection].addStream(stream);
+      }
+    }
+  };
+
+  rtc.attachStream = function(stream, domId) {
+    var element = document.getElementById(domId);
+    if (navigator.mozGetUserMedia) {
+      console.log("Attaching media stream");
+      element.mozSrcObject = stream;
+      element.play();
+    } else {
+      element.src = webkitURL.createObjectURL(stream);
+    }
+  };
+
+
+  rtc.createDataChannel = function(pcOrId, label) {
+    if (!rtc.dataChannelSupport) {
+      //TODO this should be an exception
+      alert('webRTC data channel is not yet supported in this browser,' +
+        ' or you must turn on experimental flags');
+      return;
+    }
+
+    var id, pc;
+    if (typeof(pcOrId) === 'string') {
+      id = pcOrId;
+      pc = rtc.peerConnections[pcOrId];
+    } else {
+      pc = pcOrId;
+      id = undefined;
+      for (var key in rtc.peerConnections) {
+        if (rtc.peerConnections[key] === pc) id = key;
+      }
+    }
+
+    if (!id) throw new Error('attempt to createDataChannel with unknown id');
+
+    if (!pc || !(pc instanceof PeerConnection)) throw new Error('attempt to createDataChannel without peerConnection');
+
+    // need a label
+    label = label || 'fileTransfer' || String(id);
+
+    // chrome only supports reliable false atm.
+    var options = {
+      reliable: false
+    };
+
+    var channel;
+    try {
+      console.log('createDataChannel ' + id);
+      channel = pc.createDataChannel(label, options);
+    } catch (error) {
+      console.log('seems that DataChannel is NOT actually supported!');
+      throw error;
+    }
+
+    return rtc.addDataChannel(id, channel);
+  };
+
+  rtc.addDataChannel = function(id, channel) {
+
+    channel.onopen = function() {
+      console.log('data stream open ' + id);
+      rtc.fire('data stream open', channel);
+    };
+
+    channel.onclose = function(event) {
+      delete rtc.dataChannels[id];
+      console.log('data stream close ' + id);
+      rtc.fire('data stream close', channel);
+    };
+
+    channel.onmessage = function(message) {
+      console.log('data stream message ' + id);
+      console.log(message);
+      rtc.fire('data stream data', channel, message.data);
+    };
+
+    channel.onerror = function(err) {
+      console.log('data stream error ' + id + ': ' + err);
+      rtc.fire('data stream error', channel, err);
+    };
+
+    // track dataChannel
+    rtc.dataChannels[id] = channel;
+    return channel;
+  };
+
+  rtc.addDataChannels = function() {
+    if (!rtc.dataChannelSupport) return;
+
+    for (var connection in rtc.peerConnections)
+    rtc.createDataChannel(connection);
+  };
+
+
+  rtc.on('ready', function() {
+    rtc.createPeerConnections();
+    rtc.addStreams();
+    rtc.addDataChannels();
+    rtc.sendOffers();
+  });
+
+}).call(this);
+
+function preferOpus(sdp) {
+  var sdpLines = sdp.split('\r\n');
+  var mLineIndex = null;
+  // Search for m line.
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].search('m=audio') !== -1) {
+      mLineIndex = i;
+      break;
+    }
   }
+  if (mLineIndex === null) return sdp;
+
+  // If Opus is available, set it as the default in m line.
+  for (var j = 0; j < sdpLines.length; j++) {
+    if (sdpLines[j].search('opus/48000') !== -1) {
+      var opusPayload = extractSdp(sdpLines[j], /:(\d+) opus\/48000/i);
+      if (opusPayload) sdpLines[mLineIndex] = setDefaultCodec(sdpLines[mLineIndex], opusPayload);
+      break;
+    }
+  }
+
+  // Remove CN in m line and sdp.
+  sdpLines = removeCN(sdpLines, mLineIndex);
+
+  sdp = sdpLines.join('\r\n');
+  return sdp;
 }
 
+function extractSdp(sdpLine, pattern) {
+  var result = sdpLine.match(pattern);
+  return (result && result.length == 2) ? result[1] : null;
+}
 
-//////////////////////////////////////////////////////////////////
-//
-//                Omlet start
-//
-/////////////////////////////////////////////////////////////////
-
-Omlet.ready(function() {
-  log("[+] Omlet is Ready.");
-
-  if (hasDocument()) {
-    log("[+] Initializing DocumentAPI.");
-    initDocumentAPI();
+function setDefaultCodec(mLine, payload) {
+  var elements = mLine.split(' ');
+  var newLine = [];
+  var index = 0;
+  for (var i = 0; i < elements.length; i++) {
+    if (index === 3) // Format of media starts from the fourth.
+    newLine[index++] = payload; // Put target payload to the first.
+    if (elements[i] !== payload) newLine[index++] = elements[i];
   }
-  else {
-    log("[-] Doc is not found.");
-    log("[+] Initializing DocumentAPI to use traditional style.");
-    initDocumentAPI();
-    // No Doc --> Use traditional Style
+  return newLine.join(' ');
+}
+
+function removeCN(sdpLines, mLineIndex) {
+  var mLineElements = sdpLines[mLineIndex].split(' ');
+  // Scan from end for the convenience of removing an item.
+  for (var i = sdpLines.length - 1; i >= 0; i--) {
+    var payload = extractSdp(sdpLines[i], /a=rtpmap:(\d+) CN\/\d+/i);
+    if (payload) {
+      var cnPos = mLineElements.indexOf(payload);
+      if (cnPos !== -1) {
+        // Remove CN payload from m line.
+        mLineElements.splice(cnPos, 1);
+      }
+      // Remove CN line in sdp
+      sdpLines.splice(i, 1);
+    }
   }
-});
+
+  sdpLines[mLineIndex] = mLineElements.join(' ');
+  return sdpLines;
+}
+
+function mergeConstraints(cons1, cons2) {
+  var merged = cons1;
+  for (var name in cons2.mandatory) {
+    merged.mandatory[name] = cons2.mandatory[name];
+  }
+  merged.optional.concat(cons2.optional);
+  return merged;
+}
