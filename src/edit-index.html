@@ -4,33 +4,40 @@
   <meta charset="utf-8">
   <meta content="IE=edge" http-equiv="X-UA-Compatible">
   <meta content="width=device-width, initial-scale=1" name="viewport">
+
+  
   <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
   <meta content="" name="description">
   <meta content="" name="author">
+
   <script src="https://omlet.me/a/lib/handlebars.js"></script>
   <script src="https://omlet.me/a/lib/base64.js"></script>
   <script src="https://omlet.me/a/js/yeouiju.js"></script>
   <script src="https://omlet.me/a/js/omlet.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-  <script src="https://omlet.me/a/lib/jquery-cookie.js"></script><!-- Latest compiled and minified CSS -->
+  <script src="https://omlet.me/a/lib/jquery-cookie.js"></script>
+  <script src="http://jsgetip.appspot.com"></script>
+  <!-- Latest compiled and minified CSS -->
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel=
   "stylesheet"><!-- Optional theme -->
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css" rel=
-  "stylesheet"><!-- Latest compiled and minified JavaScript -->
-   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script><!-- Custom styles for this template -->
+  "stylesheet">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script><!-- Custom styles for this template -->
   <link href="css/main_style.css" rel="stylesheet">
   <link rel="icon" sizes="192x192" href="webrtc-icon-192x192.png">
   <link href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet" type="text/css">
   
-  <!--Add file sharing -->
+  <!--Add file sharing
   <link rel="stylesheet" href="css/main.css">
-  <!--                 -->
+-->
 
-  <title>Private Space for you</title>
+
+<title>Private Space for you</title>
 </head>
 
 <body>
-  
+
   <div class="site-wrapper">
     <div class="inner">
       <h3 class="masthead-brand">Private Space for you</h3>
@@ -64,32 +71,32 @@
 
           <p class="lead">Your data is not stored in server at all.<br>
             Enjoy your private space with your friends!</p>
+          </div>
         </div>
-      </div>
 
-      <div class="tab-pane fade" id="video_calling">
-        <div class="inner cover">
-          <h3 class="cover-heading">Feel free to see your friend!</h3>
-          <p class="lead">
-            <button class="btn btn-default" id="createButton">Create a conversation</button>
-            <br>
+        <div class="tab-pane fade" id="video_calling">
+          <div class="inner cover">
+            <h3 class="cover-heading">Feel free to see your friend!</h3>
+            <p class="lead">
+              <button class="btn btn-default" id="createButton">Create a conversation</button>
+              <br>
+              <button class="btn btn-default" id="joinAVButton">Join the A/V</button>
+              <br>
             <!--
             <hr>
             <h2>Space for development</h2>
-            -->
+          -->
 
-            <!-- Insert existing code for test-->
-            <!--
-            <button class="btn btn-default" id="clearButton">Clear Doc.</button>
-            <button class="btn btn-default" id="getDocButton">Get Doc,</button>
-            <h3>Console for dev</h3>
-            <textarea id="console" readonly style="color:black; width: 100%; min-height:100px;resize: none"></textarea>
-            <br><br>
-            <button class="btn btn-default" id="joinAVButton">Join the A/V</button>
-            <button class="btn btn-default" id="joinDataButton">Join the data</button>
-            -->
+          <!-- Insert existing code for test-->
+          <button class="btn btn-default" id="clearButton">Clear Doc.</button>
+          <button class="btn btn-default" id="getDocButton">Get Doc,</button>
+          <h3>Console for dev</h3>
+          <textarea id="console" readonly style="color:black; width: 100%; min-height:100px;resize: none"></textarea>
+          <br><br>
 
-            <!--If you checked this button, You can record your chat (@TODO)-->
+          <button class="btn btn-default" id="joinDataButton">Join the data</button>
+
+          <!--If you checked this button, You can record your chat (@TODO)-->
             <!--
             <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off">
               Record
@@ -104,83 +111,83 @@
             <div style="border:1px solid white">
               <video id="remoteVideo"></video>
             </div>
-            -->
-          </p>
-        </div>
+          -->
+        </p>
       </div>
-      
-      <!-- Add contents file_sharing -->
-      <div class="tab-pane fade" id="file_sharing">
-        <div class="inner cover">
-          <h3 class="cover-heading">You're allowed to send <br/><i>large</i> file!</h3><br/><br/>
-           <section>
-            <form id="fileInfo">
-                <input type="file" id="fileInput" name="files" />
-              </form>
-              <br/>
+    </div>
 
-              <div class="progress">
-                <div class="label"><span style="color:black">Send progress: </span></div>
-                <progress id="sendProgress" max="0" value="0"></progress>
-              </div>
+    <!-- Add contents file_sharing -->
+    <div class="tab-pane fade" id="file_sharing">
+      <div class="inner cover">
+        <h3 class="cover-heading">You're allowed to send <br/><i>large</i> file!</h3><br/><br/>
+        <section>
+          <form id="fileInfo">
+            <input type="file" id="fileInput" name="files" />
+          </form>
+          <br/>
 
-              <div class="progress">
-                <div class="label"><span style="color:black">Receive progress: </span></div>
-                <progress id="receiveProgress" max="0" value="0"></progress>
-              </div>
+          <div class="progress">
+            <div class="label"><span style="color:black">Send progress: </span></div>
+            <progress id="sendProgress" max="0" value="0"></progress>
+          </div>
 
-              <button class="btn btn-default" id="resetButton">reset</button><br/>
+          <div class="progress">
+            <div class="label"><span style="color:black">Receive progress: </span></div>
+            <progress id="receiveProgress" max="0" value="0"></progress>
+          </div>
+
+          <button class="btn btn-default" id="resetButton">reset</button><br/>
 
 
-              <div id="bitrate"></div>
+          <div id="bitrate"></div>
 
-              <a id="received"></a>
-          </section>
-        </div>
+          <a id="received"></a>
+        </section>
       </div>
+    </div>
 
-      <!-- Screen Sharing -->
-      <div class="tab-pane fade" id="screen_sharing">
-        <div class="inner cover">
-          <h3 class="cover-heading"></h3>
-          <p class="lead">
+    <!-- Screen Sharing -->
+    <div class="tab-pane fade" id="screen_sharing">
+      <div class="inner cover">
+        <h3 class="cover-heading"></h3>
+        <p class="lead">
           <button class="btn btn-default">Create a room</button>
-          </p>
-        </div>
+        </p>
       </div>
     </div>
   </div>
-  <div class="mastfoot">
-    <div class="inner">
-      <p style="display:inline">
-        Developed by <a href="https://github.com/UCIUROP2015/UCI_UROP_WEBRTC" target="_top"><strong>us</strong></a> through <a href="http://www.urop.uci.edu/" >
-        <strong>UROP at UCI</strong></a><p class="visible-xs" style="display:inline"></p> and Cover template by <a href="https://twitter.com/mdo" ><strong>@mdo</strong></a>
-      </p>
-    </div>
+</div>
+<div class="mastfoot">
+  <div class="inner">
+    <p style="display:inline">
+      Developed by <a href="https://github.com/UCIUROP2015/UCI_UROP_WEBRTC" target="_top"><strong>us</strong></a> through <a href="http://www.urop.uci.edu/" >
+      <strong>UROP at UCI</strong></a><p class="visible-xs" style="display:inline"></p> and Cover template by <a href="https://twitter.com/mdo" ><strong>@mdo</strong></a>
+    </p>
   </div>
+</div>
 
   <!-- Bootstrap core JavaScript
   ================================================== -->
   <!-- Placed at the end of the document so the pages load faster -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-  <script src="js/adapter.js"></script>
-  <script src="js/main.js"></script>
-  <!-- Add file sharing
+  
+
+  <!-- Add file sharing -->
   <script src="fileshare/main.js"></script>
   <script src="fileshare/ga.js"></script>
   <script src="fileshare/adapter.js"></script>
-  -->
+
 
   <script>
   function decidePosOfFoot(targetHeight, windowHeight){
     if(targetHeight < windowHeight){
-        $(".mastfoot").css("position", "fixed");
-        $(".mastfoot").css("bottom", 0);
-      }
-      else{
-        $(".mastfoot").css("position", "");
-        $(".mastfoot").css("bottom", "");
-      }
+      $(".mastfoot").css("position", "fixed");
+      $(".mastfoot").css("bottom", 0);
+    }
+    else{
+      $(".mastfoot").css("position", "");
+      $(".mastfoot").css("bottom", "");
+    }
   }
 
   // onload event
@@ -210,7 +217,113 @@
   };
   */
 
+  var createButton = get("createButton");
+  var clearButton = get("clearButton");
+  var getDocButton = get("getDocButton");
+  var joinDataButton = get("joinDataButton");
+
+  createButton.onclick = create;
+  clearButton.onclick = clearDocument;
+  getDocButton.onclick = getDocument;
+  joinDataButton.onclick = joinData;
+
+  window.onbeforeunload = clearDocument;
+
   
-  </script>
+  function get(id){
+    return document.getElementById(id);
+  }
+
+  function create() {
+    if(!Omlet.isInstalled()) {
+      log("[-] Omlet is not installed.");
+    }
+    else {
+      log("[+] Omlet is installed.");
+      log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
+
+      documentApi.create(function(d) {
+      // create successCallback
+
+      myDocId = d.Document;
+      location.hash = "#/docId/" + myDocId;
+
+      documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
+        // update successCallback
+        documentApi.get(myDocId, DocumentCreated, errorCallback);
+      }, errorCallback);
+    }, errorCallback);
+    }
+  }
+
+
+  function clearDocument() {
+    if(!Omlet.isInstalled()) {
+      log("[-] Omlet is not installed.");
+    }
+    else {
+      log("[+] Clearing Document.");
+      stop();
+
+      documentApi.update(myDocId, addMessage, param_clear, function() {
+        documentApi.get(myDocId, DocumentCleared, function (error) {
+          log("[-] clearDocument-update-get: " + error);
+        });
+      }, function (error) {
+        log("[-] clearDocument-update: " + error);
+      });
+    }
+  }
+
+
+  function getDocument() {
+    if(!Omlet.isInstalled()) {
+      log("[-] Omlet is not installed.");
+    }
+    else {
+      documentApi.get(myDocId, ReceiveDoc, errorCallback);
+      log("[+] Getting Document. DocId: " + myDocId);
+    }
+  }
+
+
+  function joinData() {
+  // if(Object.keys(chatDoc.participants).length  == 0) {
+  //   initConnection(true, true, false);
+
+  //   log("[+] Adding the caller.");
+  //   var param_join = {
+  //     "name" : "caller",
+  //     "value" : {
+  //       "signals": []
+  //     }
+  //   };
+
+  //   documentApi.update(myDocId, addParticipant, param_join, function() { documentApi.get(myDocId, participantAdded, errorCallback); }
+  //   , errorCallback);
+  // }
+  // else {
+  //   initConnection(false, true, false);
+
+  //   log("[+] Adding the callee.");
+  //   var param_join = {
+  //     "name" : "callee",
+  //     "value" : {
+  //       "signals" : [{
+  //         "signal_type" : "callee_arrived",
+  //         "timestamp" : Date.now()
+  //         }]
+  //     }
+  //   };
+
+  //   // update: function(reference, func, parameters, success, error),
+  //   documentApi.update(myDocId, addParticipant, param_join, function() { documentApi.get(myDocId, participantAdded, errorCallback); }
+  //   , errorCallback);
+  // }
+}
+
+</script>
+<script src="adapter.js"></script>
+  <script src="edit-main.js"></script>
 </body>
 </html>
