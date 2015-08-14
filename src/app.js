@@ -10,7 +10,7 @@ var server = http.createServer(app).listen(port, function() {
   console.log('[+] Set [http] protocol and server running at port #' + port);
 });
 
-var webRTC = require('omletrtc').listen(server);
+var webRTC = require('./webrtcjs/omletrtc').listen(server);
 
 // Handle resource request by server
 app.get('/', function(req, res) {
