@@ -1,5 +1,17 @@
+'use strict';
+
+var documentApi;
+var myDocId;
+var chatDoc;
+
 var videos = [];
 var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection || window.RTCPeerConnection;
+
+function log(message){
+  var logArea = document.getElementById("console");
+  logArea.value += message + '\n';
+  logArea.scrollTop = logArea.scrollHeight;
+}
 
 function getNumPerRow() {
   var len = videos.length;
@@ -56,22 +68,6 @@ function removeVideo(socketId) {
   }
 }
 
-function addToChat(msg, color) {
-  var messages = document.getElementById('messages');
-  msg = sanitize(msg);
-  if(color) {
-    msg = '<span style="color: ' + color + '; padding-left: 15px">' + msg + '</span>';
-  } else {
-    msg = '<strong style="padding-left: 15px">' + msg + '</strong>';
-  }
-  messages.innerHTML = messages.innerHTML + msg + '<br>';
-  messages.scrollTop = 10000;
-}
-
-function sanitize(msg) {
-  return msg.replace(/</g, '&lt;');
-}
-
 function initFullScreen() {
   var button = document.getElementById("fullscreen");
   button.addEventListener('click', function(event) {
@@ -99,84 +95,32 @@ function initNewRoom() {
   })
 }
 
-
-var websocketChat = {
-  send: function(message) {
-    rtc._socket.send(message);
-  },
-  recv: function(message) {
-    return message;
-  },
-  event: 'receive_chat_msg'
-};
-
-var dataChannelChat = {
-  send: function(message) {
-    for(var connection in rtc.dataChannels) {
-      var channel = rtc.dataChannels[connection];
-      channel.send(message);
-    }
-  },
-  recv: function(channel, message) {
-    return JSON.parse(message).data;
-  },
-  event: 'data stream data'
-};
-
-function initChat() {
-  var chat;
-
-  if(rtc.dataChannelSupport) {
-    console.log('initializing data channel chat');
-    chat = dataChannelChat;
-  } else {
-    console.log('initializing websocket chat');
-    chat = websocketChat;
-  }
-
-  var input = document.getElementById("chatinput");
-  var toggleHideShow = document.getElementById("hideShowMessages");
-  var room = window.location.hash.slice(1);
-  var color = "#" + ((1 << 24) * Math.random() | 0).toString(16);
-
-  toggleHideShow.addEventListener('click', function() {
-    var element = document.getElementById("messages");
-
-    if(element.style.display === "block") {
-      element.style.display = "none";
+function createDocument() {
+  var button = document.getElementById("createDocument");
+  button.addEventListener('click', function(event) {
+    if(!Omlet.isInstalled()) {
+      log("[-] Omlet is not installed.");
     }
     else {
-      element.style.display = "block";
-    }
+      log("[+] Omlet is installed.");
+      log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
 
-  });
+      documentApi.create(function(d) {
+        myDocId = d.Document;
+        location.hash = "#/docId/" + myDocId;
 
-  input.addEventListener('keydown', function(event) {
-    var key = event.which || event.keyCode;
-    if(key === 13) {
-      chat.send(JSON.stringify({
-        "eventName": "chat_msg",
-        "data": {
-          "messages": input.value,
-          "room": room,
-          "color": color
-        }
-      }));
-      addToChat(input.value);
-      input.value = "";
+        documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
+          // update successCallback
+          documentApi.get(myDocId, DocumentCreated, errorCallback);
+        }, errorCallback);
+      }, errorCallback);
     }
-  }, false);
-  rtc.on(chat.event, function() {
-    var data = chat.recv.apply(this, arguments);
-    console.log(data.color);
-    addToChat(data.messages, data.color.toString(16));
   });
 }
 
-
 function init() {
   if(PeerConnection) {
-    rtc.createStream({
+    omletrtc.createStream({
       "video": {"mandatory": {}, "optional": []},
       "audio": true
     }, function(stream) {
@@ -194,24 +138,187 @@ function init() {
 
   var room = window.location.hash.slice(1);
 
-  rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], room);
+  omletrtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], room);
 
-  rtc.on('add remote stream', function(stream, socketId) {
-    console.log("ADDING REMOTE STREAM...");
+  omletrtc.on('add remote stream', function(stream, socketId) {
+    log("ADDING REMOTE STREAM...");
     var clone = cloneVideo('you', socketId);
     document.getElementById(clone.id).setAttribute("class", "");
-    rtc.attachStream(stream, clone.id);
+    omletrtc.attachStream(stream, clone.id);
     subdivideVideos();
   });
-  rtc.on('disconnect stream', function(data) {
-    console.log('remove ' + data);
+  omletrtc.on('disconnect stream', function(data) {
+    log('remove ' + data);
     removeVideo(data);
   });
   initFullScreen();
   initNewRoom();
   initChat();
+  createDocument();
 }
 
 window.onresize = function(event) {
   subdivideVideos();
 };
+
+
+
+
+/*
+* Omlet Framework
+*/
+
+function initDocumentAPI() {
+  if (!Omlet.isInstalled())  {
+    log("[-] Omlet is not installed." );
+  }
+
+  documentApi = Omlet.document;
+  _loadDocument();
+}
+
+function DocumentCreated(doc) {
+  var callbackurl = "https://webrtcbench-dbh3099.rhcloud.com/video-calling-interface.html#/docId/" + myDocId;
+  callbackurl = "http://203.246.112.144:3310/proto.index.html#/docId/" + myDocId;
+
+  if(Omlet.isInstalled()) {
+    var rdl = Omlet.createRDL({
+      appName: "OmletRTC",
+      noun: "poll",
+      displayTitle: "OmletRTC",
+      displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
+      displayText: 'Client: ' + ip() + '\nServer:' + location.host,
+      json: doc,
+      callback: callbackurl
+    });
+
+    Omlet.exit(rdl);
+  }
+}
+
+function ReceiveDoc(doc) {
+  chatDoc = doc;
+}
+
+function _loadDocument() {
+  if (hasDocument()) {
+    myDocId = getDocumentReference();
+    log("[+] Get documentReference id: " + myDocId );
+
+    documentApi.watch(myDocId, updateCallback, watchSuccessCallback, function (error) {
+      log('[-] _loadDocument-watch: ' + error);
+    });
+
+    // The successful result of get is the document itself.
+    documentApi.get(myDocId, function (doc) {
+      chatDoc = doc;
+    }, function (error) {
+      log('[-] _loadDocument-get: ' + error);
+    });
+  }
+  else {
+    log("[-] Document is not found." );
+  }
+}
+
+function initConnectionInfo() {
+  var chatId = 100;
+  var identity = Omlet.getIdentity();
+  var numOfUser = 0;
+
+  // Connection info
+  var info = {
+    'chatId' : chatId,
+    'creator' : identity,
+    'sender' : null,
+    'message' : null,
+    'numOfUser' : numOfUser,
+    'userJoin' : false,
+    'sessionDescription' : null,
+    'candidate' : null,
+    'id' : null,
+    'label' : null,
+    'timestamp' : Date.now()
+  };
+  return info;
+}
+
+function getDocumentReference() {
+  var docIdParam = window.location.hash.indexOf("/docId/");
+  if (docIdParam == -1) return false;
+  var docId = window.location.hash.substring(docIdParam + 7);
+  var end = docId.indexOf("/");
+  if (end != -1) docId = docId.substring(0, end);
+
+  return docId;
+}
+
+function Initialize(old, parameters) {
+  return parameters;
+}
+
+function hasDocument() {
+  var docIdParam = window.location.hash.indexOf("/docId/");
+  return (docIdParam != -1);
+}
+
+function handleMessage(doc) {
+  chatDoc = doc;
+
+  if (chatDoc.numOfUser > 2)
+    return ;
+
+  if (chatDoc.userJoin && chatDoc.creator.name === Omlet.getIdentity().name) {
+    log('[+] sender: ' + chatDoc.sender + ', message: userJoin');
+  }
+
+  if (chatDoc.sessionDescription && flag) {
+    log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
+  }
+
+  if (chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
+
+  }
+
+  if (chatDoc.message === 'clear' && isStarted) {
+
+  }
+}
+
+function updateCallback(chatDocId) {
+  documentApi.get(chatDocId, handleMessage , function (error) {
+    log('[-] updateCallback-get: ' + error);
+  });
+}
+
+function watchSuccessCallback() {
+  log("[+] Success to documentApi.watch.");
+}
+
+function errorCallback(error) {
+  log("[-] " + error);
+}
+
+function addMessage(old, parameters) {
+  return old;
+}
+
+function DocumentCleared(doc) {
+  log("[+] Document cleared");
+}
+
+function addUser(doc) {
+}
+
+Omlet.ready(function() {
+  log("[+] Omlet is Ready.");
+
+  if (hasDocument()) {
+    log("[+] Initializing DocumentAPI.");
+    initDocumentAPI();
+  }
+  else {
+    log("[-] Doc is not found.");
+    // No Doc --> Use traditional Style
+  }
+});
