@@ -335,7 +335,7 @@ if (navigator.webkitGetUserMedia) {
   omletrtc.attachStream = function(stream, domId) {
     var element = document.getElementById(domId);
     if (navigator.mozGetUserMedia) {
-      log("Attaching media stream");
+      console.log("Attaching media stream");
       element.mozSrcObject = stream;
       element.play();
     } else {
@@ -423,10 +423,4 @@ function mergeConstraints(cons1, cons2) {
   }
   merged.optional.concat(cons2.optional);
   return merged;
-}
-
-function log(message){
-  var logArea = document.getElementById("console");
-  logArea.value += message + '\n';
-  logArea.scrollTop = logArea.scrollHeight;
 }
