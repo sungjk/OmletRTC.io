@@ -565,6 +565,7 @@ Omlet.ready(function() {
   }
   else {
     log("[-] Doc is not found.");
+    initDocumentAPI();
     // No Doc --> Use traditional Style
   }
 });
