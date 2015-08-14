@@ -16,6 +16,43 @@
     <script src="https://omlet.me/a/lib/jquery-cookie.js"></script>
     <script src="http://jsgetip.appspot.com"></script>
 
+    <script type="text/javascript">
+      // Fallbacks for vendor-specific variables until the spec is finalized.
+      var PeerConnection = (window.PeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection);
+      var URL = (window.URL || window.webkitURL || window.msURL || window.oURL);
+      var getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+      var nativeRTCIceCandidate = (window.mozRTCIceCandidate || window.RTCIceCandidate);
+      var nativeRTCSessionDescription = (window.mozRTCSessionDescription || window.RTCSessionDescription); // order is very important: "RTCSessionDescription" defined in Nighly but useless
+
+      var sdpConstraints = {
+        'mandatory': {
+          'OfferToReceiveAudio': true,
+          'OfferToReceiveVideo': true
+        }
+      };
+
+      if (navigator.webkitGetUserMedia) {
+        if (!webkitMediaStream.prototype.getVideoTracks) {
+          webkitMediaStream.prototype.getVideoTracks = function() {
+            return this.videoTracks;
+          };
+          webkitMediaStream.prototype.getAudioTracks = function() {
+            return this.audioTracks;
+          };
+        }
+
+        // New syntax of getXXXStreams method in M26.
+        if (!webkitRTCPeerConnection.prototype.getLocalStreams) {
+          webkitRTCPeerConnection.prototype.getLocalStreams = function() {
+            return this.localStreams;
+          };
+          webkitRTCPeerConnection.prototype.getRemoteStreams = function() {
+            return this.remoteStreams;
+          };
+        }
+      }
+    </script>
+
     <script src="/webrtcjs/omletrtc.js"></script>
   </head>
   <body onload="init()">
