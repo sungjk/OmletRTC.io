@@ -1,7 +1,7 @@
 // Server Initiation
 var express = require('express');
 var app = express();
-var config = require('/js/config');
+var config = require('./js/config');
 
 var http = require('http') ;
 var port = config.ws.port;
