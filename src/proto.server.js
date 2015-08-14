@@ -7,7 +7,7 @@ var server = http.createServer(app).listen(3310, function() {
   console.log('[+] Set [http] protocol and server running at port #3310');
 });
 
-var webRTC = require('./webrtcjs/omletrtc.js').listen(server);
+var webRTC = require('webrtc.io').listen(server);
 
 // Handle resource request by server
 app.get('/', function(req, res) {
@@ -22,8 +22,8 @@ app.get('/webrtcjs/main.js', function(req, res) {
   res.sendfile(__dirname + '/webrtcjs/main.js');
 });
 
-app.get('/webrtcjs/omletrtc.js', function(req, res) {
-  res.sendfile(__dirname + '/webrtcjs/omletrtc.js');
+app.get('/webrtcjs/webrtc.io.js', function(req, res) {
+  res.sendfile(__dirname + '/webrtcjs/webrtc.io.js');
 });
 
 app.get('/js/omlet.js', function(req, res) {
