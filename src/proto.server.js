@@ -30,30 +30,30 @@ app.get('/js/omlet.js', function(req, res) {
   res.sendfile(__dirname + '/js/omlet.js');
 });
 
-webRTC.rtc.on('chat_msg', function(data, socket) {
-  var roomList = webRTC.rtc.rooms[data.room] || [];
+// webRTC.rtc.on('chat_msg', function(data, socket) {
+//   var roomList = webRTC.rtc.rooms[data.room] || [];
 
-  for (var i = 0; i < roomList.length; i++) {
-    var socketId = roomList[i];
+//   for (var i = 0; i < roomList.length; i++) {
+//     var socketId = roomList[i];
 
-    if (socketId !== socket.id) {
-      var soc = webRTC.rtc.getSocket(socketId);
+//     if (socketId !== socket.id) {
+//       var soc = webRTC.rtc.getSocket(socketId);
 
-      if (soc) {
-        soc.send(JSON.stringify({
-          "eventName": "receive_chat_msg",
-          "data": {
-            "messages": data.messages,
-            "color": data.color
-          }
-        }), function(error) {
-          if (error) {
-            console.log(error);
-          }
-        });
-      }
-    }
-  }
-});
+//       if (soc) {
+//         soc.send(JSON.stringify({
+//           "eventName": "receive_chat_msg",
+//           "data": {
+//             "messages": data.messages,
+//             "color": data.color
+//           }
+//         }), function(error) {
+//           if (error) {
+//             console.log(error);
+//           }
+//         });
+//       }
+//     }
+//   }
+// });
 
 app.use(express.static('.'));
