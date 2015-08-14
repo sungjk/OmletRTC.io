@@ -1,5 +1,3 @@
-'use strict';
-
 var documentApi;
 var myDocId;
 var chatDoc;
