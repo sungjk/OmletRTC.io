@@ -2,7 +2,7 @@
 
 // Fallbacks for vendor-specific variables until the spec is finalized.
 
-var PeerConnection = (window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection);
+// var PeerConnection = (window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection);
 var URL = (window.URL || window.webkitURL || window.msURL || window.oURL);
 var getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
 var nativeRTCIceCandidate = (window.mozRTCIceCandidate || window.RTCIceCandidate);
