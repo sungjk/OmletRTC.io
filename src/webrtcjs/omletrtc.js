@@ -2,11 +2,17 @@
 
 // Fallbacks for vendor-specific variables until the spec is finalized.
 
-var PeerConnection = (window.PeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection);
-var URL = (window.URL || window.webkitURL || window.msURL || window.oURL);
-var getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
-var nativeRTCIceCandidate = (window.mozRTCIceCandidate || window.RTCIceCandidate);
-var nativeRTCSessionDescription = (window.mozRTCSessionDescription || window.RTCSessionDescription); // order is very important: "RTCSessionDescription" defined in Nighly but useless
+// var PeerConnection = (window.PeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection);
+// var URL = (window.URL || window.webkitURL || window.msURL || window.oURL);
+// var getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+// var nativeRTCIceCandidate = (window.mozRTCIceCandidate || window.RTCIceCandidate);
+// var nativeRTCSessionDescription = (window.mozRTCSessionDescription || window.RTCSessionDescription); // order is very important: "RTCSessionDescription" defined in Nighly but useless
+
+var PeerConnection = window.webkitRTCPeerConnection;
+// var URL = (window.URL || window.webkitURL || window.msURL || window.oURL);
+var getUserMedia = navigator.webkitGetUserMedia;
+var nativeRTCIceCandidate = window.RTCIceCandidate;
+var nativeRTCSessionDescription = window.RTCSessionDescription; // order is very important: "RTCSessionDescription" defined in Nighly but useless
 
 var sdpConstraints = {
   'mandatory': {
