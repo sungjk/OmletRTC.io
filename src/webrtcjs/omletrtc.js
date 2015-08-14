@@ -38,30 +38,30 @@ if (navigator.webkitGetUserMedia) {
 
 (function() {
 
-  var rtc;
+  var omletrtc;
   if ('undefined' === typeof module) {
-    rtc = this.rtc = {};
+    omletrtc = this.omletrtc = {};
   } else {
-    rtc = module.exports = {};
+    omletrtc = module.exports = {};
   }
 
 
   // Holds a connection to the server.
-  rtc._socket = null;
+  omletrtc._socket = null;
 
   // Holds identity for the client
-  rtc._me = null;
+  omletrtc._me = null;
 
   // Holds callbacks for certain events.
-  rtc._events = {};
+  omletrtc._events = {};
 
-  rtc.on = function(eventName, callback) {
-    rtc._events[eventName] = rtc._events[eventName] || [];
-    rtc._events[eventName].push(callback);
+  omletrtc.on = function(eventName, callback) {
+    omletrtc._events[eventName] = omletrtc._events[eventName] || [];
+    omletrtc._events[eventName].push(callback);
   };
 
-  rtc.fire = function(eventName, _) {
-    var events = rtc._events[eventName];
+  omletrtc.fire = function(eventName, _) {
+    var events = omletrtc._events[eventName];
     var args = Array.prototype.slice.call(arguments, 1);
 
     if (!events) {
@@ -74,7 +74,7 @@ if (navigator.webkitGetUserMedia) {
   };
 
   // Holds the STUN/ICE server to use for PeerConnections.
-  rtc.SERVER = function() {
+  omletrtc.SERVER = function() {
     if (navigator.mozGetUserMedia) {
       return {
         "iceServers": [{
@@ -91,155 +91,124 @@ if (navigator.webkitGetUserMedia) {
 
 
   // Reference to the lone PeerConnection instance.
-  rtc.peerConnections = {};
+  omletrtc.peerConnections = {};
 
   // Array of known peer socket ids
-  rtc.connections = [];
+  omletrtc.connections = [];
   // Stream-related variables.
-  rtc.streams = [];
-  rtc.numStreams = 0;
-  rtc.initializedStreams = 0;
+  omletrtc.streams = [];
+  omletrtc.numStreams = 0;
+  omletrtc.initializedStreams = 0;
 
-
-  // Reference to the data channels
-  rtc.dataChannels = {};
-
-  // PeerConnection datachannel configuration
-  rtc.dataChannelConfig = {
-    "optional": [{
-      "RtpDataChannels": true
-    }, {
-      "DtlsSrtpKeyAgreement": true
-    }]
-  };
-
-  rtc.pc_constraints = {
+  // PeerConnection configuration
+  omletrtc.pc_constraints = {
     "optional": [{
       "DtlsSrtpKeyAgreement": true
     }]
   };
-
-
-  // check whether data channel is supported.
-  rtc.checkDataChannelSupport = function() {
-    try {
-      // raises exception if createDataChannel is not supported
-      var pc = new PeerConnection(rtc.SERVER(), rtc.dataChannelConfig);
-      var channel = pc.createDataChannel('supportCheck', {
-        reliable: false
-      });
-      channel.close();
-      return true;
-    } catch (e) {
-      return false;
-    }
-  };
-
-  rtc.dataChannelSupport = rtc.checkDataChannelSupport();
 
 
   /**
    * Connects to the websocket server.
    */
-  rtc.connect = function(server, room) {
+  omletrtc.connect = function(server, room) {
     room = room || ""; // by default, join a room called the blank string
-    rtc._socket = new WebSocket(server);
+    omletrtc._socket = new WebSocket(server);
 
-    rtc._socket.onopen = function() {
+    omletrtc._socket.onopen = function() {
 
-      rtc._socket.send(JSON.stringify({
+      omletrtc._socket.send(JSON.stringify({
         "eventName": "join_room",
         "data": {
           "room": room
         }
       }));
 
-      rtc._socket.onmessage = function(msg) {
+      omletrtc._socket.onmessage = function(msg) {
         var json = JSON.parse(msg.data);
-        rtc.fire(json.eventName, json.data);
+        omletrtc.fire(json.eventName, json.data);
       };
 
-      rtc._socket.onerror = function(err) {
+      omletrtc._socket.onerror = function(err) {
         console.error('onerror');
         console.error(err);
       };
 
-      rtc._socket.onclose = function(data) {
-        rtc.fire('disconnect stream', rtc._socket.id);
-        delete rtc.peerConnections[rtc._socket.id];
+      omletrtc._socket.onclose = function(data) {
+        omletrtc.fire('disconnect stream', omletrtc._socket.id);
+        delete omletrtc.peerConnections[omletrtc._socket.id];
       };
 
-      rtc.on('get_peers', function(data) {
-        rtc.connections = data.connections;
-        rtc._me = data.you;
+      omletrtc.on('get_peers', function(data) {
+        omletrtc.connections = data.connections;
+        omletrtc._me = data.you;
         // fire connections event and pass peers
-        rtc.fire('connections', rtc.connections);
+        omletrtc.fire('connections', omletrtc.connections);
       });
 
-      rtc.on('receive_ice_candidate', function(data) {
+      omletrtc.on('receive_ice_candidate', function(data) {
         var candidate = new nativeRTCIceCandidate(data);
-        rtc.peerConnections[data.socketId].addIceCandidate(candidate);
-        rtc.fire('receive ice candidate', candidate);
+        omletrtc.peerConnections[data.socketId].addIceCandidate(candidate);
+        omletrtc.fire('receive ice candidate', candidate);
       });
 
-      rtc.on('new_peer_connected', function(data) {
-        rtc.connections.push(data.socketId);
+      omletrtc.on('new_peer_connected', function(data) {
+        omletrtc.connections.push(data.socketId);
 
-        var pc = rtc.createPeerConnection(data.socketId);
-        for (var i = 0; i < rtc.streams.length; i++) {
-          var stream = rtc.streams[i];
+        var pc = omletrtc.createPeerConnection(data.socketId);
+        for (var i = 0; i < omletrtc.streams.length; i++) {
+          var stream = omletrtc.streams[i];
           pc.addStream(stream);
         }
       });
 
-      rtc.on('remove_peer_connected', function(data) {
-        rtc.fire('disconnect stream', data.socketId);
-        delete rtc.peerConnections[data.socketId];
+      omletrtc.on('remove_peer_connected', function(data) {
+        omletrtc.fire('disconnect stream', data.socketId);
+        delete omletrtc.peerConnections[data.socketId];
       });
 
-      rtc.on('receive_offer', function(data) {
-        rtc.receiveOffer(data.socketId, data.sdp);
-        rtc.fire('receive offer', data);
+      omletrtc.on('receive_offer', function(data) {
+        omletrtc.receiveOffer(data.socketId, data.sdp);
+        omletrtc.fire('receive offer', data);
       });
 
-      rtc.on('receive_answer', function(data) {
-        rtc.receiveAnswer(data.socketId, data.sdp);
-        rtc.fire('receive answer', data);
+      omletrtc.on('receive_answer', function(data) {
+        omletrtc.receiveAnswer(data.socketId, data.sdp);
+        omletrtc.fire('receive answer', data);
       });
 
-      rtc.fire('connect');
+      omletrtc.fire('connect');
     };
   };
 
 
-  rtc.sendOffers = function() {
-    for (var i = 0, len = rtc.connections.length; i < len; i++) {
-      var socketId = rtc.connections[i];
-      rtc.sendOffer(socketId);
+  omletrtc.sendOffers = function() {
+    for (var i = 0, len = omletrtc.connections.length; i < len; i++) {
+      var socketId = omletrtc.connections[i];
+      omletrtc.sendOffer(socketId);
     }
   };
 
-  rtc.onClose = function(data) {
-    rtc.on('close_stream', function() {
-      rtc.fire('close_stream', data);
+  omletrtc.onClose = function(data) {
+    omletrtc.on('close_stream', function() {
+      omletrtc.fire('close_stream', data);
     });
   };
 
-  rtc.createPeerConnections = function() {
-    for (var i = 0; i < rtc.connections.length; i++) {
-      rtc.createPeerConnection(rtc.connections[i]);
+  omletrtc.createPeerConnections = function() {
+    for (var i = 0; i < omletrtc.connections.length; i++) {
+      omletrtc.createPeerConnection(omletrtc.connections[i]);
     }
   };
 
-  rtc.createPeerConnection = function(id) {
+  omletrtc.createPeerConnection = function(id) {
 
-    var config = rtc.pc_constraints;
-    if (rtc.dataChannelSupport) config = rtc.dataChannelConfig;
+    var config = omletrtc.pc_constraints;
 
-    var pc = rtc.peerConnections[id] = new PeerConnection(rtc.SERVER(), config);
+    var pc = omletrtc.peerConnections[id] = new PeerConnection(omletrtc.SERVER(), config);
     pc.onicecandidate = function(event) {
       if (event.candidate) {
-        rtc._socket.send(JSON.stringify({
+        omletrtc._socket.send(JSON.stringify({
           "eventName": "send_ice_candidate",
           "data": {
             "label": event.candidate.sdpMLineIndex,
@@ -248,31 +217,24 @@ if (navigator.webkitGetUserMedia) {
           }
         }));
       }
-      rtc.fire('ice candidate', event.candidate);
+      omletrtc.fire('ice candidate', event.candidate);
     };
 
     pc.onopen = function() {
       // TODO: Finalize this API
-      rtc.fire('peer connection opened');
+      omletrtc.fire('peer connection opened');
     };
 
     pc.onaddstream = function(event) {
       // TODO: Finalize this API
-      rtc.fire('add remote stream', event.stream, id);
+      omletrtc.fire('add remote stream', event.stream, id);
     };
-
-    if (rtc.dataChannelSupport) {
-      pc.ondatachannel = function(evt) {
-        console.log('data channel connecting ' + id);
-        rtc.addDataChannel(id, evt.channel);
-      };
-    }
 
     return pc;
   };
 
-  rtc.sendOffer = function(socketId) {
-    var pc = rtc.peerConnections[socketId];
+  omletrtc.sendOffer = function(socketId) {
+    var pc = omletrtc.peerConnections[socketId];
 
     var constraints = {
       "optional": [],
@@ -293,7 +255,7 @@ if (navigator.webkitGetUserMedia) {
     pc.createOffer(function(session_description) {
       session_description.sdp = preferOpus(session_description.sdp);
       pc.setLocalDescription(session_description);
-      rtc._socket.send(JSON.stringify({
+      omletrtc._socket.send(JSON.stringify({
         "eventName": "send_offer",
         "data": {
           "socketId": socketId,
@@ -303,17 +265,17 @@ if (navigator.webkitGetUserMedia) {
     }, null, sdpConstraints);
   };
 
-  rtc.receiveOffer = function(socketId, sdp) {
-    var pc = rtc.peerConnections[socketId];
-    rtc.sendAnswer(socketId, sdp);
+  omletrtc.receiveOffer = function(socketId, sdp) {
+    var pc = omletrtc.peerConnections[socketId];
+    omletrtc.sendAnswer(socketId, sdp);
   };
 
-  rtc.sendAnswer = function(socketId, sdp) {
-    var pc = rtc.peerConnections[socketId];
+  omletrtc.sendAnswer = function(socketId, sdp) {
+    var pc = omletrtc.peerConnections[socketId];
     pc.setRemoteDescription(new nativeRTCSessionDescription(sdp));
     pc.createAnswer(function(session_description) {
       pc.setLocalDescription(session_description);
-      rtc._socket.send(JSON.stringify({
+      omletrtc._socket.send(JSON.stringify({
         "eventName": "send_answer",
         "data": {
           "socketId": socketId,
@@ -326,13 +288,13 @@ if (navigator.webkitGetUserMedia) {
   };
 
 
-  rtc.receiveAnswer = function(socketId, sdp) {
-    var pc = rtc.peerConnections[socketId];
+  omletrtc.receiveAnswer = function(socketId, sdp) {
+    var pc = omletrtc.peerConnections[socketId];
     pc.setRemoteDescription(new nativeRTCSessionDescription(sdp));
   };
 
 
-  rtc.createStream = function(opt, onSuccess, onFail) {
+  omletrtc.createStream = function(opt, onSuccess, onFail) {
     var options;
     onSuccess = onSuccess || function() {};
     onFail = onFail || function() {};
@@ -343,14 +305,14 @@ if (navigator.webkitGetUserMedia) {
     };
 
     if (getUserMedia) {
-      rtc.numStreams++;
+      omletrtc.numStreams++;
       getUserMedia.call(navigator, options, function(stream) {
 
-        rtc.streams.push(stream);
-        rtc.initializedStreams++;
+        omletrtc.streams.push(stream);
+        omletrtc.initializedStreams++;
         onSuccess(stream);
-        if (rtc.initializedStreams === rtc.numStreams) {
-          rtc.fire('ready');
+        if (omletrtc.initializedStreams === omletrtc.numStreams) {
+          omletrtc.fire('ready');
         }
       }, function() {
         alert("Could not connect stream.");
@@ -361,19 +323,19 @@ if (navigator.webkitGetUserMedia) {
     }
   };
 
-  rtc.addStreams = function() {
-    for (var i = 0; i < rtc.streams.length; i++) {
-      var stream = rtc.streams[i];
-      for (var connection in rtc.peerConnections) {
-        rtc.peerConnections[connection].addStream(stream);
+  omletrtc.addStreams = function() {
+    for (var i = 0; i < omletrtc.streams.length; i++) {
+      var stream = omletrtc.streams[i];
+      for (var connection in omletrtc.peerConnections) {
+        omletrtc.peerConnections[connection].addStream(stream);
       }
     }
   };
 
-  rtc.attachStream = function(stream, domId) {
+  omletrtc.attachStream = function(stream, domId) {
     var element = document.getElementById(domId);
     if (navigator.mozGetUserMedia) {
-      console.log("Attaching media stream");
+      log("Attaching media stream");
       element.mozSrcObject = stream;
       element.play();
     } else {
@@ -381,93 +343,10 @@ if (navigator.webkitGetUserMedia) {
     }
   };
 
-
-  rtc.createDataChannel = function(pcOrId, label) {
-    if (!rtc.dataChannelSupport) {
-      //TODO this should be an exception
-      alert('webRTC data channel is not yet supported in this browser,' +
-        ' or you must turn on experimental flags');
-      return;
-    }
-
-    var id, pc;
-    if (typeof(pcOrId) === 'string') {
-      id = pcOrId;
-      pc = rtc.peerConnections[pcOrId];
-    } else {
-      pc = pcOrId;
-      id = undefined;
-      for (var key in rtc.peerConnections) {
-        if (rtc.peerConnections[key] === pc) id = key;
-      }
-    }
-
-    if (!id) throw new Error('attempt to createDataChannel with unknown id');
-
-    if (!pc || !(pc instanceof PeerConnection)) throw new Error('attempt to createDataChannel without peerConnection');
-
-    // need a label
-    label = label || 'fileTransfer' || String(id);
-
-    // chrome only supports reliable false atm.
-    var options = {
-      reliable: false
-    };
-
-    var channel;
-    try {
-      console.log('createDataChannel ' + id);
-      channel = pc.createDataChannel(label, options);
-    } catch (error) {
-      console.log('seems that DataChannel is NOT actually supported!');
-      throw error;
-    }
-
-    return rtc.addDataChannel(id, channel);
-  };
-
-  rtc.addDataChannel = function(id, channel) {
-
-    channel.onopen = function() {
-      console.log('data stream open ' + id);
-      rtc.fire('data stream open', channel);
-    };
-
-    channel.onclose = function(event) {
-      delete rtc.dataChannels[id];
-      console.log('data stream close ' + id);
-      rtc.fire('data stream close', channel);
-    };
-
-    channel.onmessage = function(message) {
-      console.log('data stream message ' + id);
-      console.log(message);
-      rtc.fire('data stream data', channel, message.data);
-    };
-
-    channel.onerror = function(err) {
-      console.log('data stream error ' + id + ': ' + err);
-      rtc.fire('data stream error', channel, err);
-    };
-
-    // track dataChannel
-    rtc.dataChannels[id] = channel;
-    return channel;
-  };
-
-  rtc.addDataChannels = function() {
-    if (!rtc.dataChannelSupport) return;
-
-    for (var connection in rtc.peerConnections)
-    rtc.createDataChannel(connection);
-  };
-
-
-  rtc.on('ready', function() {
-    rtc.createPeerConnections();
-    rtc.addStreams();
-    rtc.addDataChannels();
-    rtc.sendOffers();
+  omletrtc.on('ready', function() {
+    omletrtc.createPeerConnections();
+    omletrtc.addStreams();
+    omletrtc.sendOffers();
   });
 
 }).call(this);
@@ -544,4 +423,10 @@ function mergeConstraints(cons1, cons2) {
   }
   merged.optional.concat(cons2.optional);
   return merged;
+}
+
+function log(message){
+  var logArea = document.getElementById("console");
+  logArea.value += message + '\n';
+  logArea.scrollTop = logArea.scrollHeight;
 }
