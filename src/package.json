@@ -1,0 +1,24 @@
+{
+  "name": "OmletRTC",
+  "description": "Example of multi user webrtc",
+  "version": "0.0.2-1",
+  "engines": {
+    "node": ">= 0.6.0"
+  },
+  "dependencies": {
+    "omletrtc": "latest",
+    "express": "3.1.0",
+    "ws": "latest"
+  },
+  "subdomain": "MultiWebRTC",
+  "scripts": {
+    "start": "example/server.js"
+  },
+  "author": "Seongjung Kim",
+  "contributors": [
+    {
+      // "name": "Ben Brittain",
+      // "email": "ben@brittain.org"
+    }
+  ]
+}
