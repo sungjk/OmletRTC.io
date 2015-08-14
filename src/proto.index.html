@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>Example omletrtc</title>
+    <link type="text/css" href="/css/proto.style.css" rel="stylesheet"></link>
+
+    <script src="http://jsgetip.appspot.com"></script>
+    <script src="/js/omlet.js"></script>
+    <script src="/webrtcjs/omletrtc.js"></script>
+  </head>
+  <body onload="init()">
+    <div class="buttonBox">
+      <div id="createDocument" class="button">Create A Document</div>
+    </div>
+
+    <textarea id="console" readonly style="width: 100%; min-height:100px;resize: none"> </textarea>
+
+    <div id="videos">
+      <video id="you" class="flip" autoplay width="263" height="200" style="position: absolute; left: 0px; bottom: 0px;"></video>
+    </div>
+
+    <div class="buttonBox">
+      <div id="fullscreen" class="button">Enter Full Screen</div>
+      <div id="newRoom" class="button">Create A New Room</div>
+    </div>
+    
+    <script src="/webrtcjs/main.js"></script>
+  </body>
+</html>
