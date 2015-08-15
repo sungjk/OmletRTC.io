@@ -66,33 +66,6 @@ function removeVideo(socketId) {
   }
 }
 
-function initFullScreen() {
-  var button = document.getElementById("fullscreen");
-  button.addEventListener('click', function(event) {
-    var elem = document.getElementById("videos");
-    //show full screen
-    elem.webkitRequestFullScreen();
-  });
-}
-
-function initNewRoom() {
-  var button = document.getElementById("newRoom");
-
-  button.addEventListener('click', function(event) {
-
-    var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
-    var string_length = 8;
-    var randomstring = '';
-    for(var i = 0; i < string_length; i++) {
-      var rnum = Math.floor(Math.random() * chars.length);
-      randomstring += chars.substring(rnum, rnum + 1);
-    }
-
-    window.location.hash = randomstring;
-    location.reload();
-  })
-}
-
 function createDocument() {
   var button = document.getElementById("createDocument");
   button.addEventListener('click', function(event) {
@@ -115,16 +88,6 @@ function createDocument() {
     }
   });
 }
-
-var websocketChat = {
-  send: function(message) {
-    rtc._socket.send(message);
-  },
-  recv: function(message) {
-    return message;
-  },
-  event: 'receive_chat_msg'
-};
 
 function init() {
   if(PeerConnection) {
@@ -157,8 +120,6 @@ function init() {
     log('remove ' + data);
     removeVideo(data);
   });
-  initFullScreen();
-  initNewRoom();
   createDocument();
 }
 
