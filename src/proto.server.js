@@ -18,42 +18,16 @@ app.get('/css/proto.style.css', function(req, res) {
   res.sendfile(__dirname + '/css/proto.style.css');
 });
 
-app.get('/webrtcjs/main.js', function(req, res) {
-  res.sendfile(__dirname + '/webrtcjs/main.js');
+app.get('/webrtcjs/script.js', function(req, res) {
+  res.sendfile(__dirname + '/webrtcjs/script.js');
 });
 
-app.get('/webrtcjs/omletrtc.js', function(req, res) {
-  res.sendfile(__dirname + '/webrtcjs/omletrtc.js');
+app.get('/webrtcjs/webrtc.io.js', function(req, res) {
+  res.sendfile(__dirname + '/webrtcjs/webrtc.io.js');
 });
 
 app.get('/js/omlet.js', function(req, res) {
   res.sendfile(__dirname + '/js/omlet.js');
 });
-
-// webRTC.rtc.on('chat_msg', function(data, socket) {
-//   var roomList = webRTC.rtc.rooms[data.room] || [];
-
-//   for (var i = 0; i < roomList.length; i++) {
-//     var socketId = roomList[i];
-
-//     if (socketId !== socket.id) {
-//       var soc = webRTC.rtc.getSocket(socketId);
-
-//       if (soc) {
-//         soc.send(JSON.stringify({
-//           "eventName": "receive_chat_msg",
-//           "data": {
-//             "messages": data.messages,
-//             "color": data.color
-//           }
-//         }), function(error) {
-//           if (error) {
-//             console.log(error);
-//           }
-//         });
-//       }
-//     }
-//   }
-// });
 
 app.use(express.static('.'));
