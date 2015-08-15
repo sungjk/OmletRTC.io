@@ -106,7 +106,6 @@ if (navigator.webkitGetUserMedia) {
   rtc.numStreams = 0;
   rtc.initializedStreams = 0;
 
-
   // PeerConnection configuration
   rtc.pc_constraints = {
     "optional": [{
@@ -187,6 +186,7 @@ if (navigator.webkitGetUserMedia) {
     };
   };
 
+
   rtc.sendOffers = function() {
     for (var i = 0, len = rtc.connections.length; i < len; i++) {
       var socketId = rtc.connections[i];
@@ -207,7 +207,6 @@ if (navigator.webkitGetUserMedia) {
   };
 
   rtc.createPeerConnection = function(id) {
-
     var config = rtc.pc_constraints;
 
     var pc = rtc.peerConnections[id] = new PeerConnection(rtc.SERVER(), config);
