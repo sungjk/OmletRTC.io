@@ -48,7 +48,6 @@
  													 "height": window_height});
 
  		// hidable button
- 		
  		$("#remoteVideo").click(function(){
  			var displayOpt = "block";
 	 		if($(".in-vidCall").css("display") == displayOpt){
@@ -56,16 +55,25 @@
 	 		}
 	 		$(".in-vidCall").css("display", displayOpt);
 	 	});
-		
+
+		$("#flipCamBtn").click(function(){
+			alert(localVideo.value);
+			localVideoSource = localVideo.value;
+			joinAV();
+		});
+
 	 	// mute button event
 	 	$("#muteBtn").click(function(){
 	 		var target = "images/mute.png";
+	 		var remoteVideo = document.getElementById("remoteVideo");
 	 		
 	 		if($("#muteBtnImg").attr("src") == target){
 		 		target = "images/speaker.png";
+		 		remoteVideo.muted = false;
 		 	}
 
 		 	$("#muteBtnImg").attr("src", target);
+		 	remoteVideo.muted = true;
 	 	});
 
 	 	// set button size
@@ -92,47 +100,41 @@
 	  	$("#tmpId").attr("id", B);
 	  }
 
+	  function exchangeSRC(A, B){
+	  	var tmp = $("#"+A).attr("src");
+	  	$("#"+A).attr("src", $("#"+B).attr("src"));
+	  	$("#"+B).attr("src", tmp);
+	  }
+
 	  var mDownPos = null,
 	  		mUpPos = null;
 
+	  $(".smallView").mousedown(function(event){
+	  	mDownPos = event.clientX + ' ' + event.clientY;
+	  	event.preventDefault();
+	  });
 
-	  if(navigator.mozGetUserMedia){ // for Firefox
-	  	$(".smallView").mousedown(function(event){
-		  	mDownPos = event.clientX + ' ' + event.clientY;
-		  	event.preventDefault();
-		  });
+	  $(".smallView").mouseup(function(event){
+	  	mUpPos = event.clientX + ' ' + event.clientY;
 
-		  $(".smallView").mouseup(function(event){
-		  	alert("dd");	
-		  	mUpPos = event.clientX + ' ' + event.clientY;
+		  if(mDownPos == mUpPos){
+		  	if(this.id == "remoteVideo"){
+	  			exchangeSRC(this.id, "localVideo");
+	  			exchangeId(this.id, "localVideo");
+		  	}
+	  		else{
+	  			exchangeSRC(this.id, "remoteVideo");
+	  			exchangeId(this.id, "remoteVideo");
+	  		}
+		  }
+		  event.preventDefault();
+	  });
 
-		  	if(mDownPos == mUpPos){
-			  	if(this.id == "remoteVideo")
-		  			exchangeId(this.id, "localVideo");
-		  		else
-		  			exchangeId(this.id, "remoteVideo");
-			  }
-			  event.preventDefault();
-		  });
-	  }
-	  else if(navigator.webkitGetUserMedia){ // for Chrome
-		  $(".smallView").mousedown(function(event){
-		  	mDownPos = event.clientX + ' ' + event.clientY;
-		  	event.preventDefault();
-		  });
-
-		  $(".smallView").mouseup(function(event){
-		  	mUpPos = event.clientX + ' ' + event.clientY;
-
-		  	if(mDownPos == mUpPos){
-			  	if(this.id == "remoteVideo")
-		  			exchangeId(this.id, "localVideo");
-		  		else
-		  			exchangeId(this.id, "remoteVideo");
-			  }
-			  event.preventDefault();
-		  });
-		}
+		document.getElementById("localVideo").muted = true;
+		
+		$("#finishCallBtn").click(function(){
+			Omlet.exit();
+		});
  	});
 	
   </script>

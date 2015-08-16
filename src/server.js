@@ -240,26 +240,8 @@ app.get('/css/main_style.css', function(req,res){
 	res.sendFile(__dirname + '/css/main_style.css');
 });
 
-/*
-app.get('/webRTCBench.html',function(req,res){
-	res.sendFile(__dirname + '/webRTCBench.html');
+app.get('/iamges/*', function(req,res){
+   res.sendFile(__dirname + '/images/*');
 });
-
-app.get('/poll.html',function(req,res){
-	res.sendFile(__dirname + '/poll.html');
-});
-
-app.get('/WebRTCBenchGuide.html', function(req,res){
-	res.sendFile(__dirname + '/WebRTCBenchGuide.html');
-});
-
-app.get('/js/jQuery.fastClick.js', function(req,res){
-	res.sendFile(__dirname + '/js/jQuery.fastClick.js');
-});
-
-app.get('/webrtc-data.html', function(req,res){
-	res.sendFile(__dirname + '/webrtc-data.html');
-});
-*/
 
 app.use(express.static('.'));

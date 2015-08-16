@@ -5,7 +5,6 @@
   <meta content="IE=edge" http-equiv="X-UA-Compatible">
   <meta content="width=device-width, initial-scale=1" name="viewport">
 
-  
   <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
   <meta content="" name="description">
   <meta content="" name="author">
@@ -28,10 +27,6 @@
   <link rel="icon" sizes="192x192" href="webrtc-icon-192x192.png">
   <link href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet" type="text/css">
   
-  <!--Add file sharing
-  <link rel="stylesheet" href="css/main.css">
--->
-
 
 <title>Private Space for you</title>
 </head>
@@ -54,11 +49,6 @@
         <li>
           <a data-toggle="tab" href="#file_sharing" id="file_sharing-tab">File Sharing</a>
         </li>
-
-        <!--Add video record tab
-        <li class="">
-          <a data-toggle="tab" href="#video_recording" id="video_recording-tab">Video Recording</a>
-        </li> -->
         <li>
           <a data-toggle="tab" href="#screen_sharing" id="screen_sharing-tab">Screen Sharing</a>
         </li>
@@ -82,10 +72,7 @@
               <br>
               <button class="btn btn-default" id="joinAVButton">Join the A/V</button>
               <br>
-            <!--
-            <hr>
-            <h2>Space for development</h2>
-          -->
+
 
           <!-- Insert existing code for test-->
           <button class="btn btn-default" id="clearButton">Clear Doc.</button>
@@ -95,23 +82,6 @@
           <br><br>
 
           <button class="btn btn-default" id="joinDataButton">Join the data</button>
-
-          <!--If you checked this button, You can record your chat (@TODO)-->
-            <!--
-            <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off">
-              Record
-            </button>
-            <br><br>
-            <h3>local view</h3>
-            <div style="border:1px solid white">
-              <video id="localVideo"></video>
-            </div>
-            <br>
-            <h3>remote view</h3>
-            <div style="border:1px solid white">
-              <video id="remoteVideo"></video>
-            </div>
-          -->
         </p>
       </div>
     </div>
@@ -171,13 +141,6 @@
   <!-- Placed at the end of the document so the pages load faster -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   
-
-  <!-- Add file sharing -->
-  <script src="fileshare/main.js"></script>
-  <script src="fileshare/ga.js"></script>
-  <script src="fileshare/adapter.js"></script>
-
-
   <script>
   function decidePosOfFoot(targetHeight, windowHeight){
     if(targetHeight < windowHeight){
@@ -209,13 +172,6 @@
     decidePosOfFoot(botPosOfTP, $(window).height());
 
   });
-  /*
-  $("a").on("click", function(event){
-    
-    alert("hi");    //test
-    window.open('http://www.naver.net ', '_blank');    
-  };
-  */
 
   var createButton = get("createButton");
   var clearButton = get("clearButton");
@@ -287,43 +243,8 @@
   }
 
 
-  function joinData() {
-  // if(Object.keys(chatDoc.participants).length  == 0) {
-  //   initConnection(true, true, false);
-
-  //   log("[+] Adding the caller.");
-  //   var param_join = {
-  //     "name" : "caller",
-  //     "value" : {
-  //       "signals": []
-  //     }
-  //   };
-
-  //   documentApi.update(myDocId, addParticipant, param_join, function() { documentApi.get(myDocId, participantAdded, errorCallback); }
-  //   , errorCallback);
-  // }
-  // else {
-  //   initConnection(false, true, false);
-
-  //   log("[+] Adding the callee.");
-  //   var param_join = {
-  //     "name" : "callee",
-  //     "value" : {
-  //       "signals" : [{
-  //         "signal_type" : "callee_arrived",
-  //         "timestamp" : Date.now()
-  //         }]
-  //     }
-  //   };
-
-  //   // update: function(reference, func, parameters, success, error),
-  //   documentApi.update(myDocId, addParticipant, param_join, function() { documentApi.get(myDocId, participantAdded, errorCallback); }
-  //   , errorCallback);
-  // }
-}
-
-</script>
-<script src="adapter.js"></script>
+  </script>
+  <script src="adapter.js"></script>
   <script src="edit-main.js"></script>
 </body>
 </html>
