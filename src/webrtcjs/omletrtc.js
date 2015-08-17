@@ -45,11 +45,11 @@ if (navigator.webkitGetUserMedia) {
 
 (function() {
 
-  var omletrtc;
+  var rtc;
   if ('undefined' === typeof module) {
-    omletrtc = this.omletrtc = {};
+    rtc = this.rtc = {};
   } else {
-    omletrtc = module.exports = {};
+    rtc = module.exports = {};
   }
 
 
