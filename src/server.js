@@ -201,9 +201,21 @@ app.get('/',function(req,res){
 	//res.sendFile(__dirname + '/webRTCBench.html');
 });
 
+
+// OmletRTC
+app.get('/js/omletrtc.js', function(req,res){
+	res.sendFile(__dirname + '/js/omletrtc.js');
+});
+
+app.get('/js/script.js', function(req,res){
+	res.sendFile(__dirname + '/js/script.js');
+});
+//
+
 app.get('/index.html', function(req,res){
 	res.sendFile(__dirname + '/index.html');
 });
+
 app.get('/edit-index.html', function(req,res){
 	res.sendFile(__dirname + '/edit-index.html');
 });

@@ -149,7 +149,6 @@ else {
 }
 
 
-
 // App code
 function get(id){
   return document.getElementById(id);
@@ -161,7 +160,12 @@ function log(message){
   logArea.scrollTop = logArea.scrollHeight;
 }
 
-
-
 // // Look after different browser vendors' ways of calling the getUserMedia() API method:
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+var sdpConstraints = {
+  'mandatory': {
+    'OfferToReceiveAudio': true,
+    'OfferToReceiveVideo': true
+  }
+};
