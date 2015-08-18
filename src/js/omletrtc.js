@@ -36,7 +36,7 @@ function log(message){
   */
   omletrtc.doc_info = {
     callback: "http://203.246.112.144:3310/video-calling-interface.html",
-    appName: "OmletRTC",
+    applName: "OmletRTC",
     noun: "poll",
     displayTitle: "OmletRTC",
     displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
@@ -364,7 +364,7 @@ function log(message){
 
     if(Omlet.isInstalled()) {
       var rdl = Omlet.createRDL({
-        appName: info.appName,
+        appName: info.applName,
         noun: info.noun,
         displayTitle: info.displayTitle,
         displayThumbnailUrl: info.displayThumbnailUrl,
