@@ -23,7 +23,6 @@ function init() {
     alert('Your browser is not supported or you have to turn on flags. In chrome you go to chrome://flags and turn on Enable PeerConnection remember to restart chrome');
   }
 
-
   var room = window.location.hash.slice(1);
 
   rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], room);
@@ -36,6 +35,7 @@ function init() {
   rtc.on('disconnect stream', function(data) {
     log('remove ' + data);
   });
+
   create();
 }
 
@@ -142,13 +142,6 @@ function handleMessage(doc) {
     log('[+] sender: ' + chatDoc.sender + ', message: ' + chatDoc.sessionDescription.type);
   }
 
-  if (chatDoc.candidate && chatDoc.sender !== Omlet.getIdentity().name) {
-
-  }
-
-  if (chatDoc.message === 'clear' && isStarted) {
-
-  }
 }
 
 function updateCallback(chatDocId) {
@@ -167,13 +160,6 @@ function errorCallback(error) {
 
 function addMessage(old, parameters) {
   return old;
-}
-
-function DocumentCleared(doc) {
-  log("[+] Document cleared");
-}
-
-function addUser(doc) {
 }
 
 var createButton = get("createButton");
