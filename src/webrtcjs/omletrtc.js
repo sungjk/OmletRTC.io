@@ -42,7 +42,6 @@ if (navigator.webkitGetUserMedia) {
   }
 }
 
-
 (function() {
 
   var rtc;
@@ -106,7 +105,6 @@ if (navigator.webkitGetUserMedia) {
   rtc.streams = [];
   rtc.numStreams = 0;
   rtc.initializedStreams = 0;
-
 
   // PeerConnection configuration
   rtc.pc_constraints = {
@@ -187,6 +185,7 @@ if (navigator.webkitGetUserMedia) {
       rtc.fire('connect');
     };
   };
+
 
   rtc.sendOffers = function() {
     for (var i = 0, len = rtc.connections.length; i < len; i++) {
@@ -356,3 +355,77 @@ if (navigator.webkitGetUserMedia) {
   });
 
 }).call(this);
+
+function preferOpus(sdp) {
+  var sdpLines = sdp.split('\r\n');
+  var mLineIndex = null;
+  // Search for m line.
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].search('m=audio') !== -1) {
+      mLineIndex = i;
+      break;
+    }
+  }
+  if (mLineIndex === null) return sdp;
+
+  // If Opus is available, set it as the default in m line.
+  for (var j = 0; j < sdpLines.length; j++) {
+    if (sdpLines[j].search('opus/48000') !== -1) {
+      var opusPayload = extractSdp(sdpLines[j], /:(\d+) opus\/48000/i);
+      if (opusPayload) sdpLines[mLineIndex] = setDefaultCodec(sdpLines[mLineIndex], opusPayload);
+      break;
+    }
+  }
+
+  // Remove CN in m line and sdp.
+  sdpLines = removeCN(sdpLines, mLineIndex);
+
+  sdp = sdpLines.join('\r\n');
+  return sdp;
+}
+
+function extractSdp(sdpLine, pattern) {
+  var result = sdpLine.match(pattern);
+  return (result && result.length == 2) ? result[1] : null;
+}
+
+function setDefaultCodec(mLine, payload) {
+  var elements = mLine.split(' ');
+  var newLine = [];
+  var index = 0;
+  for (var i = 0; i < elements.length; i++) {
+    if (index === 3) // Format of media starts from the fourth.
+    newLine[index++] = payload; // Put target payload to the first.
+    if (elements[i] !== payload) newLine[index++] = elements[i];
+  }
+  return newLine.join(' ');
+}
+
+function removeCN(sdpLines, mLineIndex) {
+  var mLineElements = sdpLines[mLineIndex].split(' ');
+  // Scan from end for the convenience of removing an item.
+  for (var i = sdpLines.length - 1; i >= 0; i--) {
+    var payload = extractSdp(sdpLines[i], /a=rtpmap:(\d+) CN\/\d+/i);
+    if (payload) {
+      var cnPos = mLineElements.indexOf(payload);
+      if (cnPos !== -1) {
+        // Remove CN payload from m line.
+        mLineElements.splice(cnPos, 1);
+      }
+      // Remove CN line in sdp
+      sdpLines.splice(i, 1);
+    }
+  }
+
+  sdpLines[mLineIndex] = mLineElements.join(' ');
+  return sdpLines;
+}
+
+function mergeConstraints(cons1, cons2) {
+  var merged = cons1;
+  for (var name in cons2.mandatory) {
+    merged.mandatory[name] = cons2.mandatory[name];
+  }
+  merged.optional.concat(cons2.optional);
+  return merged;
+}

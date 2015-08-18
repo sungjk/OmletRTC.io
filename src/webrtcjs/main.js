@@ -89,7 +89,6 @@ function createDocument() {
   });
 }
 
-
 function init() {
   if(PeerConnection) {
     rtc.createStream({
@@ -102,6 +101,7 @@ function init() {
   } else {
     alert('Your browser is not supported or you have to turn on flags. In chrome you go to chrome://flags and turn on Enable PeerConnection remember to restart chrome');
   }
+
 
   var room = window.location.hash.slice(1);
 
@@ -118,13 +118,15 @@ function init() {
     log('remove ' + data);
     removeVideo(data);
   });
+  initFullScreen();
+  initNewRoom();
+  initChat();
   createDocument();
 }
 
 window.onresize = function(event) {
   subdivideVideos();
 };
-
 
 
 /*
@@ -141,7 +143,8 @@ function initDocumentAPI() {
 }
 
 function DocumentCreated(doc) {
-  var callbackurl = "http://203.246.112.144:3310/proto.index.html#/docId/" + myDocId;
+  var callbackurl = "https://webrtcbench-dbh3099.rhcloud.com/video-calling-interface.html#/docId/" + myDocId;
+  callbackurl = "http://203.246.112.144:3310/proto.index.html#/docId/" + myDocId;
 
   if(Omlet.isInstalled()) {
     var rdl = Omlet.createRDL({
