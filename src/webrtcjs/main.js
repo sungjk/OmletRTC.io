@@ -2,7 +2,7 @@ var documentApi;
 var myDocId;
 var chatDoc;
 
-var videos = [];
+//var videos = [];
 var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection || window.RTCPeerConnection;
 
 function log(message){
@@ -175,11 +175,11 @@ function DocumentCreated(doc) {
     Omlet.exit(rdl);
   }
 }
-
+/*
 function ReceiveDoc(doc) {
   chatDoc = doc;
 }
-
+*/
 function _loadDocument() {
   if (hasDocument()) {
     myDocId = getDocumentReference();
