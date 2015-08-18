@@ -41,7 +41,7 @@ window.onerror = function(message, url, line)  {
   * Omlet document information - User defined
   */
   omletrtc.doc_info = {
-    callback = "http://203.246.112.144:3310/video-calling-interface.html";
+    callback: "http://203.246.112.144:3310/video-calling-interface.html";
     appName: "OmletRTC",
     noun: "poll",
     displayTitle: "OmletRTC",
