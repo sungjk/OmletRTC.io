@@ -202,7 +202,7 @@
         documents.create(function(d) {
           omletrtc.myDocId = d.Document;
           location.hash = "#/docId/" + omletrtc.myDocId;
-          documents.update(omletrtc.myDocId, omletrtc.Initialize, omletrtc.initConnection, function() {
+          documents.update(omletrtc.myDocId, omletrtc.Initialize, omletrtc.initConnection(), function() {
             documents.get(omletrtc.myDocId, omletrtc.DocumentCreated, omletrtc.errorCallback);
           }, omletrtc.errorCallback);
         }, omletrtc.errorCallback);
