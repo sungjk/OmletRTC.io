@@ -30,20 +30,6 @@ function log(message){
     };
   };
 
-
-  /*
-  * Omlet document information - User defined
-  */
-  omletrtc.doc_info = {
-    callback: "http://203.246.112.144:3310/video-calling-interface.html",
-    applName: "OmletRTC",
-    noun: "poll",
-    displayTitle: "OmletRTC",
-    displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-    displayText: 'Real Time Video Chat! Click here to start!',
-  };
-  
-
   // Reference to the Omlet documents.
   omletrtc.documentApi;
   omletrtc.myDocId;
@@ -71,6 +57,19 @@ function log(message){
     audio: false,
     video: omletrtc.localVideoSource
   };
+
+  /*
+  * Omlet document information - User defined
+  */
+  omletrtc.doc_info = {
+    callback: "http://203.246.112.144:3310/index.html",
+    appName: "OmletRTC",
+    noun: "poll",
+    displayTitle: "OmletRTC",
+    displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
+    displayText: 'Real Time Video Chat! Click here to start!',
+  };
+  
 
   omletrtc.createPeerConnection = function (data, video) {
     try {
@@ -364,7 +363,7 @@ function log(message){
 
     if(Omlet.isInstalled()) {
       var rdl = Omlet.createRDL({
-        appName: info.applName,
+        appName: info.appName,
         noun: info.noun,
         displayTitle: info.displayTitle,
         displayThumbnailUrl: info.displayThumbnailUrl,
