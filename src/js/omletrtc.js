@@ -76,7 +76,7 @@ function log(message){
       log("[+] createPeerConnection()");
       omletrtc.peerConnection = new RTCPeerConnection(omletrtc.SERVER(), omletrtc.pc_constraints);
       log("[+] Attach local Stream.");
-      omletrtc.peerConnection.addStream(localStream);
+      omletrtc.peerConnection.addStream(omletrtc.localStream);
     } catch (e) {
       log('[-] Failed to create RTCPeerConnection: ' + e.message);
       return;
