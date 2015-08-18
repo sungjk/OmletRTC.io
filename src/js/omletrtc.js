@@ -6,12 +6,6 @@ function log(message){
   logArea.scrollTop = logArea.scrollHeight;
 }
 
-window.onerror = function(message, url, line)  {
-    log(message);
-    return true;
-};
-
-
 (function() {
   var omletrtc;
   if ('undefined' === typeof module) {
