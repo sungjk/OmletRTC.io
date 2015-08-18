@@ -71,8 +71,9 @@ function removeVideo(socketId) {
 }
 */
 
+/*
 function createDocument() {
-  /* do not need to let you click, just run this code */
+  // do not need to let you click, just run the code 
 
   //var button = document.getElementById("createDocument");
   //button.addEventListener('click', function(event) {
@@ -95,6 +96,7 @@ function createDocument() {
     }
   //});
 }
+*/
 
 function init() {
   if(PeerConnection) {
@@ -130,7 +132,8 @@ function init() {
     log('remove ' + data);
     //removeVideo(data);
   });
-  createDocument();
+  // createDocument(); // duplicated with "function create()"
+  create();
 }
 
 /* useless
