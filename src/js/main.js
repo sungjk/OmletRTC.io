@@ -6,18 +6,14 @@ function log(message){
   logArea.scrollTop = logArea.scrollHeight;
 }
 
-var documentApi;
-var myDocId;
-var chatDoc;
-var peerConnection;
-var dataChannel;
+var documentApi, myDocId, chatDoc;
+var peerConnection, offer, answer;
 var sdpConstraints = {};
+
 
 var localVideo = getQuery("#localVideo");
 var remoteVideo = getQuery("#remoteVideo");
 
-var isStarted = false;
-var isCandidate = false;
 var flag = true;
 
 // streams
@@ -146,6 +142,7 @@ function handleIceGatheringChange(event) {
 }
 
 function handleUserMedia(stream) {
+  log("creator!!!: "+chatDoc.creator.name);
   localStream = stream;
   log('[+] attachMediaStream(localVideo, stream)');
   attachMediaStream(localVideo, stream);
@@ -258,6 +255,7 @@ function DocumentCreated(doc) {
 function ReceiveDoc(doc) {
   chatDoc = doc;
 }
+
 function _loadDocument() {
   if (hasDocument()) {
     myDocId = getDocumentReference();
@@ -272,7 +270,7 @@ function _loadDocument() {
     });
 
     documentApi.get(myDocId, function (doc) {
-      chatDoc = doc;
+      ReceiveDoc(doc); // chatDoc = doc;
       if(window.location.href.indexOf("video-calling-interface.html")!=-1){
         joinAV();
       }
@@ -286,13 +284,13 @@ function _loadDocument() {
 
 function initConnectionInfo() {
   var chatId = 100;
-  var identity = Omlet.getIdentity();
+  var identity = null;
   var numOfUser = 0;
 
   // Connection info
   var info = {
     'chatId' : chatId,
-    'creator' : identity,
+    'creator' : null,
     'sender' : null,
     'numOfUser' : numOfUser,
     'userJoin' : false,
@@ -350,12 +348,6 @@ function watchDocument(docref, OnUpdate) {
   }, Error);
 }
 
-
-function ReceiveDoc(doc) {
-  chatDoc = doc;
-}
-
-
 function handleMessage(doc) {
   chatDoc = doc;
 
@@ -374,7 +366,7 @@ function handleMessage(doc) {
       createOffer();
     }, function (error) {
       log("[-] upate-userJoin: " + error);
-    })
+    });
   }
 
   if (chatDoc.sessionDescription && flag) {
@@ -386,7 +378,8 @@ function handleMessage(doc) {
       });
 
       flag = false;
-    } else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
+    } 
+    else if (chatDoc.sessionDescription.type === 'offer' && chatDoc.creator.name !== Omlet.getIdentity().name) {
       peerConnection.setRemoteDescription(new RTCSessionDescription(chatDoc.sessionDescription), function () {
         log('[+] setRemoteSDP_Offer.');
         if (peerConnection.remoteDescription.type === 'offer') {
@@ -462,6 +455,12 @@ function addMessage(old, parameters) {
     old.id = parameters.id;
     old.label = parameters.label;
   }
+  if (old.numOfUser == 0){
+    old.numOfUser = old.numOfUser+1;
+  }
+  if (parameters.creator){
+    old.creator = parameters.creator;
+  }
   /*
   if (parameters.message === 'clear') {
     old.message = parameters.message;
@@ -505,12 +504,33 @@ function getQuery(id) {
 }
 
 function joinAV() {
-  log("creator name: "+chatDoc.creator.name);
+  //log("creator name: "+chatDoc.creator.name);
+
+  documentApi.update(myDocId, addMessage, {}, function () {
+    documentApi.get(myDocId, function () {});
+  }, function (error) {
+    log("[-] update-numOfUser: " + error);
+  });
+
   // Caller
-  if (chatDoc.creator.name === Omlet.getIdentity().name) {
+  if (chatDoc.numOfUser == 0){
+  //if (chatDoc.creator.name === Omlet.getIdentity().name) {
     log("[+] " + Omlet.getIdentity().name + " creates the room.");
-    navigator.getUserMedia(constraints, handleUserMedia, function (error) {
-      log("[-] joinAV-getUserMedia-caller: " + error);
+    var identity = Omlet.getIdentity();
+    var param_creator = {
+      creator : identity
+    };
+    documentApi.update(myDocId, addMessage, param_creator, function () {
+      documentApi.get(myDocId, function () {});
+    }, function (error) {
+      log("[-] update-creator: " + error);
+    });
+    documentApi.get(myDocId, function (doc) {
+      log("creator22: "+doc.creator.name);
+      chatDoc = doc;
+      navigator.getUserMedia(constraints, handleUserMedia, function (error) {
+        log("[-] joinAV-getUserMedia-caller: " + error);
+      });
     });
   } else {  // Callee
     log("[+] " + Omlet.getIdentity().name + " joins the room.");
