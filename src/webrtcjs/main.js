@@ -27,6 +27,7 @@ function getNumPerRow() {
   return biggest;
 }
 
+/* unuse functions
 function subdivideVideos() {
   var perRow = getNumPerRow();
   var numInRow = 0;
@@ -48,7 +49,9 @@ function setWH(video, i) {
   video.style.left = (i % perRow) * width + "px";
   video.style.top = Math.floor(i / perRow) * height + "px";
 }
+*/
 
+/* do not need this because there are only two peers
 function cloneVideo(domId, socketId) {
   var video = document.getElementById(domId);
   var clone = video.cloneNode(false);
@@ -58,17 +61,21 @@ function cloneVideo(domId, socketId) {
   return clone;
 }
 
+
 function removeVideo(socketId) {
   var video = document.getElementById('remote' + socketId);
   if(video) {
-    videos.splice(videos.indexOf(video), 1);
-    video.parentNode.removeChild(video);
+    videos.splice(videos.indexOf(video), 1); // find the index and remove it from the array
+    video.parentNode.removeChild(video); // remove from its parent tag
   }
 }
+*/
 
 function createDocument() {
-  var button = document.getElementById("createDocument");
-  button.addEventListener('click', function(event) {
+  /* do not need to let you click, just run this code */
+
+  //var button = document.getElementById("createDocument");
+  //button.addEventListener('click', function(event) {
     if(!Omlet.isInstalled()) {
       log("[-] Omlet is not installed.");
     }
@@ -86,7 +93,7 @@ function createDocument() {
         }, errorCallback);
       }, errorCallback);
     }
-  });
+  //});
 }
 
 function init() {
@@ -95,8 +102,8 @@ function init() {
       "video": {"mandatory": {}, "optional": []},
       "audio": true
     }, function(stream) {
-      document.getElementById('you').src = URL.createObjectURL(stream);
-      document.getElementById('you').play();
+      document.getElementById('localVideo').src = URL.createObjectURL(stream);
+      document.getElementById('localVideo').play();
     });
   } else {
     alert('Your browser is not supported or you have to turn on flags. In chrome you go to chrome://flags and turn on Enable PeerConnection remember to restart chrome');
@@ -109,22 +116,28 @@ function init() {
 
   rtc.on('add remote stream', function(stream, socketId) {
     log("ADDING REMOTE STREAM...");
+    /* do not need to clone video due to it is only two peers
     var clone = cloneVideo('you', socketId);
     document.getElementById(clone.id).setAttribute("class", "");
     rtc.attachStream(stream, clone.id);
-    subdivideVideos();
+    */
+
+    rtc.attachStream(stream, 'remoteVideo');
+
+    //subdivideVideos(); // don't need to calculate its width and height again
   });
   rtc.on('disconnect stream', function(data) {
     log('remove ' + data);
-    removeVideo(data);
+    //removeVideo(data);
   });
   createDocument();
 }
 
+/* useless
 window.onresize = function(event) {
   subdivideVideos();
 };
-
+*/
 
 /*
 * Omlet Framework
@@ -140,8 +153,8 @@ function initDocumentAPI() {
 }
 
 function DocumentCreated(doc) {
-  var callbackurl = "https://webrtcbench-dbh3099.rhcloud.com/video-calling-interface.html#/docId/" + myDocId;
-  callbackurl = "http://203.246.112.144:3310/proto.index.html#/docId/" + myDocId;
+  var callbackurl = "http://203.246.112.144:3310/video-calling-interface.html#/docId/" + myDocId;
+  //callbackurl = "http://203.246.112.144:3310/proto.index.html#/docId/" + myDocId; // duplicated
 
   if(Omlet.isInstalled()) {
     var rdl = Omlet.createRDL({
@@ -272,6 +285,75 @@ function DocumentCleared(doc) {
 function addUser(doc) {
 }
 
+var createButton = get("createButton");
+var clearButton = get("clearButton");
+var getDocButton = get("getDocButton");
+var joinDataButton = get("joinDataButton");
+
+createButton.onclick = create;
+clearButton.onclick = clearDocument;
+getDocButton.onclick = getDocument;
+joinDataButton.onclick = joinData;
+
+window.onbeforeunload = clearDocument;
+
+
+function get(id){
+  return document.getElementById(id);
+}
+
+function create() {
+  if(!Omlet.isInstalled()) {
+    log("[-] Omlet is not installed.");
+  }
+  else {
+    log("[+] Omlet is installed.");
+    log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
+
+    documentApi.create(function(d) {
+    // create successCallback
+
+      myDocId = d.Document;
+      location.hash = "#/docId/" + myDocId;
+
+      documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
+        // update successCallback
+        documentApi.get(myDocId, DocumentCreated, errorCallback);
+      }, errorCallback);
+    }, errorCallback);
+  }
+}
+
+
+function clearDocument() {
+  if(!Omlet.isInstalled()) {
+    log("[-] Omlet is not installed.");
+  }
+  else {
+    log("[+] Clearing Document.");
+    stop();
+
+    documentApi.update(myDocId, addMessage, param_clear, function() {
+      documentApi.get(myDocId, DocumentCleared, function (error) {
+        log("[-] clearDocument-update-get: " + error);
+      });
+    }, function (error) {
+      log("[-] clearDocument-update: " + error);
+    });
+  }
+}
+
+
+function getDocument() {
+  if(!Omlet.isInstalled()) {
+    log("[-] Omlet is not installed.");
+  }
+  else {
+    documentApi.get(myDocId, ReceiveDoc, errorCallback);
+    log("[+] Getting Document. DocId: " + myDocId);
+  }
+}
+  
 Omlet.ready(function() {
   log("[+] Omlet is Ready.");
 

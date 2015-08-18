@@ -13,7 +13,6 @@
   <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
   <script src="https://omlet.me/a/lib/jquery-cookie.js"></script>
   <script src="http://jsgetip.appspot.com"></script>
-  <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 
   <!-- Latest compiled and minified CSS -->
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel=
@@ -127,77 +126,6 @@
     decidePosOfFoot(botPosOfTP, $(window).height());
 
   });
-
-  var createButton = get("createButton");
-  var clearButton = get("clearButton");
-  var getDocButton = get("getDocButton");
-  var joinDataButton = get("joinDataButton");
-
-  createButton.onclick = create;
-  clearButton.onclick = clearDocument;
-  getDocButton.onclick = getDocument;
-  joinDataButton.onclick = joinData;
-
-  window.onbeforeunload = clearDocument;
-
-  
-  function get(id){
-    return document.getElementById(id);
-  }
-
-  function create() {
-    if(!Omlet.isInstalled()) {
-      log("[-] Omlet is not installed.");
-    }
-    else {
-      log("[+] Omlet is installed.");
-      log("[+] DocumentAPI Obj:" + JSON.stringify(documentApi));
-
-      documentApi.create(function(d) {
-      // create successCallback
-
-        myDocId = d.Document;
-        location.hash = "#/docId/" + myDocId;
-
-        documentApi.update(myDocId, Initialize, initConnectionInfo(), function() {
-          // update successCallback
-          documentApi.get(myDocId, DocumentCreated, errorCallback);
-        }, errorCallback);
-      }, errorCallback);
-    }
-  }
-
-
-  function clearDocument() {
-    if(!Omlet.isInstalled()) {
-      log("[-] Omlet is not installed.");
-    }
-    else {
-      log("[+] Clearing Document.");
-      stop();
-
-      documentApi.update(myDocId, addMessage, param_clear, function() {
-        documentApi.get(myDocId, DocumentCleared, function (error) {
-          log("[-] clearDocument-update-get: " + error);
-        });
-      }, function (error) {
-        log("[-] clearDocument-update: " + error);
-      });
-    }
-  }
-
-
-  function getDocument() {
-    if(!Omlet.isInstalled()) {
-      log("[-] Omlet is not installed.");
-    }
-    else {
-      documentApi.get(myDocId, ReceiveDoc, errorCallback);
-      log("[+] Getting Document. DocId: " + myDocId);
-    }
-  }
-
-
   </script>
   <script src="js/adapter.js"></script>
   <script src="js/main.js"></script>
