@@ -7,6 +7,9 @@ var config = require('./js/config');
 var events = require('./js/events') ;
 var bodyParser = require('body-parser');
 
+// omletrtc
+var omletrtc = require('./js/omletrtc');
+
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
