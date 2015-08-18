@@ -58,19 +58,6 @@ function log(message){
     video: omletrtc.localVideoSource
   };
 
-  /*
-  * Omlet document information - User defined
-  */
-  omletrtc.doc_info = {
-    callback: "http://203.246.112.144:3310/index.html",
-    appName: "OmletRTC",
-    noun: "poll",
-    displayTitle: "OmletRTC",
-    displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-    displayText: 'Real Time Video Chat!\nClick here to start!',
-  };
-  
-
   omletrtc.createPeerConnection = function (data, video) {
     try {
       log("[+] createPeerConnection()");
@@ -235,9 +222,9 @@ function log(message){
   };
 
   /*
-  * Function for parameter handling documentApi.update:
-  * function(reference, func, parameters, success, error)
-  */
+   * Function for parameter handling documentApi.update:
+   * function(reference, func, parameters, success, error)
+   */
   omletrtc.addMessage = function (old, parameters) {
     if (parameters.userJoin) {
       old.sender = parameters.sender;
@@ -331,20 +318,20 @@ function log(message){
   };
 
 
-/*****************************************************************
-*
-* Omlet.document = {
-*   create: function(success, error),
-*   get: function(reference, success, error),
-*     // The successful result of get is the document itself.
-*   update: function(reference, func, parameters, success, error),
-*   watch: function(reference, onUpdate, success, error),
-*     // The updateCallback argument to watch is called every time the document changes, for example
-*     // because it is being updated by another user. It receives the new document as its only argument.
-*   unwatch: function(reference, success, error)
-* }
-*
-*****************************************************************/
+  /*****************************************************************
+  *
+  * Omlet.document = {
+  *   create: function(success, error),
+  *   get: function(reference, success, error),
+  *     // The successful result of get is the document itself.
+  *   update: function(reference, func, parameters, success, error),
+  *   watch: function(reference, onUpdate, success, error),
+  *     // The updateCallback argument to watch is called every time the document changes, for example
+  *     // because it is being updated by another user. It receives the new document as its only argument.
+  *   unwatch: function(reference, success, error)
+  * }
+  *
+  *****************************************************************/
 
   /*
   *  Ignore everything below.
@@ -433,7 +420,7 @@ function log(message){
 
   omletrtc.DocumentCleared = function (doc) {
     log("[+] Document cleared");
-    log("[+] User in this conversation: " + doc.numOfUser);
+    log("[+] User in this conversation: " + (doc.numOfUser + 1));
   }
 
   omletrtc.Initialize = function (old, parameters) {
@@ -445,6 +432,3 @@ function log(message){
   }
 
 }).call(this);
-
-
-
