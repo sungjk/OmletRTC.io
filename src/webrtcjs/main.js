@@ -118,9 +118,6 @@ function init() {
     log('remove ' + data);
     removeVideo(data);
   });
-  initFullScreen();
-  initNewRoom();
-  initChat();
   createDocument();
 }
 
