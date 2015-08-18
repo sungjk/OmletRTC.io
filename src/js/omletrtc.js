@@ -102,13 +102,13 @@ function log(message){
           sender : Omlet.getIdentity().name,
           sessionDescription : sessionDescription
         };
-        omletrtc.documentApi.update(omletrtc.myDocId, addMessage, param_sdp, function () {
+        omletrtc.documentApi.update(omletrtc.myDocId, omletrtc.addMessage, param_sdp, function () {
             omletrtc.documentApi.get(omletrtc.myDocId, function () {});
           }, function (error) {
           log("[-] setLocalSessionDescription-update: " + error);
         });
-        omletrtc.peerConnection.onicecandidate = handleIceCandidate;
-        omletrtc.peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+        omletrtc.peerConnection.onicecandidate = omletrtc.handleIceCandidate;
+        omletrtc.peerConnection.oniceconnectionstatechange = omletrtc.handleIceCandidateChange;
       }, function (error) {
         log('[-] setLocalSessionDescription: ' + error);
       });
@@ -127,15 +127,15 @@ function log(message){
           sender : Omlet.getIdentity().name,
           sessionDescription : sessionDescription
         };
-        omletrtc.documentApi.update(omletrtc.myDocId, addMessage, param_sdp, function () {
+        omletrtc.documentApi.update(omletrtc.myDocId, omletrtc.addMessage, param_sdp, function () {
             omletrtc.documentApi.get(omletrtc.myDocId, function () {});
           }, function (error) {
           log("[-] setLocalSessionDescription-update: " + error);
         });
         // Sends ice candidates to the other peer
         log('[+] onicecandidate');
-        omletrtc.peerConnection.onicecandidate = handleIceCandidate;
-        omletrtc.peerConnection.oniceconnectionstatechange = handleIceCandidateChange;
+        omletrtc.peerConnection.onicecandidate = omletrtc.handleIceCandidate;
+        omletrtc.peerConnection.oniceconnectionstatechange = omletrtc.handleIceCandidateChange;
       }, function (error) {
         log('[-] setLocalSessionDescription: ' + error);
       });
@@ -160,7 +160,7 @@ function log(message){
         userJoin : true,
         sender : Omlet.getIdentity().name
       };
-      omletrtc.documentApi.update(omletrtc.myDocId, addMessage, param_userJoin, function () {
+      omletrtc.documentApi.update(omletrtc.myDocId, omletrtc.addMessage, param_userJoin, function () {
         omletrtc.documentApi.get(omletrtc.myDocId, function () {});
       }, function (error) {
         log("[-] update-userJoin: " + error);
@@ -178,7 +178,7 @@ function log(message){
         id : event.candidate.sdpMid,
         candidate : event.candidate.candidate
       };
-      omletrtc.documentApi.update(omletrtc.myDocId, addMessage, param_iceCandidate , function () {
+      omletrtc.documentApi.update(omletrtc.myDocId, omletrtc.addMessage, param_iceCandidate , function () {
         omletrtc.documentApi.get(omletrtc.myDocId, function () {});
       },  function (error) {
         log('[-] handleIceCandidate-update: ' + error);
