@@ -209,6 +209,7 @@ if (navigator.webkitGetUserMedia) {
   rtc.createPeerConnection = function(id) {
 
     var config = rtc.pc_constraints;
+    if (rtc.dataChannelSupport) config = rtc.dataChannelConfig;
 
     var pc = rtc.peerConnections[id] = new PeerConnection(rtc.SERVER(), config);
     pc.onicecandidate = function(event) {
@@ -234,6 +235,13 @@ if (navigator.webkitGetUserMedia) {
       // TODO: Finalize this API
       rtc.fire('add remote stream', event.stream, id);
     };
+
+    if (rtc.dataChannelSupport) {
+      pc.ondatachannel = function(evt) {
+        log('data channel connecting ' + id);
+        rtc.addDataChannel(id, evt.channel);
+      };
+    }
 
     return pc;
   };
@@ -348,9 +356,92 @@ if (navigator.webkitGetUserMedia) {
     }
   };
 
+
+  rtc.createDataChannel = function(pcOrId, label) {
+    if (!rtc.dataChannelSupport) {
+      //TODO this should be an exception
+      alert('webRTC data channel is not yet supported in this browser,' +
+        ' or you must turn on experimental flags');
+      return;
+    }
+
+    var id, pc;
+    if (typeof(pcOrId) === 'string') {
+      id = pcOrId;
+      pc = rtc.peerConnections[pcOrId];
+    } else {
+      pc = pcOrId;
+      id = undefined;
+      for (var key in rtc.peerConnections) {
+        if (rtc.peerConnections[key] === pc) id = key;
+      }
+    }
+
+    if (!id) throw new Error('attempt to createDataChannel with unknown id');
+
+    if (!pc || !(pc instanceof PeerConnection)) throw new Error('attempt to createDataChannel without peerConnection');
+
+    // need a label
+    label = label || 'fileTransfer' || String(id);
+
+    // chrome only supports reliable false atm.
+    var options = {
+      reliable: false
+    };
+
+    var channel;
+    try {
+      log('createDataChannel ' + id);
+      channel = pc.createDataChannel(label, options);
+    } catch (error) {
+      log('seems that DataChannel is NOT actually supported!');
+      throw error;
+    }
+
+    return rtc.addDataChannel(id, channel);
+  };
+
+  rtc.addDataChannel = function(id, channel) {
+
+    channel.onopen = function() {
+      log('data stream open ' + id);
+      rtc.fire('data stream open', channel);
+    };
+
+    channel.onclose = function(event) {
+      delete rtc.dataChannels[id];
+      log('data stream close ' + id);
+      rtc.fire('data stream close', channel);
+    };
+
+    channel.onmessage = function(message) {
+      log('data stream message ' + id);
+      log(message);
+      rtc.fire('data stream data', channel, message.data);
+    };
+
+    channel.onerror = function(err) {
+      log('data stream error ' + id + ': ' + err);
+      rtc.fire('data stream error', channel, err);
+    };
+
+    // track dataChannel
+    rtc.dataChannels[id] = channel;
+    return channel;
+  };
+
+  rtc.addDataChannels = function() {
+    if (!rtc.dataChannelSupport) return;
+
+    for (var connection in rtc.peerConnections)
+    rtc.createDataChannel(connection);
+  };
+
+
   rtc.on('ready', function() {
     rtc.createPeerConnections();
     rtc.addStreams();
+    rtc.addDataChannels();
     rtc.sendOffers();
   });
 
