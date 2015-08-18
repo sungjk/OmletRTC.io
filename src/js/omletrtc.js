@@ -392,7 +392,7 @@ function log(message){
 
       omletrtc.documentApi.get(omletrtc.myDocId, function (doc) {
         omletrtc.ReceiveDoc(doc);
-        if(window.location.href.indexOf("video-calling-interface.html")!=-1){
+        if(window.location.href.indexOf("index.html")!=-1){
           joinAV();
         }
       }, function (error) {
