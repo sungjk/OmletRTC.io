@@ -11,6 +11,7 @@ function log(message){
   logArea.scrollTop = logArea.scrollHeight;
 }
 
+/* unuse function
 function getNumPerRow() {
   var len = videos.length;
   var biggest;
@@ -26,6 +27,7 @@ function getNumPerRow() {
   }
   return biggest;
 }
+*/
 
 /* unuse functions
 function subdivideVideos() {
@@ -71,7 +73,7 @@ function removeVideo(socketId) {
 }
 */
 
-/*
+/* duplicated with "function create()"
 function createDocument() {
   // do not need to let you click, just run the code 
 
@@ -200,17 +202,17 @@ function _loadDocument() {
 }
 
 function initConnectionInfo() {
-  var chatId = 100;
-  var identity = Omlet.getIdentity();
-  var numOfUser = 0;
+  //var chatId = 100;
+  //var identity = Omlet.getIdentity();
+  //var numOfUser = 0;
 
   // Connection info
   var info = {
-    'chatId' : chatId,
-    'creator' : identity,
+    'chatId' : 100, /* random */
+    'creator' : null, /* Omlet.getIdentity() */
     'sender' : null,
     'message' : null,
-    'numOfUser' : numOfUser,
+    'numOfUser' : 0, /* initially it is 0 */
     'userJoin' : false,
     'sessionDescription' : null,
     'candidate' : null,
@@ -289,16 +291,16 @@ function addUser(doc) {
 }
 
 var createButton = get("createButton");
-var clearButton = get("clearButton");
-var getDocButton = get("getDocButton");
-var joinDataButton = get("joinDataButton");
+//var clearButton = get("clearButton");
+//var getDocButton = get("getDocButton");
+//var joinDataButton = get("joinDataButton");
 
 createButton.onclick = create;
-clearButton.onclick = clearDocument;
-getDocButton.onclick = getDocument;
-joinDataButton.onclick = joinData;
+//clearButton.onclick = clearDocument;
+//getDocButton.onclick = getDocument;
+//joinDataButton.onclick = joinData;
 
-window.onbeforeunload = clearDocument;
+//window.onbeforeunload = clearDocument;
 
 
 function get(id){
@@ -327,7 +329,7 @@ function create() {
   }
 }
 
-
+/*
 function clearDocument() {
   if(!Omlet.isInstalled()) {
     log("[-] Omlet is not installed.");
@@ -345,8 +347,8 @@ function clearDocument() {
     });
   }
 }
-
-
+*/
+/*
 function getDocument() {
   if(!Omlet.isInstalled()) {
     log("[-] Omlet is not installed.");
@@ -356,7 +358,7 @@ function getDocument() {
     log("[+] Getting Document. DocId: " + myDocId);
   }
 }
-  
+/*/
 Omlet.ready(function() {
   log("[+] Omlet is Ready.");
 
