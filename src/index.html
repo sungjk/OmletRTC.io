@@ -62,13 +62,15 @@
       var target = "images/mute.png";
       var remoteVideo = document.getElementById("remoteVideo");
       
-      if($("#muteBtnImg").attr("src") == target){
+      if(remoteVideo.muted == true){
         target = "images/speaker.png";
         remoteVideo.muted = false;
       }
+      else{
+        remoteVideo.muted = true; 
+      }
 
       $("#muteBtnImg").attr("src", target);
-      remoteVideo.muted = true;
     });
 
     // set button size
