@@ -66,9 +66,11 @@
         target = "images/speaker.png";
         remoteVideo.muted = false;
       }
-
+      else{
+        remoteVideo.muted = true; 
+      }
+      
       $("#muteBtnImg").attr("src", target);
-      remoteVideo.muted = true;
     });
 
     // set button size
