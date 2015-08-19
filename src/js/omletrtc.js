@@ -57,18 +57,6 @@ function log(message){
     audio: false,
     video: omletrtc.localVideoSource
   };
-
-  /*
-  * Omlet document information - User defined
-  */
-  omletrtc.doc_info = {
-    callback: "http://203.246.112.144:3310/index.html",
-    appName: "OmletRTC",
-    noun: "poll",
-    displayTitle: "OmletRTC",
-    displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-    displayText: 'Real Time Video Chat!\nClick here to start!',
-  };
   
 
   omletrtc.createPeerConnection = function (data, video) {
