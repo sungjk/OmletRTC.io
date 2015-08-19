@@ -1,6 +1,3 @@
-var webRTC = require('./webrtc.io');
-var rtc = webRTC.rtc;
-
 var documentApi;
 var myDocId;
 var chatDoc;

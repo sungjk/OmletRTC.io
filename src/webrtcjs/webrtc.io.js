@@ -1,5 +1,47 @@
 //CLIENT
 
+function log(message){
+  var logArea = document.getElementById("console");
+  logArea.value += message + '\n';
+  logArea.scrollTop = logArea.scrollHeight;
+}
+
+// Fallbacks for vendor-specific variables until the spec is finalized.
+
+var PeerConnection = (window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection);
+var URL = (window.URL || window.webkitURL || window.msURL || window.oURL);
+var getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+var nativeRTCIceCandidate = (window.mozRTCIceCandidate || window.RTCIceCandidate);
+var nativeRTCSessionDescription = (window.mozRTCSessionDescription || window.RTCSessionDescription); // order is very important: "RTCSessionDescription" defined in Nighly but useless
+
+var sdpConstraints = {
+  'mandatory': {
+    'OfferToReceiveAudio': true,
+    'OfferToReceiveVideo': true
+  }
+};
+
+if (navigator.webkitGetUserMedia) {
+  if (!webkitMediaStream.prototype.getVideoTracks) {
+    webkitMediaStream.prototype.getVideoTracks = function() {
+      return this.videoTracks;
+    };
+    webkitMediaStream.prototype.getAudioTracks = function() {
+      return this.audioTracks;
+    };
+  }
+
+  // New syntax of getXXXStreams method in M26.
+  if (!webkitRTCPeerConnection.prototype.getLocalStreams) {
+    webkitRTCPeerConnection.prototype.getLocalStreams = function() {
+      return this.localStreams;
+    };
+    webkitRTCPeerConnection.prototype.getRemoteStreams = function() {
+      return this.remoteStreams;
+    };
+  }
+}
+
 (function() {
 
   var rtc;
@@ -196,11 +238,14 @@
   };
 
   rtc.createPeerConnection = function(id) {
+    try {
+      var config = rtc.pc_constraints;
+      if (rtc.dataChannelSupport) config = rtc.dataChannelConfig;
 
-    var config = rtc.pc_constraints;
-    if (rtc.dataChannelSupport) config = rtc.dataChannelConfig;
-
-    var pc = rtc.peerConnections[id] = new PeerConnection(rtc.SERVER(), config);
+      var pc = rtc.peerConnections[id] = new PeerConnection(rtc.SERVER(), config);
+    } catch (e) {
+      console.log('[-] Failed to create RTCPeerConnection: ' + e.message);
+    }
     pc.onicecandidate = function(event) {
       if (event.candidate) {
         rtc._socket.send(JSON.stringify({
@@ -434,53 +479,7 @@
     rtc.sendOffers();
   });
 
-
-
-  function log(message){
-    var logArea = document.getElementById("console");
-    logArea.value += message + '\n';
-    logArea.scrollTop = logArea.scrollHeight;
-  }
-
-  // Fallbacks for vendor-specific variables until the spec is finalized.
-
-  var PeerConnection = (window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection);
-  var URL = (window.URL || window.webkitURL || window.msURL || window.oURL);
-  var getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
-  var nativeRTCIceCandidate = (window.mozRTCIceCandidate || window.RTCIceCandidate);
-  var nativeRTCSessionDescription = (window.mozRTCSessionDescription || window.RTCSessionDescription); // order is very important: "RTCSessionDescription" defined in Nighly but useless
-
-  var sdpConstraints = {
-    'mandatory': {
-      'OfferToReceiveAudio': true,
-      'OfferToReceiveVideo': true
-    }
-  };
-
-  if (navigator.webkitGetUserMedia) {
-    if (!webkitMediaStream.prototype.getVideoTracks) {
-      webkitMediaStream.prototype.getVideoTracks = function() {
-        return this.videoTracks;
-      };
-      webkitMediaStream.prototype.getAudioTracks = function() {
-        return this.audioTracks;
-      };
-    }
-
-    // New syntax of getXXXStreams method in M26.
-    if (!webkitRTCPeerConnection.prototype.getLocalStreams) {
-      webkitRTCPeerConnection.prototype.getLocalStreams = function() {
-        return this.localStreams;
-      };
-      webkitRTCPeerConnection.prototype.getRemoteStreams = function() {
-        return this.remoteStreams;
-      };
-    }
-  }
-
-
 }).call(this);
-
 
 function preferOpus(sdp) {
   var sdpLines = sdp.split('\r\n');
