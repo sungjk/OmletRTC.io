@@ -61,7 +61,7 @@ function DocumentCreated(doc) {
       noun: "poll",
       displayTitle: "OmletRTC",
       displayThumbnailUrl: "http://203.246.112.144:3310/images/quikpoll.png",
-      displayText: 'Client: ' + ip() + '\nServer:' + location.host,
+      displayText: 'Real Time Video Chat!\nClick here to start!\nMade by UCI_UROP',
       json: doc,
       callback: callbackurl
     });
