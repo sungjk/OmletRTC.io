@@ -18,9 +18,9 @@ app.get('/webrtcjs/main.js', function(req, res) {
   res.sendfile(__dirname + '/webrtcjs/main.js');
 });
 
-// app.get('/webrtcjs/omletrtc.js', function(req, res) {
-//   res.sendfile(__dirname + '/webrtcjs/omletrtc.js');
-// });
+app.get('/webrtcjs/webrtc.io.js', function(req, res) {
+  res.sendfile(__dirname + '/webrtcjs/webrtc.io.js');
+});
 
 app.get('/js/omlet.js', function(req, res) {
   res.sendfile(__dirname + '/js/omlet.js');
