@@ -7,7 +7,8 @@ var server = http.createServer(app).listen(3310, function() {
   console.log('[+] Set [http] protocol and server running at port #3310');
 });
 
-var webRTC = require('./webrtcjs/proto.webrtc.io').listen(server);
+var webRTC = require('./webrtcjs/webrtc.io');
+var proto_webRTC = require('./webrtcjs/proto.webrtc.io').listen(server);
 
 // Handle resource request by server
 app.get('/', function(req, res) {
