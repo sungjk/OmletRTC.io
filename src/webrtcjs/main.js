@@ -1,4 +1,4 @@
-var webRTC = require('webrtc.io');
+var webRTC = require('./webrtc.io');
 var rtc = webRTC.rtc;
 
 var documentApi;
