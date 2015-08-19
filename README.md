@@ -1,4 +1,4 @@
-# WebRTC project at UCI UROP
+# OmletRTC.io
 
 ## Overview
 WebRTC is a open source project aiming to enable the web with Real Time Communication (RTC) capabilities.<br>
