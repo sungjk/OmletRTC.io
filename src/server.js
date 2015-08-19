@@ -38,12 +38,16 @@ app.get('/edit-index.html', function(req,res){
 	res.sendFile(__dirname + '/edit-index.html');
 });
 
-app.get('/js/omletrtc.js', function(req,res){
-	res.sendFile(__dirname + '/js/omletrtc.js');
+app.get('/omletrtc.io/omletrtc.js', function(req,res){
+	res.sendFile(__dirname + '/omletrtc.io/omletrtc.js');
 });
 
-app.get('/js/script.js', function(req,res){
-	res.sendFile(__dirname + '/js/script.js');
+app.get('/omletrtc.io/script.js', function(req,res){
+	res.sendFile(__dirname + '/omletrtc.io/script.js');
+});
+
+app.get('/omletrtc.io/adapter.js', function(req,res){
+	res.sendFile(__dirname + '/omletrtc.io/adapter.js');
 });
 
 app.get('/js/main.js', function(req,res){
