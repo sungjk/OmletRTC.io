@@ -5,21 +5,26 @@ var chatDoc;
 
 var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection || window.RTCPeerConnection;
 
+
+
+
+
 function log(message){
   var logArea = document.getElementById("console");
   logArea.value += message + '\n';
   logArea.scrollTop = logArea.scrollHeight;
 }
 
-function init() {
-  if(!isFront) {
+function createStream(isFront) {
+  if(isFront) {
     videoId = videoIds[3];
-    isFront = true;
+    isFront = false;
   }
   else {
     videoId = videoIds[4];
-    isFront = false;
+    isFront = true;
   }
+
   var opt = {
     "video": {
       "mandatory": {}, 
@@ -36,6 +41,11 @@ function init() {
   } else {
     alert('Your browser is not supported or you have to turn on flags. In chrome you go to chrome://flags and turn on Enable PeerConnection remember to restart chrome');
   }
+}
+
+function init() {
+
+  createStream(isFront);
 
   var room = window.location.hash.slice(1);
 
