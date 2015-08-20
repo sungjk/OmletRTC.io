@@ -53,13 +53,12 @@ function gotSources(sourceInfos) {
             if( audioSourceId == null )
                 audioSourceId = sourceInfo.id ;
         } else if (sourceInfo.kind === 'video') {
-            log('Video source found: ' + sourceInfo.label ) ;
             if( sourceInfo.label.indexOf("facing back"))
             {
                 videoBack  = sourceInfo.id ;
                 log("videoBack " + videoBack ) ;
             }
-            else {
+            if ( sourceInfo.label.indexOf("facing front")) {
                 videoFront = sourceInfo.id;
                 log("videoFront " + videoFront ) ;
             }
