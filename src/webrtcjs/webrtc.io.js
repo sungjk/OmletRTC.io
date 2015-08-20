@@ -372,7 +372,7 @@ if (detectedBrowser == "Chrome") {
 
 
   rtc.createStream = function(opt, onSuccess, onFail) {
-    var options;
+    var options = opt;
     onSuccess = onSuccess || function() {};
     onFail = onFail || function() {};
 
