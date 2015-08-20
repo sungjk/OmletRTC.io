@@ -12,8 +12,14 @@ function log(message){
 }
 
 function init() {
-  if(!isFront) videoId = videoIds[3];
-  else videoId = videoIds[4];
+  if(!isFront) {
+    videoId = videoIds[3];
+    isFront = false;
+  }
+  else {
+    videoId = videoIds[4];
+    isFront = true;
+  }
   var opt = {
     "video": {
       "mandatory": {}, 
