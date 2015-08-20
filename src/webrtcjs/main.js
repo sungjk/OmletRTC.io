@@ -5,10 +5,6 @@ var chatDoc;
 
 var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection || window.RTCPeerConnection;
 
-
-
-
-
 function log(message){
   var logArea = document.getElementById("console");
   logArea.value += message + '\n';
@@ -17,13 +13,11 @@ function log(message){
 
 function createStream(isFront) {
   if(isFront) {
-    audioId = audioIds[1];
-    videoId = videoIds[3];
+    videoId = videoIds[0];
     isFront = false;
   }
   else {
-    audioId = audioIds[2];
-    videoId = videoIds[4];
+    videoId = videoIds[1];
     isFront = true;
   }
 
@@ -32,9 +26,7 @@ function createStream(isFront) {
       "mandatory": {}, 
       "optional": videoId
     },
-    "audio": {
-      "optional": audioId
-    }
+    "audio": true
   };
 
   if(PeerConnection) {
