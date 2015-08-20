@@ -405,15 +405,17 @@ function sourceSelected(audioSource, videoSource) {
 
     // };
 
-    options = {
-      video: { 
-        optional: [{ sourceId: opt.video.optional }]
-      }, 
-      audio: {
-        optional: [{ sourceId: opt.audio.optional }]
-      }
-    };
+    // options = {
+    //   video: { 
+    //     optional: [{ sourceId: opt.video.optional }]
+    //   }, 
+    //   audio: !! opt.audio
+    // };
 
+    options = {
+      video: !! opt.video,
+      audio: !! opt.audio
+    };
 
     if (getUserMedia) {
       rtc.numStreams++;

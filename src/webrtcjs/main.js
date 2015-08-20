@@ -38,7 +38,7 @@ function createStream(isFront) {
   };
 
   if(PeerConnection) {
-    rtc.createStream(videoId, function(stream) {
+    rtc.createStream(opt, function(stream) {
       document.getElementById('localVideo').src = URL.createObjectURL(stream);
       document.getElementById('localVideo').play();
     });
