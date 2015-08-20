@@ -44,6 +44,7 @@ var audioSourceId = null ;
 
 var videoFront = null;
 var videoBack = null;
+var videoIds = {};
 
 function gotSources(sourceInfos) {
     for (var i = 0; i != sourceInfos.length; ++i) {
@@ -53,23 +54,16 @@ function gotSources(sourceInfos) {
             if( audioSourceId == null )
                 audioSourceId = sourceInfo.id ;
         } else if (sourceInfo.kind === 'video') {
-            // if(sourceInfo.label.indexOf("facing back"))
-            // {
-            //     videoBack  = sourceInfo.id ;
-            //     log("videoBack " + videoBack ) ;
-            // }
-            // if(sourceInfo.label.indexOf("facing front")) {
-            //     videoFront = sourceInfo.id;
-            //     log("videoFront " + videoFront ) ;
-            // }
-            log('Video ' + sourceInfo.id) ;
-            videoSourceId = sourceInfo.id;
+            // videoSourceId = sourceInfo.id;
+
+            videoIds[i] = sourceInfo.id;
+            log('videoIds[' + i + ']' + videoIds[i]);
         } else {
             log('Some other kind of source: ', sourceInfo);
         }
     }
 
-    sourceSelected(audioSourceId, videoSourceId);
+    // sourceSelected(audioSourceId, videoSourceId);
 }
 if (detectedBrowser == "Chrome") {
     MediaStreamTrack.getSources(gotSources);
@@ -408,9 +402,17 @@ function sourceSelected(audioSource, videoSource) {
 
     // };
 
+    options = {
+      video: {
+        sourceId: opt.video.optional
+      }, 
+      audio: opt.audio
+    };
+
+
     if (getUserMedia) {
       rtc.numStreams++;
-      getUserMedia.call(navigator, sourceSelected(), function(stream) {
+      getUserMedia.call(navigator, options, function(stream) {
 
         rtc.streams.push(stream);
         rtc.initializedStreams++;
