@@ -42,8 +42,9 @@ if (navigator.getUserMedia) {
 var videoSourceId = null ;
 var audioSourceId = null ;
 
-var videoFront = null;
-var videoBack = null;
+var videoIds = {};
+// var videoFront = null;
+// var videoBack = null;
 
 function gotSources(sourceInfos) {
     for (var i = 0; i != sourceInfos.length; ++i) {
@@ -53,15 +54,16 @@ function gotSources(sourceInfos) {
             if( audioSourceId == null )
                 audioSourceId = sourceInfo.id ;
         } else if (sourceInfo.kind === 'video') {
-            if( sourceInfo.label.indexOf("facing back"))
-            {
-                videoBack  = sourceInfo.id ;
-                log("videoBack " + videoBack ) ;
-            }
-            if ( sourceInfo.label.indexOf("facing front")) {
-                videoFront = sourceInfo.id;
-                log("videoFront " + videoFront ) ;
-            }
+          videoIds[i] = sourceInfo.id ;
+            // if(sourceInfo.label.indexOf("facing back"))
+            // {
+            //     videoBack  = sourceInfo.id ;
+            //     log("videoBack " + videoBack ) ;
+            // }
+            // if(sourceInfo.label.indexOf("facing front")) {
+            //     videoFront = sourceInfo.id;
+            //     log("videoFront " + videoFront ) ;
+            // }
         } else {
             log('Some other kind of source: ', sourceInfo);
         }
