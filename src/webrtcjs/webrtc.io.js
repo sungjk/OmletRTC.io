@@ -383,7 +383,7 @@ if (detectedBrowser == "Chrome") {
 
     if (getUserMedia) {
       rtc.numStreams++;
-      getUserMedia.call(navigator, opt, function(stream) {
+      getUserMedia.call(navigator, options, function(stream) {
 
         rtc.streams.push(stream);
         rtc.initializedStreams++;
