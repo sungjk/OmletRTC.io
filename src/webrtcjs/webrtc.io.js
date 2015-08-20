@@ -1,31 +1,3 @@
-// // flip
-// if (typeof MediaStreamTrack === 'undefined'){
-//   alert('This browser does not support MediaStreamTrack.\n\nTry Chrome Canary.');
-// } else {
-//   MediaStreamTrack.getSources( onSourcesAcquired);
-// }
-
-// function onSourcesAcquired(sources) {
-//   for (var i = 0; i != sources.length; ++i) {
-//     var source = sources[i];
-//     // source.id -> DEVICE ID
-//     // source.label -> DEVICE NAME
-//     // source.kind = "audio" OR "video"
-//     // TODO: add this to some datastructure of yours or a selection dialog
-//   }
-// }
-// var constraints = {
-//   audio: {
-//     optional: [{sourceId: selected_audio_source_id}]
-//   },
-//   video: {
-//     optional: [{sourceId: selected_video_source_id}]
-//   }
-// };
-// navigator.getUserMedia(constraints, onSuccessCallback, onErrorCallback);
-
-
-
 //CLIENT
 
 function log(message){
@@ -69,6 +41,10 @@ if (navigator.getUserMedia) {
 
 var videoSourceId = null ;
 var audioSourceId = null ;
+
+var videoFront = null;
+var videoBack = null;
+
 function gotSources(sourceInfos) {
     for (var i = 0; i != sourceInfos.length; ++i) {
         var sourceInfo = sourceInfos[i];
@@ -80,8 +56,12 @@ function gotSources(sourceInfos) {
             log('Video source found: ' + sourceInfo.label ) ;
             if( sourceInfo.label.indexOf("facing back") != -1 )
             {
-                videoSourceId  = sourceInfo.id ;
-                log("Found " + videoSourceId ) ;
+                videoBack  = sourceInfo.id ;
+                log("videoBack " + videoBack ) ;
+            }
+            if ( sourceInfo.label.indexOf("facing front") != -1 ) {
+                videoFront = sourceInfo.id;
+                log("videoFront " + videoFront ) ;
             }
         } else {
             log('Some other kind of source: ', sourceInfo);
@@ -396,21 +376,14 @@ if (detectedBrowser == "Chrome") {
     onSuccess = onSuccess || function() {};
     onFail = onFail || function() {};
 
-    options = {
-      // video: !! opt.video,
-      // audio: !! opt.audio
-        audio: {
-          optional: [{sourceId: audioSourceId}]
-        },
-        video: {
-          optional: [{sourceId: videoSourceId}]
-        }
-
-    };
+    // options = {
+    //   // video: !! opt.video,
+    //   // audio: !! opt.audio
+    // };
 
     if (getUserMedia) {
       rtc.numStreams++;
-      getUserMedia.call(navigator, options, function(stream) {
+      getUserMedia.call(navigator, opt, function(stream) {
 
         rtc.streams.push(stream);
         rtc.initializedStreams++;

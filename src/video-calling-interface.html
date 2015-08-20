@@ -51,9 +51,8 @@
       });
 
       $("#flipCamBtn").click(function(){
-        alert(localVideo.value);
-        localVideoSource = localVideo.value;
-        joinAV();
+        if(isFront) init(false);
+        else init(true);
       });
 
       // mute button event

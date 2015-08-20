@@ -1,3 +1,4 @@
+var isFront = true;
 var documentApi;
 var myDocId;
 var chatDoc;
@@ -11,11 +12,18 @@ function log(message){
 }
 
 function init() {
+  if(!isFront) videoId = videoBack;
+  else videoId = videoFront;
+  var opt = {
+    "video": {
+      "mandatory": {}, 
+      "optional": videoId
+    },
+    "audio": true
+  };
+
   if(PeerConnection) {
-    rtc.createStream({
-      "video": {"mandatory": {}, "optional": []},
-      "audio": true
-    }, function(stream) {
+    rtc.createStream(opt, function(stream) {
       document.getElementById('localVideo').src = URL.createObjectURL(stream);
       document.getElementById('localVideo').play();
     });
