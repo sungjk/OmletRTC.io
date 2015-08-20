@@ -14,11 +14,11 @@ function log(message){
 function init() {
   if(!isFront) {
     videoId = videoIds[3];
-    isFront = false;
+    isFront = true;
   }
   else {
     videoId = videoIds[4];
-    isFront = true;
+    isFront = false;
   }
   var opt = {
     "video": {
