@@ -404,7 +404,7 @@ function sourceSelected(audioSource, videoSource) {
 
     options = {
       video: { 
-        optional: [{ sourceId: opt.video.optional }]
+        optional: { sourceId: opt.video.optional }
       }, 
       audio: opt.audio
     };

@@ -44,7 +44,6 @@ function createStream(isFront) {
 }
 
 function init() {
-
   createStream(isFront);
 
   var room = window.location.hash.slice(1);
