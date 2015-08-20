@@ -51,8 +51,9 @@
       });
 
       $("#flipCamBtn").click(function(){
-        if(isFront) init(false);
-        else init(true);
+        init();
+        if(isFront) isFront = false;
+        else isFront = true;
       });
 
       // mute button event

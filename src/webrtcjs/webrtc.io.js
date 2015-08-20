@@ -55,15 +55,7 @@ function gotSources(sourceInfos) {
                 audioSourceId = sourceInfo.id ;
         } else if (sourceInfo.kind === 'video') {
           videoIds[i] = sourceInfo.id ;
-            // if(sourceInfo.label.indexOf("facing back"))
-            // {
-            //     videoBack  = sourceInfo.id ;
-            //     log("videoBack " + videoBack ) ;
-            // }
-            // if(sourceInfo.label.indexOf("facing front")) {
-            //     videoFront = sourceInfo.id;
-            //     log("videoFront " + videoFront ) ;
-            // }
+          log(sourceInfo.label + videoFront ) ;
         } else {
             log('Some other kind of source: ', sourceInfo);
         }
