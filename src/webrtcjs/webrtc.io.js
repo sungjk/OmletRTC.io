@@ -403,8 +403,10 @@ function sourceSelected(audioSource, videoSource) {
     // };
 
     options = {
-      video: {
-        sourceId: opt.video.optional
+      video: { 
+        optional: { 
+          sourceId: opt.video.optional 
+        }
       }, 
       audio: opt.audio
     };
