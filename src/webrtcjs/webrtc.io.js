@@ -59,10 +59,10 @@ function gotSources(sourceInfos) {
                 videoBack  = sourceInfo.id ;
                 log("videoBack " + videoBack ) ;
             }
-            if ( sourceInfo.label.indexOf("facing front") != -1 ) {
-                videoFront = sourceInfo.id;
-                log("videoFront " + videoFront ) ;
-            }
+            // if ( sourceInfo.label.indexOf("facing front") != -1 ) {
+            //     videoFront = sourceInfo.id;
+            //     log("videoFront " + videoFront ) ;
+            // }
         } else {
             log('Some other kind of source: ', sourceInfo);
         }
