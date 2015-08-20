@@ -11,8 +11,7 @@ We're going to accomplish three main tasks: Acquiring audio and video; Communica
   
 ## What Is Included ?
 This release is composed of three components:
-
-1. Web server based on socket.io for URL redirection
+1. Web server based on express for URL redirection
 2. HTML5 WebRTC application
 3. Omelt API for web apps
 
@@ -33,7 +32,7 @@ This release is composed of three components:
 <video id="localVideo" autoplay="autoplay"></video>
 <video id="remoteVideo" autoplay="autoplay"></video>
 
-<script src="/omletrtc.js"></script>
+<script src="/omletrtc.io.js"></script>
 <script>
 
 </script>
@@ -42,7 +41,7 @@ This release is composed of three components:
 ### Server
 
 ```javascript
-var io = require('socket.io').listen(port);
+var omletrtc = require('omletrtc.io');
 //then a bunch of callbacks are available
 ```
 
