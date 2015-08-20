@@ -43,7 +43,7 @@ var videoSourceId = null ;
 var audioSourceId = null ;
 
 var videoIds = {};
-int idx_video = 0;
+var idx_video = 0;
 
 function gotSources(sourceInfos) {
     for (var i = 0; i != sourceInfos.length; ++i) {
