@@ -45,14 +45,17 @@ var audioSourceId = null ;
 var videoFront = null;
 var videoBack = null;
 var videoIds = {};
+var audioIds = {};
 
 function gotSources(sourceInfos) {
     for (var i = 0; i != sourceInfos.length; ++i) {
         var sourceInfo = sourceInfos[i];
         if (sourceInfo.kind === 'audio') {
-            log('Audio ' + sourceInfo.label ) ;
-            if( audioSourceId == null )
-                audioSourceId = sourceInfo.id ;
+            audioIds[i] = sourceInfo.id;
+            log('audioIds[' + i + ']' + audioIds[i]);
+
+            // if( audioSourceId == null )
+            //     audioSourceId = sourceInfo.id ;
         } else if (sourceInfo.kind === 'video') {
             // videoSourceId = sourceInfo.id;
 
@@ -404,9 +407,11 @@ function sourceSelected(audioSource, videoSource) {
 
     options = {
       video: { 
-        optional: { sourceId: opt.video.optional }
+        optional: [{ sourceId: opt.video.optional }]
       }, 
-      audio: opt.audio
+      audio: {
+        optional: [{ sourceId: opt.audio.optional }]
+      }
     };
 
 

@@ -17,10 +17,12 @@ function log(message){
 
 function createStream(isFront) {
   if(isFront) {
+    audioId = audioIds[1];
     videoId = videoIds[3];
     isFront = false;
   }
   else {
+    audioId = audioIds[2];
     videoId = videoIds[4];
     isFront = true;
   }
@@ -30,11 +32,13 @@ function createStream(isFront) {
       "mandatory": {}, 
       "optional": videoId
     },
-    "audio": true
+    "audio": {
+      "optional": audioId
+    }
   };
 
   if(PeerConnection) {
-    rtc.createStream(opt, function(stream) {
+    rtc.createStream(videoId, function(stream) {
       document.getElementById('localVideo').src = URL.createObjectURL(stream);
       document.getElementById('localVideo').play();
     });
