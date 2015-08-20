@@ -1,3 +1,59 @@
+// // flip
+// if (typeof MediaStreamTrack === 'undefined'){
+//   alert('This browser does not support MediaStreamTrack.\n\nTry Chrome Canary.');
+// } else {
+//   MediaStreamTrack.getSources( onSourcesAcquired);
+// }
+
+// function onSourcesAcquired(sources) {
+//   for (var i = 0; i != sources.length; ++i) {
+//     var source = sources[i];
+//     // source.id -> DEVICE ID
+//     // source.label -> DEVICE NAME
+//     // source.kind = "audio" OR "video"
+//     // TODO: add this to some datastructure of yours or a selection dialog
+//   }
+// }
+// var constraints = {
+//   audio: {
+//     optional: [{sourceId: selected_audio_source_id}]
+//   },
+//   video: {
+//     optional: [{sourceId: selected_video_source_id}]
+//   }
+// };
+// navigator.getUserMedia(constraints, onSuccessCallback, onErrorCallback);
+
+
+// //
+// var videoSourceId = null ;
+// var audioSourceId = null ;
+
+// function gotSources(sourceInfos) {
+//     for (var i = 0; i != sourceInfos.length; ++i) {
+//         var sourceInfo = sourceInfos[i];
+//         if (sourceInfo.kind === 'audio') {
+//             //log('Audio ' + sourceInfo.label ) ;
+//             if( audioSourceId == null )
+//                 audioSourceId = sourceInfo.id ;
+//         } else if (sourceInfo.kind === 'video') {
+//             log('Video source found: ' + sourceInfo.label ) ;
+//             if( sourceInfo.label.indexOf("facing back") != -1 )
+//             {
+//                 videoSourceId  = sourceInfo.id ;
+//                 log("Found " + videoSourceId ) ;
+//             }
+//         } else {
+//             log('Some other kind of source: ', sourceInfo);
+//         }
+//     }
+// }
+// if (detectedBrowser == "Chrome") {
+//     MediaStreamTrack.getSources(gotSources);
+// }
+
+
+
 //CLIENT
 
 function log(message){
@@ -21,26 +77,26 @@ var sdpConstraints = {
   }
 };
 
-if (navigator.webkitGetUserMedia) {
-  if (!webkitMediaStream.prototype.getVideoTracks) {
-    webkitMediaStream.prototype.getVideoTracks = function() {
-      return this.videoTracks;
-    };
-    webkitMediaStream.prototype.getAudioTracks = function() {
-      return this.audioTracks;
-    };
-  }
+// if (navigator.webkitGetUserMedia) {
+//   if (!webkitMediaStream.prototype.getVideoTracks) {
+//     webkitMediaStream.prototype.getVideoTracks = function() {
+//       return this.videoTracks;
+//     };
+//     webkitMediaStream.prototype.getAudioTracks = function() {
+//       return this.audioTracks;
+//     };
+//   }
 
-  // New syntax of getXXXStreams method in M26.
-  if (!webkitRTCPeerConnection.prototype.getLocalStreams) {
-    webkitRTCPeerConnection.prototype.getLocalStreams = function() {
-      return this.localStreams;
-    };
-    webkitRTCPeerConnection.prototype.getRemoteStreams = function() {
-      return this.remoteStreams;
-    };
-  }
-}
+//   // New syntax of getXXXStreams method in M26.
+//   if (!webkitRTCPeerConnection.prototype.getLocalStreams) {
+//     webkitRTCPeerConnection.prototype.getLocalStreams = function() {
+//       return this.localStreams;
+//     };
+//     webkitRTCPeerConnection.prototype.getRemoteStreams = function() {
+//       return this.remoteStreams;
+//     };
+//   }
+// }
 
 (function() {
 
