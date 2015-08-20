@@ -372,7 +372,7 @@ if (detectedBrowser == "Chrome") {
 
 
   rtc.createStream = function(opt, onSuccess, onFail) {
-    var options = opt;
+    var options;
     onSuccess = onSuccess || function() {};
     onFail = onFail || function() {};
 
@@ -380,6 +380,17 @@ if (detectedBrowser == "Chrome") {
     //   // video: !! opt.video,
     //   // audio: !! opt.audio
     // };
+    options = {
+      // video: !! opt.video,
+      // audio: !! opt.audio
+        audio: {
+          optional: [{sourceId: audioSourceId}]
+        },
+        video: {
+          optional: [{sourceId: opt.video.optional}]
+        }
+
+    };
 
     if (getUserMedia) {
       rtc.numStreams++;
