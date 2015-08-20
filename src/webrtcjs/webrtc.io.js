@@ -25,32 +25,49 @@
 // navigator.getUserMedia(constraints, onSuccessCallback, onErrorCallback);
 
 
-// //
-// var videoSourceId = null ;
-// var audioSourceId = null ;
+//
+var RTCPeerConnection = null;
+var getUserMedia = null;
+var connectStreamToSrc = null;
+var onMessage = null ;
+var detectedBrowser = null;
 
-// function gotSources(sourceInfos) {
-//     for (var i = 0; i != sourceInfos.length; ++i) {
-//         var sourceInfo = sourceInfos[i];
-//         if (sourceInfo.kind === 'audio') {
-//             //log('Audio ' + sourceInfo.label ) ;
-//             if( audioSourceId == null )
-//                 audioSourceId = sourceInfo.id ;
-//         } else if (sourceInfo.kind === 'video') {
-//             log('Video source found: ' + sourceInfo.label ) ;
-//             if( sourceInfo.label.indexOf("facing back") != -1 )
-//             {
-//                 videoSourceId  = sourceInfo.id ;
-//                 log("Found " + videoSourceId ) ;
-//             }
-//         } else {
-//             log('Some other kind of source: ', sourceInfo);
-//         }
-//     }
-// }
-// if (detectedBrowser == "Chrome") {
-//     MediaStreamTrack.getSources(gotSources);
-// }
+if (navigator.getUserMedia) {
+    // WebRTC standard
+    RTCPeerConnection = RTCPeerConnection;
+    getUserMedia = navigator.getUserMedia.bind(navigator);
+} else if (navigator.webkitGetUserMedia) {
+    detectedBrowser = "Chrome" ;
+    RTCPeerConnection = webkitRTCPeerConnection;
+    getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
+} else {
+    alert("WebRTC is not supported.");
+}
+
+var videoSourceId = null ;
+var audioSourceId = null ;
+function gotSources(sourceInfos) {
+    for (var i = 0; i != sourceInfos.length; ++i) {
+        var sourceInfo = sourceInfos[i];
+        if (sourceInfo.kind === 'audio') {
+            log('Audio ' + sourceInfo.label ) ;
+            if( audioSourceId == null )
+                audioSourceId = sourceInfo.id ;
+        } else if (sourceInfo.kind === 'video') {
+            log('Video source found: ' + sourceInfo.label ) ;
+            if( sourceInfo.label.indexOf("facing back") != -1 )
+            {
+                videoSourceId  = sourceInfo.id ;
+                log("Found " + videoSourceId ) ;
+            }
+        } else {
+            log('Some other kind of source: ', sourceInfo);
+        }
+    }
+}
+if (detectedBrowser == "Chrome") {
+    MediaStreamTrack.getSources(gotSources);
+}
 
 
 
@@ -403,8 +420,15 @@ var sdpConstraints = {
     onFail = onFail || function() {};
 
     options = {
-      video: !! opt.video,
-      audio: !! opt.audio
+      // video: !! opt.video,
+      // audio: !! opt.audio
+        audio: {
+          optional: [{sourceId: audioSourceId}]
+        },
+        video: {
+          optional: [{sourceId: videoSourceId}]
+        }
+
     };
 
     if (getUserMedia) {
