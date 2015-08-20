@@ -6,12 +6,9 @@ We're going to accomplish three main tasks: Acquiring audio and video; Communica
 
 ## What is WebRTC?
 ![alt img](https://github.com/UCIUROP2015/UCI_UROP_WEBRTC/blob/master/images/logo-webrtc.png)<br>
-webRTC is a new webstandard being developed for peer-to-peer communication on the web. This means that browsers will be able to send information, without sending information through the server. Server side this will reduce load dramatically.
-
-Currently the webRTC standard is very focused on the video & audio aspects of the project. In the future (hopefully near future!) they will begin implementing the data channel, which will allow arbitrary data to be sent peer-to-peer. For now the webRTC team is focused on stabalizing and optimizing the video and audio channels.
-
-Unfortunately, a server (or two) will still be required for two reasons, The media for the page must be initially supplied, and the server, in conjunction with a [STUN server](http://en.wikipedia.org/wiki/STUN), is required to synchronize the connections.
-
+  WebRTC stands for Web Real-Time Communication and it was drafted by W3C. It is an open source project to allow real-time communication through web browser with simple JavaScript API. It can be used for real-time video and voice chatting or sharing data with only have a web browser. <br>
+  This is a significant evolution in the web application world, since it enables, for the first time, web developers to build real-time multimedia applications with no need for proprietary plug-ins. <br>
+  
 ## What Is Included ?
 This release is composed of three components:
 
