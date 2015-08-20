@@ -12,8 +12,8 @@ function log(message){
 }
 
 function init() {
-  if(isFront) videoId = videoIds[0];
-  else videoId = videoIds[1];
+  if(!isFront) videoId = videoBack;
+  else videoId = videoFront;
   var opt = {
     "video": {
       "mandatory": {}, 

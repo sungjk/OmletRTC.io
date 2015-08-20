@@ -42,9 +42,8 @@ if (navigator.getUserMedia) {
 var videoSourceId = null ;
 var audioSourceId = null ;
 
-var videoIds = {};
-// var videoFront = null;
-// var videoBack = null;
+var videoFront = null;
+var videoBack = null;
 
 function gotSources(sourceInfos) {
     for (var i = 0; i != sourceInfos.length; ++i) {
@@ -54,15 +53,39 @@ function gotSources(sourceInfos) {
             if( audioSourceId == null )
                 audioSourceId = sourceInfo.id ;
         } else if (sourceInfo.kind === 'video') {
-          videoIds[i] = sourceInfo.id ;
-          log(sourceInfo.label + videoFront ) ;
+            // if(sourceInfo.label.indexOf("facing back"))
+            // {
+            //     videoBack  = sourceInfo.id ;
+            //     log("videoBack " + videoBack ) ;
+            // }
+            // if(sourceInfo.label.indexOf("facing front")) {
+            //     videoFront = sourceInfo.id;
+            //     log("videoFront " + videoFront ) ;
+            // }
+            log('Video ' + sourceInfo.id) ;
+            videoSourceId = sourceInfo.id;
         } else {
             log('Some other kind of source: ', sourceInfo);
         }
     }
+
+    sourceSelected(audioSourceId, videoSourceId);
 }
 if (detectedBrowser == "Chrome") {
     MediaStreamTrack.getSources(gotSources);
+}
+
+function sourceSelected(audioSource, videoSource) {
+  var constraints = {
+    audio: {
+      optional: [{sourceId: audioSource}]
+    },
+    video: {
+      optional: [{sourceId: videoSource}]
+    }
+  };
+
+  return constraints;
 }
 
 (function() {
@@ -373,21 +396,21 @@ if (detectedBrowser == "Chrome") {
     //   // video: !! opt.video,
     //   // audio: !! opt.audio
     // };
-    options = {
-      // video: !! opt.video,
-      // audio: !! opt.audio
-        audio: {
-          optional: [{sourceId: audioSourceId}]
-        },
-        video: {
-          optional: [{sourceId: opt.video.optional}]
-        }
+    // options = {
+    //   // video: !! opt.video,
+    //   // audio: !! opt.audio
+    //     audio: {
+    //       optional: [{sourceId: audioSourceId}]
+    //     },
+    //     video: {
+    //       optional: [{sourceId: opt.video.optional}]
+    //     }
 
-    };
+    // };
 
     if (getUserMedia) {
       rtc.numStreams++;
-      getUserMedia.call(navigator, options, function(stream) {
+      getUserMedia.call(navigator, sourceSelected(), function(stream) {
 
         rtc.streams.push(stream);
         rtc.initializedStreams++;
