@@ -36,8 +36,7 @@ This release is composed of three components:
 ### Omlet
 ```javascript
 <script>
-  // How to initialize documents information
-  // For example,
+  // How to initialize documents information. For example,
   omletrtc.initConnection = function () {
     var info = {
       'id' : Omlet.getIdentity(),
@@ -48,6 +47,7 @@ This release is composed of three components:
   };
 
   // How to update documents information
+  // You can create, get and update documents using these function
   Omlet.document = {
     create: function(success, error),
     get: function(reference, success, error),
