@@ -1,4 +1,3 @@
-var isFront = true;
 var documentApi;
 var myDocId;
 var chatDoc;
@@ -11,36 +10,18 @@ function log(message){
   logArea.scrollTop = logArea.scrollHeight;
 }
 
-function createStream(isFront) {
-  if(isFront) {
-    videoId = videoIds[0];
-    isFront = false;
-  }
-  else {
-    videoId = videoIds[1];
-    isFront = true;
-  }
-
-  var opt = {
-    "video": {
-      "mandatory": {}, 
-      "optional": videoId
-    },
-    "audio": true
-  };
-
+function init() {
   if(PeerConnection) {
-    rtc.createStream(opt, function(stream) {
+    rtc.createStream({
+      "video": {"mandatory": {}, "optional": []},
+      "audio": true
+    }, function(stream) {
       document.getElementById('localVideo').src = URL.createObjectURL(stream);
       document.getElementById('localVideo').play();
     });
   } else {
     alert('Your browser is not supported or you have to turn on flags. In chrome you go to chrome://flags and turn on Enable PeerConnection remember to restart chrome');
   }
-}
-
-function init() {
-  createStream(isFront);
 
   var room = window.location.hash.slice(1);
 
