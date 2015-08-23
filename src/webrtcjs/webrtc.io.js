@@ -21,52 +21,26 @@ var sdpConstraints = {
   }
 };
 
-var RTCPeerConnection = null;
-var getUserMedia = null;
-var connectStreamToSrc = null;
-var onMessage = null ;
-var detectedBrowser = null;
+if (navigator.webkitGetUserMedia) {
+  if (!webkitMediaStream.prototype.getVideoTracks) {
+    webkitMediaStream.prototype.getVideoTracks = function() {
+      return this.videoTracks;
+    };
+    webkitMediaStream.prototype.getAudioTracks = function() {
+      return this.audioTracks;
+    };
+  }
 
-if (navigator.getUserMedia) {
-    // WebRTC standard
-    RTCPeerConnection = RTCPeerConnection;
-    getUserMedia = navigator.getUserMedia.bind(navigator);
-} else if (navigator.webkitGetUserMedia) {
-    detectedBrowser = "Chrome" ;
-    RTCPeerConnection = webkitRTCPeerConnection;
-    getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
-} else {
-    alert("WebRTC is not supported.");
+  // New syntax of getXXXStreams method in M26.
+  if (!webkitRTCPeerConnection.prototype.getLocalStreams) {
+    webkitRTCPeerConnection.prototype.getLocalStreams = function() {
+      return this.localStreams;
+    };
+    webkitRTCPeerConnection.prototype.getRemoteStreams = function() {
+      return this.remoteStreams;
+    };
+  }
 }
-
-var videoSourceId = null ;
-var audioSourceId = null ;
-
-var videoIds = {};
-var idx_video = 0;
-
-function gotSources(sourceInfos) {
-    for (var i = 0; i != sourceInfos.length; ++i) {
-        var sourceInfo = sourceInfos[i];
-        if (sourceInfo.kind === 'audio') {
-            log('audioIds[' + i + ']' + audioIds[i]);
-
-            if( audioSourceId == null )
-                audioSourceId = sourceInfo.id ;
-        } else if (sourceInfo.kind === 'video') {
-            // videoSourceId = sourceInfo.id;
-
-            videoIds[idx_video] = sourceInfo.id;
-            log('videoIds[' + i + ']' + videoIds[i]);
-        } else {
-            log('Some other kind of source: ', sourceInfo);
-        }
-    }
-}
-if (detectedBrowser == "Chrome") {
-    MediaStreamTrack.getSources(gotSources);
-}
-
 
 (function() {
 
@@ -372,21 +346,10 @@ if (detectedBrowser == "Chrome") {
     onSuccess = onSuccess || function() {};
     onFail = onFail || function() {};
 
-    // options = {
-    //   // video: !! opt.video,
-    //   // audio: !! opt.audio
-    // };
     options = {
-      // video: !! opt.video,
-      // audio: !! opt.audio
-        audio: {
-          optional: [{sourceId: audioSourceId}]
-        },
-        video: {
-          optional: [{sourceId: opt.video.optional}]
-        }
+      video: !! opt.video,
+      audio: !! opt.audio
     };
-
 
     if (getUserMedia) {
       rtc.numStreams++;
