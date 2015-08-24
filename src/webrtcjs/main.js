@@ -194,7 +194,7 @@ function create() {
 
 Omlet.ready(function() {
   log("[+] Omlet is Ready.");
-      log("UA", navigator.userAgent.toString());
+  log(navigator.userAgent.toString());
 
   if (hasDocument()) {
     log("[+] Initializing DocumentAPI.");
