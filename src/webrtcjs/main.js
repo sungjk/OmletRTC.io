@@ -173,7 +173,6 @@ function get(id){
 function create() {
   if(!Omlet.isInstalled()) {
     log("[-] Omlet is not installed.");
-    log("UA", navigator.userAgent.toString());
   }
   else {
     log("[+] Omlet is installed.");
@@ -195,6 +194,7 @@ function create() {
 
 Omlet.ready(function() {
   log("[+] Omlet is Ready.");
+      log("UA", navigator.userAgent.toString());
 
   if (hasDocument()) {
     log("[+] Initializing DocumentAPI.");
