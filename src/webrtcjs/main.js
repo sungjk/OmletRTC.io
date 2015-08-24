@@ -173,6 +173,7 @@ function get(id){
 function create() {
   if(!Omlet.isInstalled()) {
     log("[-] Omlet is not installed.");
+    log("UA", navigator.userAgent.toString());
   }
   else {
     log("[+] Omlet is installed.");
