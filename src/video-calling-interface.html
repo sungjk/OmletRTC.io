@@ -1,121 +1,165 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta content="IE=edge" http-equiv="X-UA-Compatible">
-  <meta content="width=device-width, initial-scale=1" name="viewport">
-
-  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-  <meta content="" name="description">
-  <meta content="" name="author">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
 
   <script src="js/omlet.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-  <script src="https://omlet.me/a/lib/jquery-cookie.js"></script>
-
-  <!-- Latest compiled and minified CSS -->
-  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel=
-  "stylesheet"><!-- Optional theme -->
-  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css" rel=
-  "stylesheet">
-  <!-- Latest compiled and minified JavaScript -->
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script><!-- Custom styles for this template -->
-
-  <link href="css/main_style.css" rel="stylesheet">
-  <link rel="icon" sizes="192x192" href="webrtc-icon-192x192.png">
-  <link href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet" type="text/css">
-  
-
-<title>Private Space for you</title>
-</head>
-
-<body>
-
-  <div class="site-wrapper">
-    <div class="inner">
-      <h3 class="masthead-brand">Private Space for you</h3>
-
-      <ul class="nav masthead-nav">
-        <li>
-          <a data-toggle="tab" href="#about" id="about-tab">About</a>
-        </li>
-
-        <li class="active">
-          <a data-toggle="tab" href="#video_calling" id="video_calling-tab">Video Calling</a>
-        </li>
-      </ul>
-    </div>
-    <div class="tab-content">
-      <div class="tab-pane fade" id="about">
-        <div class="inner cover">
-          <h1 class="cover-heading">Be free from watching</h1>
-
-          <p class="lead">Your data is not stored in server at all.<br>
-            Enjoy your private space with your friends!</p>
-          </div>
-        </div>
-
-        <div class="tab-pane fade in active" id="video_calling">
-          <div class="inner cover">
-            <h3 class="cover-heading">Feel free to see your friend!</h3>
-            <p class="lead">
-              <button class="btn btn-default" id="createButton">Create a conversation</button>
-
-              <textarea id="console" readonly style="color:black; width: 100%; min-height:100px;resize: none; display:none"></textarea>
-              <br><br>
-
-            </p>
-          </div>
-        </div>
-
-              <textarea id="console" readonly style="color:black; width: 100%; min-height:100px;resize: none;display:none"></textarea>
-            </p>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="mastfoot">
-    <div class="inner">
-      <p style="display:inline">
-        Developed by <a href="https://github.com/UCIUROP2015/UCI_UROP_WEBRTC" target="_top"><strong>us</strong></a> through <a href="http://www.urop.uci.edu/" >
-        <strong>UROP at UCI</strong></a><p class="visible-xs" style="display:inline"></p> and Cover template by <a href="https://twitter.com/mdo" ><strong>@mdo</strong></a>
-      </p>
-    </div>
-  </div>
-
-  <!-- Bootstrap core JavaScript
-  ================================================== -->
-  <!-- Placed at the end of the document so the pages load faster -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  <script src="js/jquery_ui_touch_punch-0.2.3.js"></script>
 
   <script>
-  function decidePosOfFoot(targetHeight, windowHeight){
-    if(targetHeight < windowHeight){
-      $(".mastfoot").css("position", "fixed");
-      $(".mastfoot").css("bottom", 0);
-    }
-    else{
-      $(".mastfoot").css("position", "");
-      $(".mastfoot").css("bottom", "");
-    }
-  }
-  // onload event
-  $(function(){
-    // suppose "about" is the first loaded id of list
-    $(window).load(function(){
-      var tabPane = $("#about");
-      var botPosOfTP = tabPane.offset().top+tabPane.height();
-      decidePosOfFoot(botPosOfTP, $(window).height());
+    // onload function
+    $(function(){
+      
+      $("#draggable").draggable({ containment: "#containment-wrapper", 
+                                  scroll: false });
+      var window_height = $(window).height();
+      var window_width = $(window).width();
+      
+      // set initial position of local view
+      $("#draggable").css("left", 
+        window_width*3/4-
+        $("body").css("margin-left").replace("px", "")*2);
+      // set boundary of draggable area
+      $("#containment-wrapper").css("width", 
+        window_width-
+        $("body").css("margin-right").replace("px", "")*2);
+      $("#containment-wrapper").css("height",
+        window_height-
+        $("body").css("margin-bottom").replace("px", "")*2);
+      // size of local view is quarter of screen
+      $("#draggable").css({"width": window_width/4, 
+                           "height": window_height/4});
+      $("#localVideo").css({"width": window_width/4,
+                            "height": window_height/4});
+      
+      // size of remote view is full screen
+      $("#remoteVideo").css({"width": window_width,
+                             "height": window_height});
+      // hidable button
+      $("#remoteVideo").click(function(){
+        var displayOpt = "block";
+        if($(".in-vidCall").css("display") == displayOpt){
+          displayOpt = "none"
+        }
+        $(".in-vidCall").css("display", displayOpt);
+      });
+      $("#flipCamBtn").click(function(){
+        createStream(isFront);
+      });
+      // mute button event
+      $("#muteBtn").click(function(){
+        var target = "images/mute.png";
+        var remoteVideo = document.getElementById("remoteVideo");
+        
+        if($("#muteBtnImg").attr("src") == target){
+          target = "images/speaker.png";
+          remoteVideo.muted = false;
+        }
+        $("#muteBtnImg").attr("src", target);
+        remoteVideo.muted = true;
+      });
+      // set button size
+      $("#flipCamBtnImg").css("width", window_width/6);
+      $("#finishCallBtnImg").css("width", window_width/4);
+      $("#muteBtnImg").css("width", window_width/6);
+      $("#flipCamBtn").css({"top": window_height*5/6,
+                            "left": window_width/4-
+                                    $("#flipCamBtn").width()/2}); 
+      $("#finishCallBtn").css({"top": window_height*5/6,
+                               "left": window_width/2-
+                                       $("#finishCallBtn").width()/2}); 
+      $("#muteBtn").css({"top": window_height*5/6,
+                         "left": window_width*3/4-
+                                 $("#muteBtn").width()/2}); 
+      $("#finishCallBtnImg").css("margin-top",
+        ($("#flipCamBtnImg").height()-$("#finishCallBtnImg").height())/2);
+      
+      function exchangeId(A, B){
+        $("#"+A).attr("id", "tmpId");
+        $("#"+B).attr("id", A);
+        $("#tmpId").attr("id", B);
+      }
+      function exchangeSRC(A, B){
+        var tmp = $("#"+A).attr("src");
+        $("#"+A).attr("src", $("#"+B).attr("src"));
+        $("#"+B).attr("src", tmp);
+      }
+      var mDownPos = null,
+          mUpPos = null;
+      $(".smallView").mousedown(function(event){
+        mDownPos = event.clientX + ' ' + event.clientY;
+        event.preventDefault();
+      });
+      $(".smallView").mouseup(function(event){
+        mUpPos = event.clientX + ' ' + event.clientY;
+        if(mDownPos == mUpPos){
+          if(this.id == "remoteVideo"){
+            exchangeSRC(this.id, "localVideo");
+            exchangeId(this.id, "localVideo");
+          }
+          else{
+            exchangeSRC(this.id, "remoteVideo");
+            exchangeId(this.id, "remoteVideo");
+          }
+        }
+        event.preventDefault();
+      });
+      document.getElementById("localVideo").muted = true;
+      $("#finishCallBtn").click(function(){
+        Omlet.exit();
+      });
     });
-  });
-  // onclick event
-  $("li").on("click", function(event){
-    var tabPane = $("#"+event.target.id.split("-")[0]);
-    var botPosOfTP = tabPane.offset().top+tabPane.height();
-    decidePosOfFoot(botPosOfTP, $(window).height());
-  });
   </script>
+  <style>
+  video{
+    transform: rotateY(180deg);
+    -webkit-transform:rotateY(180deg); /* Safari and Chrome */
+    -moz-transform:rotateY(180deg); /* Firefox */
+    object-fit: fill;
+  }
+  .btn.in-vidCall{
+    border: transparent;
+    position: absolute;
+    z-index: 1;
+  }
+  .btn{
+    outline: 0;
+  }
+  </style>
+</head>
 
+<body onload="init()">
+  <!-- do not need to be clicked it will be running while the body is loading -->
+  <textarea id="console" readonly style="display:block;position:absolute;z-index:1; margin-top:30px;width: 100%; min-height:100px;resize: none"> </textarea>
+  <div id="containment-wrapper" style="position:absolute">
+    <div class="ui-draggable ui-widget-content btn in-vidCall" id="draggable">
+      <video class="in-vidCall smallView" id="localVideo" autoplay
+             style="border:1px solid;position:absolute;z-index:1">local video</video>
+    </div>
+  </div>
+
+  <div>
+    <video id="remoteVideo" style="position:absolute;left:0%;top:0%" autoplay>remote video</video>
+  </div>
+
+  <a class="btn btn-default in-vidCall" id="flipCamBtn">
+    <img id="flipCamBtnImg" src="images/flip-cam.png"/>
+  </a>  
+
+  <!-- 
+  // Finish calling button 
+  // When it's clicked, move out from the calling to chatting room
+  -->
+  <a class="btn btn-default in-vidCall" id="finishCallBtn">
+    <img id="finishCallBtnImg" src="images/finish-call.png"/>
+  </a>
+
+  <a class="btn btn-default in-vidCall" id="muteBtn">
+    <img id="muteBtnImg" src="images/speaker.png"/>
+  </a>
+  
   <script src="/webrtcjs/webrtc.io.js"></script>
   <script src="/webrtcjs/main.js"></script>
 </body>
