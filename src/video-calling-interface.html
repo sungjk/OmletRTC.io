@@ -45,9 +45,11 @@
         }
         $(".in-vidCall").css("display", displayOpt);
       });
-      $("#flipCamBtn").click(function(){
-        createStream(isFront);
-      });
+
+
+      // $("#flipCamBtn").click(function(){
+      //   createStream(isFront);
+      // });
       // mute button event
       $("#muteBtn").click(function(){
         var target = "images/mute.png";
@@ -61,20 +63,14 @@
         remoteVideo.muted = true;
       });
       // set button size
-      $("#flipCamBtnImg").css("width", window_width/6);
       $("#finishCallBtnImg").css("width", window_width/4);
       $("#muteBtnImg").css("width", window_width/6);
-      $("#flipCamBtn").css({"top": window_height*5/6,
-                            "left": window_width/4-
-                                    $("#flipCamBtn").width()/2}); 
-      $("#finishCallBtn").css({"top": window_height*5/6,
-                               "left": window_width/2-
-                                       $("#finishCallBtn").width()/2}); 
-      $("#muteBtn").css({"top": window_height*5/6,
-                         "left": window_width*3/4-
-                                 $("#muteBtn").width()/2}); 
-      $("#finishCallBtnImg").css("margin-top",
-        ($("#flipCamBtnImg").height()-$("#finishCallBtnImg").height())/2);
+      // $("#flipCamBtnImg").css("width", window_width/6);
+      // $("#flipCamBtn").css({"top": window_height * 5/6, "left": window_width/4 - $("#flipCamBtn").width()/2}); 
+      // $("#finishCallBtnImg").css("margin-top", ($("#flipCamBtnImg").height() - $("#finishCallBtnImg").height())/2);
+      $("#finishCallBtn").css({"top": window_height*5/6, "left": window_width/2 - $("#finishCallBtn").width()/2}); 
+      $("#muteBtn").css({"top": window_height*5/6, "left": window_width*3/4 - $("#muteBtn").width()/2}); 
+      
       
       function exchangeId(A, B){
         $("#"+A).attr("id", "tmpId");
@@ -140,7 +136,7 @@
     </div>
   </div>
 
-  <div>
+  <div>f
     <video id="remoteVideo" style="position:absolute;left:0%;top:0%" autoplay>remote video</video>
   </div>
 
