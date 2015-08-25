@@ -53,7 +53,7 @@ function initDocumentAPI() {
 }
 
 function DocumentCreated(doc) {
-  var callbackurl = "http://203.246.112.144:3310/video-calling-interface.html#/docId/" + myDocId;
+  var callbackurl = "http://203.246.112.144:3310/index.html#/docId/" + myDocId;
 
   if(Omlet.isInstalled()) {
     var rdl = Omlet.createRDL({
